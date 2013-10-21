@@ -2,7 +2,8 @@ package ash.vm;
 
 import java.io.Serializable;
 
-import bruce.downloader.framework.utils.CommonUtils;
+import bruce.common.utils.CommonUtils;
+
 import ash.compiler.Compiler;
 import ash.parser.ListUtils;
 import ash.parser.Node;

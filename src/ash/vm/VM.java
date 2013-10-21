@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import bruce.downloader.framework.functional.Func2;
-import bruce.downloader.framework.functional.LambdaUtils;
-import bruce.downloader.framework.utils.FileUtil;
+import bruce.common.functional.Func2;
+import bruce.common.functional.LambdaUtils;
+import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
 import ash.parser.Node;
 import ash.parser.Parser;

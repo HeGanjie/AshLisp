@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import bruce.downloader.framework.functional.LambdaUtils;
+import bruce.common.functional.LambdaUtils;
 import ash.parser.ListUtils;
 import ash.parser.Node;
 import ash.vm.Instruction;

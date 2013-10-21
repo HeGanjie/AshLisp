@@ -6,7 +6,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
-import bruce.downloader.framework.utils.CommonUtils;
+import bruce.common.utils.CommonUtils;
 import ash.parser.ListUtils;
 import ash.parser.Node;
 

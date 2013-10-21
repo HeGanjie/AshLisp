@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import bruce.downloader.framework.utils.CommonUtils;
+import bruce.common.utils.CommonUtils;
 
 public final class Node implements Iterable<Node>, Serializable {
 	private static final long serialVersionUID = -3802355140695976127L;

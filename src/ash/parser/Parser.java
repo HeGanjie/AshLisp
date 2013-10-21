@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import bruce.downloader.framework.utils.CommonUtils;
+import bruce.common.utils.CommonUtils;
 
 public final class Parser {
 	private static final Pattern getFirstUnwrappedPattern = Pattern.compile("(\\S+)\\s*");

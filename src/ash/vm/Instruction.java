@@ -3,7 +3,7 @@ package ash.vm;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import bruce.downloader.framework.utils.CommonUtils;
+import bruce.common.utils.CommonUtils;
 
 public final class Instruction implements Serializable {
 	private static final long serialVersionUID = 4568764332998004451L;
