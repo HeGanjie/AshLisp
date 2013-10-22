@@ -80,3 +80,5 @@
 (def apply (lambda (func args) (eval (cons func args))))
 
 (def eval (lambda (ast) (.vmexec (.compile ast))))
+
+(def identity (lambda (x) x))
