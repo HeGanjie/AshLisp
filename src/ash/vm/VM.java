@@ -35,7 +35,8 @@ public final class VM implements Serializable {
 	}
 
 	public Serializable runInMain(Node compiledCodes) {
-		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(), new Func2<List<Instruction>, List<Instruction>, Node>() {
+		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
+				new Func2<List<Instruction>, List<Instruction>, Node>() {
 			@Override
 			public List<Instruction> call(List<Instruction> t, Node t2) {
 				t.addAll(((Node) t2.left).toList(Instruction.class));
