@@ -15,7 +15,7 @@ import ash.vm.VM;
 
 public class AshLispUsage {
     private static Parser p = new Parser();
-	private static VM vm = new VM(p);
+	private static VM vm = new VM();
 	
 	protected static Serializable eval(String code) {
 		return vm.runInMain(Compiler.astsToInsts(p.split(code)));
@@ -93,7 +93,7 @@ public class AshLispUsage {
 		trace(eval("(filter even? (range 0 10))")); // (0 2 4 6 8)
         
         // make list from args
-    	trace(eval("((lambda (. ls) ls) 10 20 30)")); // (10 20 30)
+    	trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
 ```
 
 ## Specification

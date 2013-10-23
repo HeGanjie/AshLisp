@@ -12,8 +12,9 @@ public final class VMTest extends TestCase {
 	private static Parser p = new Parser();
 	private static VM vm = new VM();
 	
-	static {
-		vm.preload();
+	public void testEvalRaw() throws Exception {
+		String rawExp = "10";
+		assertEquals(10, exec(rawExp));
 	}
 	
 	public void testQuote() throws Exception {

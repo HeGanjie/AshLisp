@@ -13,9 +13,9 @@ public final class REPLInVM {
 
 	public static void main(String[] args) {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		Parser parser = new Parser();
+		Parser p = new Parser();
 		VM vm = new VM();
-		vm.preload();
+		
 		while (true) {
 			try {
 				String readIn;
@@ -23,7 +23,7 @@ public final class REPLInVM {
 				readIn = br.readLine();
 				if (readIn == null) break;
 				long start = System.currentTimeMillis();
-				Serializable val = vm.runInMain(Compiler.astsToInsts(parser.split(readIn)));
+				Serializable val = vm.runInMain(Compiler.astsToInsts(p.split(readIn)));
 				System.out.println(val);
 				reportElapse(System.currentTimeMillis() - start);
 			} catch (Exception e) {

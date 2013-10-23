@@ -23,11 +23,12 @@ public final class VM implements Serializable {
 	protected final Deque<VMFrame> frameStack = new ArrayDeque<>(64);
 	public VMFrame headFrame;
 	
-	public void preload() {
+	static {
+		VM vm = new VM();
 		Parser p = new Parser();
-		load(p, "maths.scm");
-		load(p, "funs.scm");
-		load(p, "utils.scm");
+		vm.load(p, "maths.scm");
+		vm.load(p, "funs.scm");
+		vm.load(p, "utils.scm");
 	}
 
 	protected void load(Parser parser, String resName) {
