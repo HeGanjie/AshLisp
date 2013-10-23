@@ -7,7 +7,9 @@ import java.util.regex.Pattern;
 import bruce.common.utils.CommonUtils;
 
 public final class Parser {
-	private static final Pattern getFirstUnwrappedPattern = Pattern.compile("(\\S+)\\s*");
+	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
+	private static final char ESCAPE_CHARACTER = '\\';
+	private static final char STRING_WRAPPING_CHARS = '\"';
 
 	protected Serializable createAst(String readIn) {
 		if (readIn.charAt(0) == '(') {
@@ -41,22 +43,30 @@ public final class Parser {
 	}
 
 	private String getFirst(String str) {
-		return str.charAt(0) == '('
-				? str.substring(0, getFirstElemLen(str, 0, 0))
-				: getFirstPlainText(str);
+		char headCh = str.charAt(0);
+		return headCh == '('
+				? str.substring(0, getFirstElemLen(str, 0, 0, '\0'))
+				: headCh == '\"'
+					? str.substring(0, getFirstElemLen(str, 0, 0, '\0'))
+					: getHeadPlainText(str);
 	}
 
-	protected String getFirstPlainText(String str) {
-		Matcher m = getFirstUnwrappedPattern.matcher(str);
+	protected String getHeadPlainText(String str) {
+		Matcher m = getFirstPlainTextPattern.matcher(str);
 		m.find();
 		return m.group(1);
 	}
-	
-	private int getFirstElemLen(String src, int balance, int elemLen) {
-		if (elemLen != 0 && balance == 0) return elemLen;
+
+	private int getFirstElemLen(String src, int balance, int elemLen, char spanChar) {
+		if (elemLen != 0 && balance == 0 && spanChar == '\0') return elemLen;
 		
 		final char c = src.charAt(elemLen);
-		return getFirstElemLen(src, balance + (c == '(' ? -1 : (c == ')' ? 1: 0)), elemLen + 1);
+		boolean scanningStringContent = spanChar == STRING_WRAPPING_CHARS;
+		
+		return getFirstElemLen(src,
+				scanningStringContent ? balance : balance + (c == '(' ? 1 : (c == ')' ? -1 : 0)),
+				elemLen + (c == ESCAPE_CHARACTER ? 2 : 1),
+				STRING_WRAPPING_CHARS == c ? (spanChar == c ? '\0' : c) : spanChar);
 	}
 
 }

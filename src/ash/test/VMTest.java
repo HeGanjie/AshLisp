@@ -117,6 +117,13 @@ public final class VMTest extends TestCase {
 		assertEquals("(2 4)", exec("(filter even? '(1 2 3 4))").toString());
 	}
 	
+	public void testString() throws Exception {
+		assertEquals(" a 1", exec("(.str \" a \" 1)"));
+		assertEquals(" ) 1", exec("(.str \" ) \" 1)"));
+		assertEquals(" ( 1", exec("(.str \" ( \" 1)"));
+		assertEquals(" a b c ", exec("\" a b c \""));
+	}
+	
 	protected static Serializable exec(String code) {
 		return vm.runInMain(Compiler.astsToInsts(p.split(code)));
 	}

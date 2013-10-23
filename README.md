@@ -94,6 +94,9 @@ public class AshLispUsage {
         
         // make list from args
     	trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
+    	
+        // build string 
+    	trace(eval("(.str \"No.\" 1)")); // No.1
 ```
 
 ## Specification
