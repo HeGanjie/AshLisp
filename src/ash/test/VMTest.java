@@ -10,7 +10,11 @@ import ash.vm.VM;
 
 public final class VMTest extends TestCase {
 	private static Parser p = new Parser();
-	private static VM vm = new VM(p);
+	private static VM vm = new VM();
+	
+	static {
+		vm.preload();
+	}
 	
 	public void testQuote() throws Exception {
 		String calc = "'()";

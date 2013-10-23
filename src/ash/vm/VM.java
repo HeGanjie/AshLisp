@@ -23,8 +23,8 @@ public final class VM implements Serializable {
 	protected final Deque<VMFrame> frameStack = new ArrayDeque<>(64);
 	public VMFrame headFrame;
 	
-	public VM(Parser p) {
-		if (p == null) return;
+	public void preload() {
+		Parser p = new Parser();
 		load(p, "maths.scm");
 		load(p, "funs.scm");
 		load(p, "utils.scm");
@@ -38,9 +38,9 @@ public final class VM implements Serializable {
 		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
 				new Func2<List<Instruction>, List<Instruction>, Node>() {
 			@Override
-			public List<Instruction> call(List<Instruction> t, Node t2) {
-				t.addAll(((Node) t2.left).toList(Instruction.class));
-				return t;
+			public List<Instruction> call(List<Instruction> insts, Node instList) {
+				insts.addAll(((Node) instList.left).toList(Instruction.class));
+				return insts;
 			}
 		});
 		allInstInMain.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return

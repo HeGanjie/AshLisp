@@ -25,7 +25,11 @@ public final class Compiler {
 	
 	public static Node astsToInsts(Node parseResult) {
 		if (parseResult == Node.NIL) return Node.NIL;
-		return new Node(compile(parseResult.left, null, Node.NIL, 0), astsToInsts(parseResult.next));
+		Serializable instNode = compile(parseResult.left, null, Node.NIL, 0);
+		if (!(instNode instanceof Node)) {
+			instNode = new Node(instNode); // ensure no raw instructions in the returned list
+		}
+		return new Node(instNode, astsToInsts(parseResult.next));
 	}
 	
 	// var tailRecurFuncName is only for tail recursion optimize

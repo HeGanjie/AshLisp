@@ -14,7 +14,8 @@ public final class REPLInVM {
 	public static void main(String[] args) {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		Parser parser = new Parser();
-		VM vm = new VM(parser);
+		VM vm = new VM();
+		vm.preload();
 		while (true) {
 			try {
 				String readIn;

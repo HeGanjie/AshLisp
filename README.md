@@ -72,7 +72,7 @@ public class AshLispUsage {
 		
 		// closure
 		eval("(def func ((lambda (x) (lambda (y) (+ x y))) 10))");
-		trace(eval("(identity func)")); // ash.vm.Closure@17f74864
+		trace(eval("func")); // ash.vm.Closure@17f74864
 		trace(eval("(func -5)")); // 5
 ```
 
@@ -93,7 +93,7 @@ public class AshLispUsage {
 		trace(eval("(filter even? (range 0 10))")); // (0 2 4 6 8)
         
         // make list from args
-    	trace(eval("((lambda (. ls) (identity ls)) 10 20 30)")); // (10 20 30)
+    	trace(eval("((lambda (. ls) ls) 10 20 30)")); // (10 20 30)
 ```
 
 ## Specification
