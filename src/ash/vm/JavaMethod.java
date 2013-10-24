@@ -32,9 +32,6 @@ public final class JavaMethod implements Serializable {
 			return Compiler.astsToInsts(new Node(args[0]));
 		case "vmexec":
 			return new VM().runInMain((Node) args[0]);
-//		case "get_defs":
-//			return new Node(ListUtils.toNode(VM.tempVar.keySet().iterator()),
-//					ListUtils.toNode(VM.tempVar.values().iterator()));
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodName);
 		}

@@ -12,6 +12,7 @@ import ash.parser.Node;
 
 public final class VMFrame implements Serializable {
 	private static final long serialVersionUID = 3322385890943332297L;
+	private static final boolean debugging = false;
 	
 	public static final Map<String, Serializable> tempVar = VM.tempVar;
 	private Scope myScope;
@@ -51,7 +52,7 @@ public final class VMFrame implements Serializable {
 	public void execUntilStackChange() {
 		while (nextFrame == null && prevFrame != null) {
 			Instruction i = executingInsts.get(runIndex++);
-			if (CommonUtils.DEBUGGING) {
+			if (debugging) {
 				if (i.args != null)
 					System.out.print(CommonUtils.buildString(makeIndent(this), i.ins, ' ', CommonUtils.displayArray(i.args, " ")));
 				else
@@ -60,7 +61,7 @@ public final class VMFrame implements Serializable {
 			
 			exec(i.ins, i.args);
 			
-			if (CommonUtils.DEBUGGING) {
+			if (debugging) {
 				System.out.print('\t');
 				System.out.println(workingStack);
 			}

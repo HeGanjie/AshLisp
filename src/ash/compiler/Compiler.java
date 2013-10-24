@@ -49,13 +49,15 @@ public final class Compiler {
 					return compileCond(node.next, tailRecurFuncName, lambdaArgs, startIndex);
 				case "lambda":
 					int dotIndex = ListUtils.indexOf((Node) node.next.left, MULTI_ARGS_SIGNAL, 0);
+					boolean notCombineArgs = dotIndex == -1;
 					return listInstruction(InstructionSetEnum.closure.create(
-							expand(listInstructionRecur(dotIndex == -1 ? 1 : 0,
+							expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 									InstructionSetEnum.cons_args.create(dotIndex),
 									compile(node.next.next.left,
 											tailRecurFuncName,
-											ListUtils.append((Node) node.next.left, lambdaArgs), 0),
-											InstructionSetEnum.ret.create()))));
+											ListUtils.append((Node) node.next.left, lambdaArgs),
+											notCombineArgs ? 0 : 1),
+									InstructionSetEnum.ret.create()))));
 				default:
 					return listInstruction(
 							compileArgs(node.next, lambdaArgs, startIndex),

@@ -8,8 +8,9 @@ import bruce.common.utils.CommonUtils;
 
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
-	private static final char ESCAPE_CHARACTER = '\\';
-	private static final char STRING_WRAPPING_CHARS = '\"';
+	private static final char ESCAPE_CHAR = '\\';
+	private static final char STRING_WRAPPING_CHAR = '\"';
+	private static final char QUOTE_CHAR = '\'';
 
 	protected Serializable createAst(String readIn) {
 		if (readIn.charAt(0) == '(') {
@@ -27,7 +28,7 @@ public final class Parser {
 
 	public Node split(String str) {
 		String trim = str.trim();
-		boolean quoteSugar = trim.charAt(0) == '\'';
+		boolean quoteSugar = trim.charAt(0) == QUOTE_CHAR;
 		String first = quoteSugar ? getFirst(trim.substring(1)) : getFirst(trim);
 		String rest = getRest(trim, quoteSugar ? first.length() + 1 : first.length());
 		
@@ -44,11 +45,9 @@ public final class Parser {
 
 	private String getFirst(String str) {
 		char headCh = str.charAt(0);
-		return headCh == '('
+		return headCh == '(' || headCh == STRING_WRAPPING_CHAR
 				? str.substring(0, getFirstElemLen(str, 0, 0, '\0'))
-				: headCh == '\"'
-					? str.substring(0, getFirstElemLen(str, 0, 0, '\0'))
-					: getHeadPlainText(str);
+				: getHeadPlainText(str);
 	}
 
 	protected String getHeadPlainText(String str) {
@@ -61,12 +60,11 @@ public final class Parser {
 		if (elemLen != 0 && balance == 0 && spanChar == '\0') return elemLen;
 		
 		final char c = src.charAt(elemLen);
-		boolean scanningStringContent = spanChar == STRING_WRAPPING_CHARS;
-		
 		return getFirstElemLen(src,
-				scanningStringContent ? balance : balance + (c == '(' ? 1 : (c == ')' ? -1 : 0)),
-				elemLen + (c == ESCAPE_CHARACTER ? 2 : 1),
-				STRING_WRAPPING_CHARS == c ? (spanChar == c ? '\0' : c) : spanChar);
+				spanChar == STRING_WRAPPING_CHAR
+					? balance
+					: balance + (c == '(' ? 1 : (c == ')' ? -1 : 0)),
+				elemLen + (c == ESCAPE_CHAR ? 2 : 1),
+				STRING_WRAPPING_CHAR == c ? (spanChar == c ? '\0' : c) : spanChar);
 	}
-
 }

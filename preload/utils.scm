@@ -7,9 +7,9 @@
 (def dec (lambda (n) (sub n 1)))
 
 (def reduce (lambda (func init seq)
-	      (cond (seq (reduce func
-				 (func init (car seq))
-				 (cdr seq)))
+	      (cond (seq (tail func
+			       (func init (car seq))
+			       (cdr seq)))
 		    ('t init))))
 
 (def fold-right (lambda (func init seq)
@@ -18,10 +18,10 @@
 			('t init))))
 
 (def mapr (lambda (func seq)
-		 (fold-right (lambda (item init) (cons (func item) init)) '() seq)))
+	    (fold-right (lambda (item init) (cons (func item) init)) '() seq)))
 
 (def reverse (lambda (seq)
-	    (reduce (lambda (init item) (cons item init)) '() seq)))
+	       (reduce (lambda (init item) (cons item init)) '() seq)))
 
 (def map (lambda (func seq)
 	   (cond (seq (cons (func (car seq)) (map func (cdr seq)))))))
@@ -38,10 +38,10 @@
 	   (cond
 	     ((not seq) '())
 	     ((eq n 0) (car seq))
-	     ('t (nth (sub n 1) (cdr seq))))))
+	     ('t (tail (sub n 1) (cdr seq))))))
 
 (def ntree (lambda (nth-seq tree)
-	     (cond (nth-seq (ntree (cdr nth-seq) (nth (car nth-seq) tree)))
+	     (cond (nth-seq (tail (cdr nth-seq) (nth (car nth-seq) tree)))
 		   ('t tree))))
 
 (def pair (lambda (keys vals)
@@ -54,7 +54,7 @@
 	     (cond ((not pair-seq) '())
 		   ((eq (ntree '(0 0) pair-seq) key)
 		    (ntree '(0 1) pair-seq))
-		   ('t (assoc key (cdr pair-seq))))))
+		   ('t (tail key (cdr pair-seq))))))
 
 (def append (lambda (l r)
 	      (cond (l (cons (car l) (append (cdr l) r)))
@@ -65,7 +65,7 @@
 (def indexof (lambda (item seq skip)
 	       (cond ((not seq) -1)
 		     ((eq (car seq) item) skip)
-		     ('t (indexof item (cdr seq) (add skip 1))))))
+		     ('t (tail item (cdr seq) (add skip 1))))))
 
 (def contains (lambda (item seq) (neq -1 (indexof item seq 0))))
 

@@ -13,16 +13,13 @@ public final class VMTest extends TestCase {
 	private static VM vm = new VM();
 	
 	public void testEvalRaw() throws Exception {
-		String rawExp = "10";
-		assertEquals(10, exec(rawExp));
+		assertEquals(10, exec("10"));
 	}
 	
 	public void testQuote() throws Exception {
-		String calc = "'()";
-		assertEquals(Node.NIL, exec(calc));
+		assertEquals(Node.NIL, exec("'()"));
 		
-		calc = "(list '1 '+ '() 'a 1)";
-		assertEquals("(1 + () a 1)", exec(calc).toString());
+		assertEquals("(1 + () a 1)", exec("(list '1 '+ '() 'a 1)").toString());
 	}
 	
 	public void testAtom() throws Exception {
@@ -58,16 +55,13 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testCond() throws Exception {
-		String exp = "(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))";
-		assertEquals("c", exec(exp));
+		assertEquals("c", exec("(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))"));
 	}
 	
 	public void testLambda() throws Exception {
-		String exp = "((lambda (x) (eq 1 x)) 1)";
-		assertEquals(Node.T, exec(exp));
+		assertEquals(Node.T, exec("((lambda (x) (eq 1 x)) 1)"));
 		
-		exp = "(((lambda (f) f) add) 1 -1)";
-		assertEquals(0, exec(exp));
+		assertEquals(0, exec("(((lambda (f) f) add) 1 -1)"));
 	}
 	
 	public void testMaths() throws Exception {
@@ -79,23 +73,23 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testFib() throws Exception {
-		String calc = "(fib 30)";
-		assertEquals(832040, exec(calc));
-//		assertEquals(75025, exec(calc));
+		assertEquals(832040, exec("(fib 30)"));
 	}
 	
 	public void testFibs() throws Exception {
-		String calc = "(fibs 30)";
-		assertEquals(832040, exec(calc));
+		assertEquals(832040, exec("(fibs 30)"));
 	}
 	
 	public void testFibTail() throws Exception {
-		String calc = "(fib-tail 32)";
-		assertEquals(2178309, exec(calc));
+		assertEquals(2178309, exec("(fib-tail 32)"));
 	}
 
-	public void testTail() throws Exception {
-		// TODO 
+	public void testTailAndCombineArgs() throws Exception {
+		exec("(def reverse0 (lambda (x y) (cond (x (tail (cdr x) (cons (car x) y))) ('t y))))");
+		assertEquals("(1 0)", exec("(reverse0 (range 0 2) '())").toString());
+		
+		exec("(def reverse1 (lambda (x . y) (cond (x (tail (cdr x) (cons (car x) y))) ('t y))))");
+		assertEquals("((1 (0 ())))", exec("(reverse1 (range 0 2) '())").toString());
 	}
 	
 	public void testClosure() throws Exception {
