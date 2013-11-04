@@ -25,14 +25,13 @@ public final class VM implements Serializable {
 	
 	static {
 		VM vm = new VM();
-		Parser p = new Parser();
-		vm.load(p, "maths.scm");
-		vm.load(p, "funs.scm");
-		vm.load(p, "utils.scm");
+		vm.load("maths.scm");
+		vm.load("funs.scm");
+		vm.load("utils.scm");
 	}
 
-	protected void load(Parser parser, String resName) {
-		runInMain(Compiler.astsToInsts(parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
+	protected void load(String resName) {
+		runInMain(Compiler.astsToInsts(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
 	public Serializable runInMain(Node compiledCodes) {

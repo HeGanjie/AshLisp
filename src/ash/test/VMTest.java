@@ -9,7 +9,6 @@ import ash.parser.Parser;
 import ash.vm.VM;
 
 public final class VMTest extends TestCase {
-	private static Parser p = new Parser();
 	private static VM vm = new VM();
 	
 	public void testEvalRaw() throws Exception {
@@ -119,6 +118,6 @@ public final class VMTest extends TestCase {
 	}
 	
 	protected static Serializable exec(String code) {
-		return vm.runInMain(Compiler.astsToInsts(p.split(code)));
+		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}
 }
