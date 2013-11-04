@@ -99,6 +99,9 @@ public class AshLispUsage {
     	trace(eval("(.str \"No.\" 1)")); // No.1
 ```
 
+### REPL
+`ash.repl.REPLInVM` Run As Java Application
+
 ## Specification
 * List is the data structure only supported. (Doesn't support dotted pair)
 * Doesn't support macro.
