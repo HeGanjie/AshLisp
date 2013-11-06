@@ -117,7 +117,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 8) { // jz
 							Serializable pop = popWorkingStack();
 							if (pop == Node.NIL) runIndex = (Integer) args[0];
-						} else { // tail TODO tail + cons_args => ?
+						} else { // tail
 							callArgs = createCallingArgs((Integer) args[0]);
 							workingStack.clear();
 							runIndex = 0;

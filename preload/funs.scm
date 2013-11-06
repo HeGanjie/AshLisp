@@ -17,3 +17,9 @@
 			     (cond
 			       ((eq n x) b)
 			       ('t (tail n b (add a b) (add x 1))))))))
+			       
+(def fac-c (lambda (n f)
+	     (cond ((zero? n) (f 1))
+		   ('t (tail (dec n)
+			     (lambda (x) (f (* n x))))))))
+

@@ -117,6 +117,10 @@ public final class VMTest extends TestCase {
 		assertEquals(" a b c ", exec("\" a b c \""));
 	}
 	
+	public void testContinuation() throws Exception {
+		assertEquals(3628800, exec("(fac-c 10 identity)"));
+	}
+	
 	protected static Serializable exec(String code) {
 		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}

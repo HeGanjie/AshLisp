@@ -82,3 +82,5 @@
 (def eval (lambda (ast) (.vmexec (.compile ast))))
 
 (def identity (lambda (x) x))
+
+(def zero? (lambda (x) (eq x 0)))
