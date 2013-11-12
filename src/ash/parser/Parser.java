@@ -34,7 +34,7 @@ public final class Parser {
 		String first = quoteSugar ? getFirst(trim.substring(1)) : getFirst(trim);
 		String rest = getRest(trim, quoteSugar ? first.length() + 1 : first.length());
 		
-		Serializable ast = quoteSugar ? new Node("quote", new Node(createAst(first))) : createAst(first);
+		Serializable ast = quoteSugar ? new Node("quote", split(first)) : createAst(first);
 		if (CommonUtils.isStringNullOrWriteSpace(rest))
 			return new Node(ast);
 		else
