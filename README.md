@@ -14,11 +14,10 @@ import ash.parser.Parser;
 import ash.vm.VM;
 
 public class AshLispUsage {
-    private static Parser p = new Parser();
 	private static VM vm = new VM();
 	
 	protected static Serializable eval(String code) {
-		return vm.runInMain(Compiler.astsToInsts(p.split(code)));
+		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}
 	
 	private static void trace(Serializable arg) {
