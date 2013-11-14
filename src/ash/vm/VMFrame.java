@@ -13,6 +13,7 @@ import ash.parser.Node;
 public final class VMFrame implements Serializable {
 	private static final long serialVersionUID = 3322385890943332297L;
 	private static final boolean debugging = false;
+	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
 	public static final Map<String, Serializable> tempVar = VM.tempVar;
 	private Scope myScope;
@@ -54,9 +55,10 @@ public final class VMFrame implements Serializable {
 			Instruction i = executingInsts.get(runIndex++);
 			if (debugging) {
 				if (i.args != null)
-					System.out.print(CommonUtils.buildString(makeIndent(this), i.ins, ' ', CommonUtils.displayArray(i.args, " ")));
+					System.out.print(CommonUtils.buildString(makeIndent(this),
+							INST_ARR[i.ins], ' ', CommonUtils.displayArray(i.args, " ")));
 				else
-					System.out.print(CommonUtils.buildString(makeIndent(this), i.ins));
+					System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
 			}
 			
 			exec(i.ins, i.args);
@@ -70,8 +72,7 @@ public final class VMFrame implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void exec(InstructionSetEnum ins, Serializable[] args) {
-		int ordinal = ins.ordinal();
+	private void exec(int ordinal, Serializable[] args) {
 		if (ordinal < 16) {
 			if (ordinal < 8) {
 				if (ordinal < 4) { // 0...4
@@ -129,8 +130,8 @@ public final class VMFrame implements Serializable {
 							Serializable func = popWorkingStack();
 							if (func instanceof Closure) { // symbol
 								prepareNextFrame((Closure) func, (Integer) args[0]);
-							} else if (func instanceof InstructionSetEnum) { // instruction
-								exec((InstructionSetEnum) func, args);
+							} else if (func instanceof Instruction) { // instruction
+								exec(((Instruction) func).ins, args);
 							} else { // java method
 								pushWorkingStack(((JavaMethod) func).call(createCallingArgs((Integer) args[0])));
 							}

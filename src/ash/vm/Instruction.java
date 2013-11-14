@@ -7,33 +7,34 @@ import bruce.common.utils.CommonUtils;
 
 public final class Instruction implements Serializable {
 	private static final long serialVersionUID = 4568764332998004451L;
+	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
-	final InstructionSetEnum ins;
+	final int ins;
 	final Serializable [] args;
 	
 	public Instruction(InstructionSetEnum instruction) {
-		ins = instruction;
+		ins = instruction.ordinal();
 		args = null;
 	}
 	
 	public Instruction(InstructionSetEnum instruction, Serializable... instructionArgs) {
-		ins = instruction;
+		ins = instruction.ordinal();
 		args = instructionArgs;
 	}
 
 	@Override
 	public String toString() {
 		if (args != null)
-			return CommonUtils.buildString(ins, ' ', CommonUtils.displayArray(args, " "));
+			return CommonUtils.buildString(INST_ARR[ins], ' ', CommonUtils.displayArray(args, " "));
 		else
-			return ins.name();
+			return INST_ARR[ins].name();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = prime + Arrays.hashCode(args);
-		return prime * result + (ins == null ? 0 : ins.hashCode());
+		return prime * result + ins;
 	}
 
 	@Override
@@ -46,5 +47,4 @@ public final class Instruction implements Serializable {
 		if (ins != other.ins) return false;
 		return true;
 	}
-
 }

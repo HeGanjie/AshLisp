@@ -85,7 +85,7 @@ public final class Compiler {
 			int symbolIndexOfArgs = findArgIndex(lambdaArgs, exp);
 			if (symbolIndexOfArgs == -1) {
 				if (InstructionSetEnum.contains(op))
-					return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(op)); // instruction
+					return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(op).create()); // instruction
 				else
 					return InstructionSetEnum.ldv.create(op); // symbol
 			} else {
