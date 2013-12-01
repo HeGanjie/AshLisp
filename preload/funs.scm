@@ -12,12 +12,12 @@
 		  ('t (+ (fibs (- x 1))
 			 (fibs (- x 2)))))))
 
-(def fib-tail (lambda (n) ((lambda (fib-iter) (fib-iter n 0 1 1))
-			   (lambda (n a b x)
+(def fib-tail (lambda (n) ((lambda (fib-iter) (fib-iter n 0 1))
+			   (lambda (x a b)
 			     (cond
-			       ((eq n x) b)
-			       ('t (tail n b (add a b) (add x 1))))))))
-			       
+			       ((eq 0 x) a)
+			       ('t (tail (sub x 1) b (add a b))))))))
+
 (def fac-c (lambda (n f)
 	     (cond ((zero? n) (f 1))
 		   ('t (tail (dec n)
