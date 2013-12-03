@@ -25,15 +25,14 @@ public final class Compiler {
 	
 	public static Node astsToInsts(Node parseResult) {
 		if (parseResult == Node.NIL) return Node.NIL;
-		Serializable instNode = compile(parseResult.left, null, Node.NIL, 0);
+		Serializable instNode = compile(parseResult.left, Node.NIL, 0);
 		if (!(instNode instanceof Node)) {
 			instNode = new Node(instNode); // ensure no raw instructions in the returned list
 		}
 		return new Node(instNode, astsToInsts(parseResult.next));
 	}
 	
-	// var tailRecurFuncName is only for tail recursion optimize
-	private static Serializable compile(final Serializable exp, String tailRecurFuncName, Node lambdaArgs, int startIndex) {
+	private static Serializable compile(final Serializable exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
 			final Serializable op = node.left;
@@ -41,12 +40,12 @@ public final class Compiler {
 				switch (((String) op).toLowerCase()) {
 				case "def":
 					return listInstruction(
-							compile(node.next.next.left, (String) node.next.left, lambdaArgs, startIndex),
+							compile(node.next.next.left, lambdaArgs, startIndex),
 							InstructionSetEnum.asn.create(node.next.left));
 				case "quote":
 					return listInstruction(InstructionSetEnum.quote.create(node.next.left));
 				case "cond":
-					return compileCond(node.next, tailRecurFuncName, lambdaArgs, startIndex);
+					return compileCond(node.next, lambdaArgs, startIndex);
 				case "lambda":
 					int dotIndex = ListUtils.indexOf((Node) node.next.left, MULTI_ARGS_SIGNAL, 0);
 					boolean notCombineArgs = dotIndex == -1;
@@ -54,7 +53,6 @@ public final class Compiler {
 							expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 									InstructionSetEnum.cons_args.create(dotIndex),
 									compile(node.next.next.left,
-											tailRecurFuncName,
 											ListUtils.append((Node) node.next.left, lambdaArgs),
 											notCombineArgs ? 0 : 1),
 									InstructionSetEnum.ret.create()))));
@@ -65,14 +63,12 @@ public final class Compiler {
 				}
 			} else { // (+ ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
 				int argsCount = LambdaUtils.count(node.next, null);
-				InstructionSetEnum callMethod = op.equals(tailRecurFuncName)
-						? InstructionSetEnum.tail // tail recursion optimize
-						: op instanceof String && op.toString().charAt(0) == '.'
-							? InstructionSetEnum.java_call
-							: InstructionSetEnum.call;
+				InstructionSetEnum callMethod = op instanceof String && op.toString().charAt(0) == '.'
+						? InstructionSetEnum.java_call
+						: InstructionSetEnum.call;
 				return listInstruction(
 						compileArgs(node.next, lambdaArgs, startIndex),
-						callMethod == InstructionSetEnum.tail ? Node.NIL : compile(op, null, lambdaArgs, startIndex),
+						callMethod == InstructionSetEnum.tail ? Node.NIL : compile(op, lambdaArgs, startIndex),
 						callMethod.create(argsCount));
 			}
 		} else if (exp instanceof String) { // (... abc "a" add .puts ...)
@@ -112,22 +108,22 @@ public final class Compiler {
 	
 	private static Node compileArgs(Node args, Node lambdaArgs, int startIndex) {
 		if (args == Node.NIL) return Node.NIL;
-		return listInstruction(compile(args.left, null, lambdaArgs, startIndex), compileArgs(args.next, lambdaArgs, startIndex));
+		return listInstruction(compile(args.left, lambdaArgs, startIndex), compileArgs(args.next, lambdaArgs, startIndex));
 	}
 
-	private static Serializable compileCond(Node pairList, String tailRecurFuncName, Node lambdaArgs, int startIndex) {
+	private static Serializable compileCond(Node pairList, Node lambdaArgs, int startIndex) {
 		if (pairList == Node.NIL) return listInstruction(InstructionSetEnum.quote.create(Node.NIL));
 		
 		Node headPair = (Node) pairList.left;
 		boolean isDefaultCase = DEFAULT_CASE.equals(headPair.left);
 		
-		Serializable condition = isDefaultCase ? Node.NIL : compile(headPair.left, null, lambdaArgs, startIndex);
+		Serializable condition = isDefaultCase ? Node.NIL : compile(headPair.left, lambdaArgs, startIndex);
 		int condInstCount = isDefaultCase ? 0 : countInstruction(condition) + 1;
 		
-		Serializable exp = compile(headPair.next.left, tailRecurFuncName, lambdaArgs, startIndex + condInstCount);
+		Serializable exp = compile(headPair.next.left, lambdaArgs, startIndex + condInstCount);
 		int nextCaseStartIndex = startIndex + condInstCount + countInstruction(exp) + 1;
 		
-		Serializable nextCase = isDefaultCase ? Node.NIL : compileCond(pairList.next, tailRecurFuncName, lambdaArgs, nextCaseStartIndex);
+		Serializable nextCase = isDefaultCase ? Node.NIL : compileCond(pairList.next, lambdaArgs, nextCaseStartIndex);
 		
 		return listInstructionRecur(isDefaultCase ? 2 : 0,
 				condition,

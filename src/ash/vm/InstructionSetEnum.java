@@ -1,6 +1,11 @@
 package ash.vm;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
+import bruce.common.functional.Func1;
+import bruce.common.functional.LambdaUtils;
 
 
 public enum InstructionSetEnum {
@@ -46,7 +51,15 @@ public enum InstructionSetEnum {
 //	rem,
 //	dup;
 	
-	public final Instruction create() { return new Instruction(this); }
+	private static final List<Instruction> INST_CACHES = LambdaUtils.select(Arrays.asList(values()),
+			new Func1<Instruction, InstructionSetEnum>() {
+		@Override
+		public Instruction call(InstructionSetEnum inst) {
+			return new Instruction(inst);
+		}
+	});
+		
+	public final Instruction create() { return INST_CACHES.get(ordinal()); }
 	
 	public final Instruction create(Serializable... args) { return new Instruction(this, args); }
 
