@@ -17,6 +17,7 @@ public final class VMTest extends TestCase {
 	
 	public void testQuote() throws Exception {
 		assertEquals(Node.NIL, exec("'()"));
+		assertEquals("(quote a)", exec("''a").toString());
 		
 		assertEquals("(1 + () a 1)", exec("(list '1 '+ '() 'a 1)").toString());
 	}
@@ -119,6 +120,11 @@ public final class VMTest extends TestCase {
 	
 	public void testContinuation() throws Exception {
 		assertEquals(3628800, exec("(fac-c 10 identity)"));
+	}
+	
+	public void testMacro() throws Exception {
+		assertEquals("((lambda (a) a) 1)", exec("'(let (a 1) a)").toString());
+		assertEquals(100, exec("(let (a 100) a)"));
 	}
 	
 	protected static Serializable exec(String code) {

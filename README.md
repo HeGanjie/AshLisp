@@ -82,6 +82,12 @@ public class AshLispUsage {
         //println 0 1 2 ... 9 (last .puts return nil)
 ```
 
+### Macro
+```Java
+		trace(eval("'(let (a 1) a)")); // ((lambda (a) a) 1)
+		trace(eval("(let (a 100) a)")); // 100
+```
+
 ### Misc
 ```Java
 		// eval
@@ -103,7 +109,6 @@ public class AshLispUsage {
 
 ## Specification
 * List is the data structure only supported. (Doesn't support dotted pair)
-* Doesn't support macro.
 * Purely functional. (Defining the same symbol again will cause error)
 * Nil for false, others for true. Nil expressing into '().
 * Preload file using '.scm' as suffix just for the convenience of editing and color coding.

@@ -2,11 +2,11 @@ package ash.vm;
 
 import java.io.Serializable;
 
-import bruce.common.utils.CommonUtils;
-
 import ash.compiler.Compiler;
 import ash.parser.ListUtils;
+import ash.parser.MacroExpander;
 import ash.parser.Node;
+import bruce.common.utils.CommonUtils;
 
 public final class JavaMethod implements Serializable {
 	private static final long serialVersionUID = -933603269059202413L;
@@ -32,6 +32,9 @@ public final class JavaMethod implements Serializable {
 			return Compiler.astsToInsts(new Node(args[0]));
 		case "vmexec":
 			return new VM().runInMain((Node) args[0]);
+		case "new-macro":
+			MacroExpander.MARCOS_MAP.put((String)args[0], (Node)args[1]);
+			break;
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodName);
 		}

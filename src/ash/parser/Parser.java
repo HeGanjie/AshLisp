@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import bruce.common.utils.CommonUtils;
-
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
 	private static final char ESCAPE_CHAR = '\\';
@@ -14,15 +12,11 @@ public final class Parser {
 
 	private Parser() {}
 	
-	protected static Serializable createAst(String readIn) {
-		if (readIn.charAt(0) == '(') {
-			String unWrapped = unWrapped(readIn);
-			return CommonUtils.isStringNullOrWriteSpace(unWrapped) ? Node.NIL : split(unWrapped);
-		} else
-			return readIn;
+	private static Serializable createAst(String readIn) {
+		return readIn.charAt(0) == '(' ? split(unwrap(readIn)) : readIn;
 	}
 
-	private static String unWrapped(String exp) {
+	private static String unwrap(String exp) {
 		if (exp.charAt(0) == '(' && exp.charAt(exp.length() - 1) == ')')
 			return exp.substring(1, exp.length() - 1);
 		throw new UnsupportedOperationException("Can not Unwrap:" + exp);
@@ -30,15 +24,18 @@ public final class Parser {
 
 	public static Node split(String str) {
 		String trim = str.trim();
-		boolean quoteSugar = trim.charAt(0) == QUOTE_CHAR;
-		String first = quoteSugar ? getFirst(trim.substring(1)) : getFirst(trim);
-		String rest = getRest(trim, quoteSugar ? first.length() + 1 : first.length());
+		if (trim.length() == 0) return Node.NIL;
 		
-		Serializable ast = quoteSugar ? new Node("quote", split(first)) : createAst(first);
-		if (CommonUtils.isStringNullOrWriteSpace(rest))
-			return new Node(ast);
-		else
-			return new Node(ast, split(rest));
+		if (trim.charAt(0) == QUOTE_CHAR) {
+			String first = getFirst(trim.substring(1));
+			String rest = getRest(trim, first.length() + 1);
+			return new Node(new Node("quote", split(first)), split(rest));
+		} else {
+			String first = getFirst(trim);
+			String rest = getRest(trim, first.length());
+			Node rst = new Node(createAst(first), split(rest));
+			return MacroExpander.hasMacro(first) ? MacroExpander.expand(rst) : rst;
+		}
 	}
 
 	private static String getRest(String str, int firstStrLen) {
@@ -52,7 +49,7 @@ public final class Parser {
 				: getHeadPlainText(str);
 	}
 
-	protected static String getHeadPlainText(String str) {
+	private static String getHeadPlainText(String str) {
 		Matcher m = getFirstPlainTextPattern.matcher(str);
 		m.find();
 		return m.group(1);

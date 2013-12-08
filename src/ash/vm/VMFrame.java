@@ -68,7 +68,6 @@ public final class VMFrame implements Serializable {
 				System.out.println(workingStack);
 			}
 		}
-
 	}
 	
 	@SuppressWarnings("unchecked")
