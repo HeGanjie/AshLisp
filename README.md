@@ -84,6 +84,7 @@ public class AshLispUsage {
 
 ### Macro
 ```Java
+		// macro.scm show you how to define macros using "defmacro"
 		trace(eval("'(let (a 1) a)")); // ((lambda (a) a) 1)
 		trace(eval("(let (a 100) a)")); // 100
 ```
