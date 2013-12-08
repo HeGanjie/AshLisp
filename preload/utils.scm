@@ -7,15 +7,15 @@
 (def dec (lambda (n) (sub n 1)))
 
 (def reduce (lambda (func init seq)
-	      (cond (seq (tail func
-			       (func init (car seq))
-			       (cdr seq)))
-		    ('t init))))
+	      (if seq (tail func
+			    (func init (car seq))
+			    (cdr seq))
+		init)))
 
 (def fold-right (lambda (func init seq)
-		  (cond (seq (func (car seq)
-				   (fold-right func init (cdr seq))))
-			('t init))))
+		  (if seq (func (car seq)
+				(fold-right func init (cdr seq)))
+		    init)))
 
 (def mapr (lambda (func seq)
 	    (fold-right (lambda (item init) (cons (func item) init)) '() seq)))
@@ -27,8 +27,8 @@
 	   (cond (seq (cons (func (car seq)) (map func (cdr seq)))))))
 
 (def filter (lambda (pred seq)
-	      (fold-right (lambda (item init) (cond ((pred item) (cons item init))
-						    ('t init)))
+	      (fold-right (lambda (item init) (if (pred item) (cons item init)
+						init))
 			  '()
 			  seq)))
 
@@ -41,8 +41,8 @@
 	     ('t (tail (sub n 1) (cdr seq))))))
 
 (def ntree (lambda (nth-seq tree)
-	     (cond (nth-seq (tail (cdr nth-seq) (nth (car nth-seq) tree)))
-		   ('t tree))))
+	     (if nth-seq (tail (cdr nth-seq) (nth (car nth-seq) tree))
+	       tree)))
 
 (def pair (lambda (keys vals)
 	    (cond
@@ -57,8 +57,8 @@
 		   ('t (tail key (cdr pair-seq))))))
 
 (def append (lambda (l r)
-	      (cond (l (cons (car l) (append (cdr l) r)))
-		    ('t r))))
+	      (if l (cons (car l) (append (cdr l) r))
+		r)))
 
 (def count (lambda (seq) (reduce inc 0 seq)))
 
@@ -84,3 +84,4 @@
 (def identity (lambda (x) x))
 
 (def zero? (lambda (x) (eq x 0)))
+

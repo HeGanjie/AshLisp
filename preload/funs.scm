@@ -1,25 +1,24 @@
 (def fac (lambda (x)
-	   (cond ((eq x 1) 1)
-		 ('t (mul x (fac (sub x 1)))))))
+	   (if (eq x 1) 1
+	     (mul x (fac (sub x 1))))))
 
 (def fib (lambda (x)
-	   (cond ((lt x 2) x)
-		 ('t (add (fib (sub x 1))
-			  (fib (sub x 2)))))))
+	   (if (lt x 2) x
+	     (add (fib (sub x 1))
+		  (fib (sub x 2))))))
 
 (def fibs (lambda (x)
-	    (cond ((< x 2) x)
-		  ('t (+ (fibs (- x 1))
-			 (fibs (- x 2)))))))
+	    (if (< x 2) x
+	      (+ (fibs (- x 1))
+		 (fibs (- x 2))))))
 
-(def fib-tail (lambda (n) ((lambda (fib-iter) (fib-iter n 0 1))
-			   (lambda (x a b)
-			     (cond
-			       ((eq 0 x) a)
-			       ('t (tail (sub x 1) b (add a b))))))))
+(def fib-tail (lambda (n) (let (fib-iter (lambda (x a b)
+					   (if
+					     (eq 0 x) a
+					     (tail (sub x 1) b (add a b)))))
+			    (fib-iter n 0 1))))
 
 (def fac-c (lambda (n f)
-	     (cond ((zero? n) (f 1))
-		   ('t (tail (dec n)
-			     (lambda (x) (f (* n x))))))))
-
+	     (if (zero? n) (f 1)
+	       (tail (dec n)
+		     (lambda (x) (f (* n x)))))))

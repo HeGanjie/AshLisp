@@ -25,10 +25,10 @@ public final class VM implements Serializable {
 	
 	static {
 		VM vm = new VM();
+		vm.load("macro.scm");
 		vm.load("maths.scm");
 		vm.load("funs.scm");
 		vm.load("utils.scm");
-		vm.load("macro.scm");
 	}
 
 	protected void load(String resName) {
