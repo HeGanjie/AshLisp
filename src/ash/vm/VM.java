@@ -20,15 +20,15 @@ public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;
 
 	public static final Map<String, Serializable> tempVar = new HashMap<>();
-	protected final Deque<VMFrame> frameStack = new ArrayDeque<>(64);
+	protected final Deque<VMFrame> frameStack = new ArrayDeque<>();
 	public VMFrame headFrame;
 	
 	static {
 		VM vm = new VM();
 		vm.load("macro.scm");
 		vm.load("maths.scm");
-		vm.load("funs.scm");
 		vm.load("utils.scm");
+		vm.load("funs.scm");
 	}
 
 	protected void load(String resName) {

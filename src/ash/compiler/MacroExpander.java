@@ -25,13 +25,14 @@ public class MacroExpander {
 
 	private static Node createAstByTemplate(Map<String, Serializable> mapping, Node template) {
 		if (template == Node.NIL) return Node.NIL;
-		Serializable leftReplacement;
+		Serializable leftReplacement = null;
 		if (template.left instanceof Node) {
 			leftReplacement = createAstByTemplate(mapping, (Node) template.left);
 		} else {
-			String symbol = (String) template.left;
-			leftReplacement = mapping.get(symbol);
-			if (leftReplacement == null) leftReplacement = symbol;
+			if (template.left instanceof String)
+				leftReplacement = mapping.get((String) template.left);
+			if (leftReplacement == null)
+				leftReplacement = template.left;
 		}
 		return new Node(leftReplacement, createAstByTemplate(mapping, template.next));
 	}

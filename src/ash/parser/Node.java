@@ -24,7 +24,7 @@ public final class Node implements Iterable<Node>, Serializable {
 	public Node(Node node) { this(node, NIL); }
 
 	public Node(Serializable l, Node n) {
-		left = l instanceof String ?  realType((String) l) : l;
+		left = l instanceof String ? realType((String) l) : l;
 		next = n;
 	}
 
@@ -61,7 +61,6 @@ public final class Node implements Iterable<Node>, Serializable {
 		int result = prime + ((left == null) ? 0 : left.hashCode());
 		return prime * result + ((next == null) ? 0 : next.hashCode());
 	}
-
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -99,10 +98,6 @@ public final class Node implements Iterable<Node>, Serializable {
 		};
 	}
 
-	public List<? extends Serializable> toList() {
-		return toList(left.getClass());
-	}
-	
 	@SuppressWarnings("unchecked")
 	public <T> List<T> toList(Class<T> c) {
 		List<T> arrayList = new ArrayList<>();

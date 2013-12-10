@@ -1,87 +1,96 @@
-(def && (lambda (. x) (reduce and (car x) (cdr x))))
+(defn && (. x) (reduce and (car x) (cdr x)))
 
-(def || (lambda (. x) (reduce or (car x) (cdr x))))
+(defn || (. x) (reduce or (car x) (cdr x)))
 
-(def inc (lambda (n) (add n 1)))
+(defn reduce (func init seq)
+      (if seq
+	(tail func
+	      (func init (car seq))
+	      (cdr seq))
+	init))
 
-(def dec (lambda (n) (sub n 1)))
+(defn fold-right (func init seq)
+      (if seq
+	(func (car seq)
+	      (fold-right func init (cdr seq)))
+	init))
 
-(def reduce (lambda (func init seq)
-	      (if seq (tail func
-			    (func init (car seq))
-			    (cdr seq))
-		init)))
+(defn mapr (func seq)
+      (fold-right (lambda (item init) (cons (func item) init))
+		  '()
+		  seq))
 
-(def fold-right (lambda (func init seq)
-		  (if seq (func (car seq)
-				(fold-right func init (cdr seq)))
-		    init)))
+(defn reverse (seq)
+      (reduce (lambda (init item) (cons item init))
+	      '()
+	      seq))
 
-(def mapr (lambda (func seq)
-	    (fold-right (lambda (item init) (cons (func item) init)) '() seq)))
+(defn map (func seq)
+      (when seq
+	(cons (func (car seq)) (map func (cdr seq)))))
 
-(def reverse (lambda (seq)
-	       (reduce (lambda (init item) (cons item init)) '() seq)))
+(defn filter (pred seq)
+      (fold-right (lambda (item init)
+		    (if (pred item)
+		      (cons item init)
+		      init))
+		  '()
+		  seq))
 
-(def map (lambda (func seq)
-	   (cond (seq (cons (func (car seq)) (map func (cdr seq)))))))
+(defn list (. x) x)
 
-(def filter (lambda (pred seq)
-	      (fold-right (lambda (item init) (if (pred item) (cons item init)
-						init))
-			  '()
-			  seq)))
+(defn nth (n seq)
+      (cond
+	((not seq) '())
+	((eq n 0) (car seq))
+	('t (tail (dec n) (cdr seq)))))
 
-(def list (lambda (. x) x))
+(defn ntree (nth-seq tree)
+      (if nth-seq
+	(tail (cdr nth-seq) (nth (car nth-seq) tree))
+	tree))
 
-(def nth (lambda (n seq)
-	   (cond
-	     ((not seq) '())
-	     ((eq n 0) (car seq))
-	     ('t (tail (sub n 1) (cdr seq))))))
+(defn pair (keys vals)
+      (cond
+	((or (not keys) (not vals)) '())
+	((eq (car keys) '.) (list (nth 1 keys) vals))
+	('t (cons (list (car keys) (car vals)) (pair (cdr keys) (cdr vals))))))
 
-(def ntree (lambda (nth-seq tree)
-	     (if nth-seq (tail (cdr nth-seq) (nth (car nth-seq) tree))
-	       tree)))
+(defn assoc (key pair-seq)
+      (cond ((not pair-seq) '())
+	    ((eq (ntree '(0 0) pair-seq) key)
+	     (ntree '(0 1) pair-seq))
+	    ('t (tail key (cdr pair-seq)))))
 
-(def pair (lambda (keys vals)
-	    (cond
-	      ((or (not keys) (not vals)) '())
-	      ((eq (car keys) '.) (list (nth 1 keys) vals))
-	      ('t (cons (list (car keys) (car vals)) (pair (cdr keys) (cdr vals)))))))
+(defn append (l r)
+      (if l
+	(cons (car l) (append (cdr l) r))
+	r))
 
-(def assoc (lambda (key pair-seq)
-	     (cond ((not pair-seq) '())
-		   ((eq (ntree '(0 0) pair-seq) key)
-		    (ntree '(0 1) pair-seq))
-		   ('t (tail key (cdr pair-seq))))))
+(defn count (seq) (reduce inc 0 seq))
 
-(def append (lambda (l r)
-	      (if l (cons (car l) (append (cdr l) r))
-		r)))
+(defn indexof (item seq skip)
+      (cond ((not seq) -1)
+	    ((eq (car seq) item) skip)
+	    ('t (tail item (cdr seq) (inc skip)))))
 
-(def count (lambda (seq) (reduce inc 0 seq)))
+(defn contains (item seq)
+      (neq -1 (indexof item seq 0)))
 
-(def indexof (lambda (item seq skip)
-	       (cond ((not seq) -1)
-		     ((eq (car seq) item) skip)
-		     ('t (tail item (cdr seq) (add skip 1))))))
+(defn last (seq)
+      (if (cdr seq)
+	(car seq)
+	(tail (cdr seq))))
 
-(def contains (lambda (item seq) (neq -1 (indexof item seq 0))))
+(defn do (. things) (last things))
 
-(def last (lambda (seq)
-	    (nth (sub (count seq) 1) seq)))
+(defn range (low high)
+      (when (< low high)
+	(cons low (range (inc low) high))))
 
-(def do (lambda (. things) (last things)))
+(defn apply (func args) (eval (cons func args)))
 
-(def range (lambda (low high)
-	     (cond ((lt low high) (cons low (range (add low 1) high))))))
+(defn eval (ast) (.vmexec (.compile ast)))
 
-(def apply (lambda (func args) (eval (cons func args))))
-
-(def eval (lambda (ast) (.vmexec (.compile ast))))
-
-(def identity (lambda (x) x))
-
-(def zero? (lambda (x) (eq x 0)))
+(defn identity (x) x)
 

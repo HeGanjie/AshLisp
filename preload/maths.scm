@@ -1,21 +1,19 @@
-(def + (lambda (. x) (reduce add (car x) (cdr x))))
+(defn = (. x) (reduce eq (car x) (cdr x)))
+(defn + (. x) (reduce add (car x) (cdr x)))
+(defn - (. x) (reduce sub (car x) (cdr x)))
+(defn * (. x) (reduce mul (car x) (cdr x)))
+(defn / (. x) (reduce div (car x) (cdr x)))
+(defn % (x y) (mod x y))
 
-(def - (lambda (. x) (reduce sub (car x) (cdr x))))
+(defn < (x y) (lt x y))
+(defn <= (x y) (le x y))
+(defn > (x y) (gt x y))
+(defn >= (x y) (ge x y))
 
-(def * (lambda (. x) (reduce mul (car x) (cdr x))))
-
-(def / (lambda (. x) (reduce div (car x) (cdr x))))
-
-(def % (lambda (x y) (mod x y)))
-
-(def < (lambda (x y) (lt x y)))
-
-(def <= (lambda (x y) (le x y)))
-
-(def > (lambda (x y) (gt x y)))
-
-(def >= (lambda (x y) (ge x y)))
-
-(def even? (lambda (x) (eq 0 (mod x 2))))
-
-(def odd? (lambda (x) (eq 1 (mod x 2))))
+(defn even? (x) (eq 0 (mod x 2)))
+(defn odd? (x) (eq 1 (mod x 2)))
+(defn inc (x) (add x 1))
+(defn dec (x) (sub x 1))
+(defn pos? (x) (lt 0 x))
+(defn neg? (x) (lt x 0))
+(defn zero? (x) (eq x 0))
