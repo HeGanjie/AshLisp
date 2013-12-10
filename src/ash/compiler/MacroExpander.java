@@ -1,8 +1,10 @@
-package ash.parser;
+package ash.compiler;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import ash.parser.Node;
 
 public class MacroExpander {
 	public static final Map<String, Node> MARCOS_MAP = new HashMap<>();

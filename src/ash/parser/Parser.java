@@ -33,8 +33,7 @@ public final class Parser {
 		} else {
 			String first = getFirst(trim);
 			String rest = getRest(trim, first.length());
-			Node rst = new Node(createAst(first), split(rest));
-			return MacroExpander.hasMacro(first) ? MacroExpander.expand(rst) : rst;
+			return new Node(createAst(first), split(rest));
 		}
 	}
 

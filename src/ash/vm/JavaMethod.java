@@ -3,8 +3,8 @@ package ash.vm;
 import java.io.Serializable;
 
 import ash.compiler.Compiler;
+import ash.compiler.MacroExpander;
 import ash.parser.ListUtils;
-import ash.parser.MacroExpander;
 import ash.parser.Node;
 import bruce.common.utils.CommonUtils;
 
