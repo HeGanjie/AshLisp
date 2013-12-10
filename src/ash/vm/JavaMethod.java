@@ -35,6 +35,8 @@ public final class JavaMethod implements Serializable {
 		case "new-macro":
 			MacroExpander.MARCOS_MAP.put((String)args[0], (Node)args[1]);
 			break;
+		case "expand-macro":
+			return MacroExpander.expand((Node) args[0]);
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodName);
 		}

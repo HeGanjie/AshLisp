@@ -123,7 +123,8 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testMacro() throws Exception {
-		assertEquals("((lambda (a) a) 1)", exec("'(let (a 1) a)").toString());
+		assertEquals("(let (a 1) a)", exec("'(let (a 1) a)").toString());
+		assertEquals("((lambda (a) a) 1)", exec("(.expand-macro '(let (a 1) a))").toString());
 		assertEquals(100, exec("(let (a 100) a)"));
 	}
 	
