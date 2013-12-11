@@ -32,7 +32,7 @@ public class AshLispUsage {
 
 ### Calculation
 ```Java
-        trace(eval("(+ 1 2 3)")); // 6
+        trace(eval("(+ 1 2 3 4)")); // 10
     	trace(eval("(* 2.5 3)")); // 7.5
 ```
 
@@ -111,6 +111,5 @@ public class AshLispUsage {
 
 ## Specification
 * List is the data structure only supported. (Doesn't support dotted pair)
-* Purely functional. (Defining the same symbol again will cause error)
 * Nil for false, others for true. Nil expressing into '().
 * Preload file using '.scm' as suffix just for the convenience of editing and color coding.

@@ -1,6 +1,8 @@
 (def defmacro (lambda (pattern template)
 		(.new-macro (car pattern)
 			    (cons pattern (cons template '())))))
+			    
+(defmacro '(comment x) ''())
 
 (defmacro '(defn fname args body)
   '(def fname (lambda args body)))

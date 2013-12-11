@@ -91,8 +91,6 @@ public final class VMFrame implements Serializable {
 				} else { // 4...8
 					if (ordinal < 6) {
 						if (ordinal == 4) { //asn
-							if (tempVar.containsKey((String) args[0]))
-								throw new IllegalArgumentException("Already Define:" + args[0]);
 							tempVar.put((String) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
