@@ -6,8 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import bruce.common.functional.LambdaUtils;
-import ash.parser.ListUtils;
-import ash.parser.Node;
+import ash.lang.ListUtils;
+import ash.lang.MacroExpander;
+import ash.lang.Node;
 import ash.vm.Instruction;
 import ash.vm.InstructionSetEnum;
 import ash.vm.JavaMethod;

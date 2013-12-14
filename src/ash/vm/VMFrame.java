@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import bruce.common.utils.CommonUtils;
-import ash.parser.ListUtils;
-import ash.parser.Node;
+import ash.lang.ListUtils;
+import ash.lang.Node;
 
 public final class VMFrame implements Serializable {
 	private static final long serialVersionUID = 3322385890943332297L;
-	private static final boolean debugging = false;
+	private static final boolean debugging = true;
 	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
 	public static final Map<String, Serializable> tempVar = VM.tempVar;

@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 import bruce.common.utils.CommonUtils;
 import ash.compiler.Compiler;
+import ash.lang.BasicType;
 import ash.parser.Parser;
 import ash.vm.VM;
 
@@ -23,7 +24,7 @@ public final class REPLInVM {
 				if (readIn == null) break;
 				long start = System.currentTimeMillis();
 				Serializable val = vm.runInMain(Compiler.astsToInsts(Parser.split(readIn)));
-				System.out.println(val);
+				System.out.println(BasicType.asString(val));
 				reportElapse(System.currentTimeMillis() - start);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -33,7 +34,6 @@ public final class REPLInVM {
 		}
 	}
 	
-
 	protected static void reportElapse(long elapse) {
 		if (100 < elapse)
 			System.out.println(String.format("Eval Elapse: %gs", (double) elapse / 1000));

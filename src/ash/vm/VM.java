@@ -13,7 +13,7 @@ import bruce.common.functional.Func2;
 import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
-import ash.parser.Node;
+import ash.lang.Node;
 import ash.parser.Parser;
 
 public final class VM implements Serializable {

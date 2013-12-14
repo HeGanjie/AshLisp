@@ -3,9 +3,9 @@ package ash.vm;
 import java.io.Serializable;
 
 import ash.compiler.Compiler;
-import ash.compiler.MacroExpander;
-import ash.parser.ListUtils;
-import ash.parser.Node;
+import ash.lang.ListUtils;
+import ash.lang.MacroExpander;
+import ash.lang.Node;
 import bruce.common.utils.CommonUtils;
 
 public final class JavaMethod implements Serializable {

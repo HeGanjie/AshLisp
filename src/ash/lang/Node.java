@@ -1,17 +1,14 @@
-package ash.parser;
+package ash.lang;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import bruce.common.utils.CommonUtils;
 
 public final class Node implements Iterable<Node>, Serializable {
 	private static final long serialVersionUID = -3802355140695976127L;
-	private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?\\d+");
-	private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?(?:\\d+)?\\.\\d+");
 	
 	public static final String T = "t";
 	public static final Node NIL = new Node(null, null);
@@ -24,24 +21,16 @@ public final class Node implements Iterable<Node>, Serializable {
 	public Node(Node node) { this(node, NIL); }
 
 	public Node(Serializable l, Node n) {
-		left = l instanceof String ? realType((String) l) : l;
+		left = l instanceof String ? BasicType.realType((String) l) : l;
 		next = n;
-	}
-
-	private Serializable realType(String val) {
-		if (NUMBER_PATTERN.matcher(val).matches())
-			return Integer.parseInt(val);
-		else if (DECIMAL_PATTERN.matcher(val).matches())
-			return Double.parseDouble(val);
-		return val;
 	}
 
 	private String innerToString() {
 		StringBuilder sb = new StringBuilder();
-		if (left instanceof Node) {
+		if (left instanceof Node)
 			sb.append(left);
-		} else if (left != null)
-			sb.append(left);
+		else if (left != null)
+			sb.append(BasicType.asString(left));
 		
 		if (NIL != next && NIL != this) {
 			sb.append(' ');
@@ -49,7 +38,7 @@ public final class Node implements Iterable<Node>, Serializable {
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		return CommonUtils.buildString('(', innerToString(), ')');

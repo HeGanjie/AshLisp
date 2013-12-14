@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import junit.framework.TestCase;
 import ash.compiler.Compiler;
-import ash.parser.Node;
+import ash.lang.Node;
 import ash.parser.Parser;
 import ash.vm.VM;
 
