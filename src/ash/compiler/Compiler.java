@@ -15,7 +15,6 @@ import ash.vm.JavaMethod;
 
 public final class Compiler {
 	private static final String MULTI_ARGS_SIGNAL = ".";
-	private static final Node DEFAULT_CASE = new Node("quote", new Node(Node.T));
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda",
 			"atom", "car", "cdr", "not",
@@ -118,17 +117,16 @@ public final class Compiler {
 		if (pairList == Node.NIL) return listInstruction(InstructionSetEnum.quote.create(Node.NIL));
 		
 		Node headPair = (Node) pairList.left;
-		boolean isDefaultCase = DEFAULT_CASE.equals(headPair.left);
 		
-		Serializable condition = isDefaultCase ? Node.NIL : compile(headPair.left, lambdaArgs, startIndex);
-		int condInstCount = isDefaultCase ? 0 : countInstruction(condition) + 1;
+		Serializable condition = compile(headPair.left, lambdaArgs, startIndex);
+		int condInstCount = countInstruction(condition) + 1;
 		
 		Serializable exp = compile(headPair.next.left, lambdaArgs, startIndex + condInstCount);
 		int nextCaseStartIndex = startIndex + condInstCount + countInstruction(exp) + 1;
 		
-		Serializable nextCase = isDefaultCase ? Node.NIL : compileCond(pairList.next, lambdaArgs, nextCaseStartIndex);
+		Serializable nextCase = compileCond(pairList.next, lambdaArgs, nextCaseStartIndex);
 		
-		return listInstructionRecur(isDefaultCase ? 2 : 0,
+		return listInstruction(
 				condition,
 				InstructionSetEnum.jz.create(nextCaseStartIndex),
 				exp,
