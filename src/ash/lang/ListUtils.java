@@ -13,6 +13,16 @@ public final class ListUtils {
 		return Node.NIL;
 	}
 
+	public static Node take(int count, Node src) {
+		if (src == Node.NIL) return Node.NIL;
+		return count == 0 ? Node.NIL : new Node(src.left, take(count - 1, src.next));
+	}
+	
+	public static Node drop(int count, Node src) {
+		if (src == Node.NIL) return Node.NIL;
+		return count == 0 ? src : drop(count - 1, src.next);
+	}
+	
 	public static Node toNode(Iterator<? extends Serializable> tailNodeSeq) {
 		if (!tailNodeSeq.hasNext()) return Node.NIL;
 		return new Node(tailNodeSeq.next(), toNode(tailNodeSeq));

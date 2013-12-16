@@ -126,6 +126,12 @@ public final class VMTest extends TestCase {
 		assertEquals("(let (a 1) a)", exec("'(let (a 1) a)").toString());
 		assertEquals("((lambda (a) a) 1)", exec("(.expand-macro '(let (a 1) a))").toString());
 		assertEquals(100, exec("(let (a 100) a)"));
+		
+		// advanced
+		assertEquals("(add (add 1 2) 3)", exec("(.expand-macro '(+ 1 2 3))").toString());
+		assertEquals("((lambda (b) ((lambda (a) (+ a b)) 1)) 2)",
+				exec("(.expand-macro '(let (a 1 b 2) (+ a b)))").toString());
+		assertEquals(3, exec("(let (a 1 b 2) (+ a b))"));
 	}
 	
 	protected static Serializable exec(String code) {

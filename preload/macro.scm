@@ -7,8 +7,8 @@
 (defmacro '(defn fname args body)
   '(def fname (lambda args body)))
 
-(defmacro '(let (name val) body)
-  '((lambda (name) body) val))
+(defmacro '(let (*) body)
+  '((lambda (%1) @body) %2))
 
 (defmacro '(if test true else)
   '(cond (test true)
@@ -17,6 +17,12 @@
 (defmacro '(when test true)
   '(cond (test true)))
 
+(defmacro '(+ x *) '(add @x %))
+(defmacro '(- x *) '(sub @x %))
+(defmacro '(* x *) '(mul @x %))
+(defmacro '(/ x *) '(div @x %))
+
+(defmacro '(= x y) '(eq x y))
 (defmacro '(% x y) '(mod x y))
 (defmacro '(< x y) '(lt x y))
 (defmacro '(<= x y) '(le x y))
