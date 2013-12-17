@@ -1,7 +1,7 @@
 (def defmacro (lambda (pattern template)
 		(.new-macro (car pattern)
 			    (cons pattern (cons template '())))))
-			    
+
 (defmacro '(comment *) ''())
 
 (defmacro '(defn fname args body)
@@ -21,6 +21,9 @@
 (defmacro '(- x *) '(sub @x %))
 (defmacro '(* x *) '(mul @x %))
 (defmacro '(/ x *) '(div @x %))
+
+(defmacro '(&& x *) '(and @x %))
+(defmacro '(|| x *) '(or @x %))
 
 (defmacro '(= x y) '(eq x y))
 (defmacro '(% x y) '(mod x y))

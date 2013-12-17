@@ -40,7 +40,7 @@ public class MacroExpander {
 					&& match((Node) pattern.left, (Node) ast.left)
 					&& match(pattern.next, ast.next);
 		} else if (pattern.left instanceof String) { // * x
-			return MORE_ELEM.equals((String) pattern.left)
+			return MORE_ELEM.equals(pattern.left)
 					|| ast != Node.NIL && match(pattern.next, ast.next);
 		} else {
 			throw new IllegalArgumentException("Pattern Illegal!");
@@ -105,9 +105,9 @@ public class MacroExpander {
 	}
 
 	private static int countReplacementRequire(Node template) {
-		int leftTreeCount = 0;
 		if (template == Node.NIL) return 0;
-		else if (template.left instanceof Node)
+		int leftTreeCount = 0;
+		if (template.left instanceof Node)
 			leftTreeCount = countReplacementRequire((Node) template.left);
 		else {
 			Serializable val = template.left;

@@ -72,11 +72,7 @@ public final class VMTest extends TestCase {
 		assertEquals(9, exec("(/ 45 5)"));
 		assertEquals(2, exec("(% 42 5)"));
 	}
-	
-	public void testFib() throws Exception {
-		assertEquals(832040, exec("(fib 30)"));
-	}
-	
+		
 	public void testFibs() throws Exception {
 		assertEquals(832040, exec("(fibs 30)"));
 	}

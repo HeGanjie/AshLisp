@@ -5,6 +5,9 @@
 (defn / (. x) (reduce div (car x) (cdr x)))
 (defn % (x y) (mod x y))
 
+(defn && (. x) (reduce and (car x) (cdr x)))
+(defn || (. x) (reduce or (car x) (cdr x)))
+
 (defn < (x y) (lt x y))
 (defn <= (x y) (le x y))
 (defn > (x y) (gt x y))

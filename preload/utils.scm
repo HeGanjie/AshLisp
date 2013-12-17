@@ -1,7 +1,3 @@
-(defn && (. x) (reduce and (car x) (cdr x)))
-
-(defn || (. x) (reduce or (car x) (cdr x)))
-
 (defn reduce (func init seq)
       (if seq
 	(tail func
@@ -42,7 +38,7 @@
 (defn nth (n seq)
       (cond
 	((not seq) '())
-	((eq n 0) (car seq))
+	((zero? n) (car seq))
 	('t (tail (dec n) (cdr seq)))))
 
 (defn ntree (nth-seq tree)
