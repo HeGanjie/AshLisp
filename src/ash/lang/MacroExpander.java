@@ -23,6 +23,8 @@ public class MacroExpander {
 		Node pattern = (Node) pAndt.left;
 		Node template = (Node) pAndt.next.left;
 		
+		if (!match(pattern, ast)) return Node.NIL;
+		
 		PersistentMap<String, Serializable> mapping = findMapping(pattern.next, ast.next);
 		Node moreElem = (Node) mapping.get(MORE_ELEM);
 		if (moreElem == null)
@@ -30,8 +32,24 @@ public class MacroExpander {
 		return createAstRecur(mapping.dissoc(MORE_ELEM), template, moreElem, null, countReplacementRequire(template));
 	}
 	
+	private static boolean match(Node pattern, Node ast) {
+		if (pattern == Node.NIL) return ast == Node.NIL; // pattern ending
+		
+		if (pattern.left instanceof Node) { // inner Node
+			return ast.left instanceof Node
+					&& match((Node) pattern.left, (Node) ast.left)
+					&& match(pattern.next, ast.next);
+		} else if (pattern.left instanceof String) { // * x
+			return MORE_ELEM.equals((String) pattern.left)
+					|| ast != Node.NIL && match(pattern.next, ast.next);
+		} else {
+			throw new IllegalArgumentException("Pattern Illegal!");
+		}
+	}
+
 	private static Node createAstByTemplate(PersistentMap<String, Serializable> mapping, Node template, Node moreElem, Node stack) {
 		if (template == Node.NIL) return Node.NIL;
+		
 		Serializable leftReplacement = null;
 		if (template.left instanceof Node)
 			leftReplacement = createAstByTemplate(mapping, (Node) template.left, moreElem, stack);
@@ -58,19 +76,18 @@ public class MacroExpander {
 			int drop = Integer.parseInt(symbol.substring(1)) - 1;
 			Serializable replacement = ListUtils.drop(drop, moreElem).left;
 			if (replacement == null)
-				throw new IllegalArgumentException("Macro Illegal!");
+				throw new IllegalArgumentException("Ast Illegal!");
 			return replacement;
 		}
 	}
 
 	private static Node createAstRecur(PersistentMap<String, Serializable> mapping,
-			Node template, Node moreElem, Node stack, int wildcardCount) {
+			Node template, Node moreElem, Node stack, int replacementCount) {
+		if (moreElem == Node.NIL) return stack;
 		
-		if (moreElem != Node.NIL) {
-			Node res = createAstByTemplate(mapping, template, ListUtils.take(wildcardCount, moreElem), stack);
-			return createAstRecur(mapping, template, ListUtils.drop(wildcardCount, moreElem), res, wildcardCount);
-		}
-		return stack;
+		Node res = createAstByTemplate(mapping, template, moreElem, stack);
+		if (replacementCount == 0) return res;
+		return createAstRecur(mapping, template, ListUtils.drop(replacementCount, moreElem), res, replacementCount);
 	}
 
 	private static PersistentMap<String, Serializable> findMapping(Node pattern, Node ast) {

@@ -61,9 +61,13 @@ public final class Compiler {
 							compileArgs(node.next, lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf((String) op).create());
 				}
-			} else if (op instanceof String && MacroExpander.hasMacro((String) op)) {
-				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (+ ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
+				if (op instanceof String && MacroExpander.hasMacro((String) op)) {
+					Node expand = MacroExpander.expand(node);
+					if (expand != Node.NIL) {
+						return compile(expand, lambdaArgs, startIndex);
+					}
+				}
 				int argsCount = LambdaUtils.count(node.next, null);
 				InstructionSetEnum callMethod = op instanceof String && op.toString().charAt(0) == '.'
 						? InstructionSetEnum.java_call

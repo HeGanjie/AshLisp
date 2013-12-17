@@ -2,7 +2,7 @@
 		(.new-macro (car pattern)
 			    (cons pattern (cons template '())))))
 			    
-(defmacro '(comment x) ''())
+(defmacro '(comment *) ''())
 
 (defmacro '(defn fname args body)
   '(def fname (lambda args body)))

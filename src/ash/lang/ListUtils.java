@@ -13,6 +13,11 @@ public final class ListUtils {
 		return Node.NIL;
 	}
 
+	public static int count(Node src) {
+		if (src == Node.NIL) return 0;
+		return 1 + count(src.next);
+	}
+	
 	public static Node take(int count, Node src) {
 		if (src == Node.NIL) return Node.NIL;
 		return count == 0 ? Node.NIL : new Node(src.left, take(count - 1, src.next));

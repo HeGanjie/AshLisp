@@ -34,6 +34,7 @@ public final class VMTest extends TestCase {
 		assertEquals(Node.NIL, exec("(eq 2 1)"));
 		assertEquals(Node.T, exec("(eq '1 1)"));
 		assertEquals(Node.T, exec("(eq '(a b (c)) '(a b (c)))"));
+		assertEquals(Node.NIL, exec("(= 1 1 2)"));
 	}
 	
 	public void testCar() throws Exception {
