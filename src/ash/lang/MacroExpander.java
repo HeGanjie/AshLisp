@@ -67,8 +67,8 @@ public class MacroExpander {
 			Node template, Node moreElem, Node stack, int wildcardCount) {
 		
 		if (moreElem != Node.NIL) {
-			Node res = createAstByTemplate(mapping, template, ListUtils.take(wildcardCount, moreElem), stack);
-			return createAstRecur(mapping, template, ListUtils.drop(wildcardCount, moreElem), res, wildcardCount);
+			Node prevResult = createAstByTemplate(mapping, template, moreElem, stack);
+			return createAstRecur(mapping, template, ListUtils.drop(wildcardCount, moreElem), prevResult, wildcardCount);
 		}
 		return stack;
 	}
@@ -88,15 +88,15 @@ public class MacroExpander {
 	}
 
 	private static int countReplacementRequire(Node template) {
-		if (template == Node.NIL)
-			return 0;
+		int leftTreeCount = 0;
+		if (template == Node.NIL) return 0;
 		else if (template.left instanceof Node)
-			return countReplacementRequire((Node) template.left) + countReplacementRequire(template.next);
+			leftTreeCount = countReplacementRequire((Node) template.left);
 		else {
 			Serializable val = template.left;
 			if (val instanceof String && ((String) val).startsWith(PLACE_HERE_ELEM))
-				return 1 + countReplacementRequire(template.next);
+				leftTreeCount = 1;
 		}
-		return countReplacementRequire(template.next);
+		return leftTreeCount + countReplacementRequire(template.next);
 	}
 }
