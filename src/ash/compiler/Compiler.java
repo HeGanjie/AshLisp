@@ -82,7 +82,7 @@ public final class Compiler {
 			if (op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"')
 				return InstructionSetEnum.ldc.create(op.substring(1, op.length() - 1)); // String
 			else if (op.charAt(0) == '.')
-				return InstructionSetEnum.ldc.create(new JavaMethod(op.substring(1))); // java method
+				return InstructionSetEnum.ldc.create(JavaMethod.create(op.substring(1))); // java method
 
 			int symbolIndexOfArgs = findArgIndex(lambdaArgs, exp);
 			if (symbolIndexOfArgs == -1) {
@@ -93,7 +93,7 @@ public final class Compiler {
 			} else {
 				return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
 			}
-		} else // (... 1 2 3.4 ...)
+		} else // (... 1 2 3.4 \a ...)
 			return InstructionSetEnum.ldc.create(exp);
 	}
 

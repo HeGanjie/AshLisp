@@ -1,6 +1,8 @@
 package ash.vm;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import ash.compiler.Compiler;
 import ash.lang.ListUtils;
@@ -10,13 +12,24 @@ import bruce.common.utils.CommonUtils;
 
 public final class JavaMethod implements Serializable {
 	private static final long serialVersionUID = -933603269059202413L;
+	private static final Map<String, JavaMethod> CACHE = new HashMap<>();
+	
 	String methodName;
 
-	public JavaMethod(String name) { methodName = name; }
+	private JavaMethod(String name) { methodName = name; }
+	
+	public static JavaMethod create(String methodName) {
+		JavaMethod javaMethod = CACHE.get(methodName);
+		if (javaMethod == null) {
+			javaMethod = new JavaMethod(methodName);
+			CACHE.put(methodName, javaMethod);
+		}
+		return javaMethod;
+	}
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString('*', methodName, '*');
+		return '.' + methodName;
 	}
 
 	public Serializable call(Serializable[] args) {

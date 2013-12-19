@@ -74,7 +74,7 @@ public final class VMTest extends TestCase {
 	}
 		
 	public void testFibs() throws Exception {
-		assertEquals(832040, exec("(fibs 30)"));
+		assertEquals(2178309, exec("(fibs 32)"));
 	}
 	
 	public void testFibTail() throws Exception {
