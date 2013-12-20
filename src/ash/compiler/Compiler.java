@@ -49,25 +49,22 @@ public final class Compiler {
 				case "lambda":
 					int dotIndex = ListUtils.indexOf((Node) node.next.left, MULTI_ARGS_SIGNAL, 0);
 					boolean notCombineArgs = dotIndex == -1;
-					return listInstruction(InstructionSetEnum.closure.create(
-							expand(listInstructionRecur(notCombineArgs ? 1 : 0,
-									InstructionSetEnum.cons_args.create(dotIndex),
-									compile(node.next.next.left,
-											ListUtils.append((Node) node.next.left, lambdaArgs),
-											notCombineArgs ? 0 : 1),
-									InstructionSetEnum.ret.create()))));
+					return listInstruction(
+							InstructionSetEnum.closure.create(
+									expand(listInstructionRecur(notCombineArgs ? 1 : 0,
+											InstructionSetEnum.cons_args.create(dotIndex),
+											compile(node.next.next.left,
+													ListUtils.append((Node) node.next.left, lambdaArgs),
+													notCombineArgs ? 0 : 1),
+													InstructionSetEnum.ret.create()))));
 				default:
 					return listInstruction(
 							compileArgs(node.next, lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf((String) op).create());
 				}
+			} else if (op instanceof String && MacroExpander.hasMacro((String) op, node)) {
+				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (+ ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
-				if (op instanceof String && MacroExpander.hasMacro((String) op)) {
-					Node expand = MacroExpander.expand(node);
-					if (expand != Node.NIL) {
-						return compile(expand, lambdaArgs, startIndex);
-					}
-				}
 				int argsCount = LambdaUtils.count(node.next, null);
 				InstructionSetEnum callMethod = op instanceof String && op.toString().charAt(0) == '.'
 						? InstructionSetEnum.java_call
@@ -77,24 +74,28 @@ public final class Compiler {
 						callMethod == InstructionSetEnum.tail ? Node.NIL : compile(op, lambdaArgs, startIndex),
 						callMethod.create(argsCount));
 			}
-		} else if (exp instanceof String) { // (... abc "a" add .puts ...)
-			String op = (String) exp;
-			if (op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"')
-				return InstructionSetEnum.ldc.create(op.substring(1, op.length() - 1)); // String
-			else if (op.charAt(0) == '.')
-				return InstructionSetEnum.ldc.create(JavaMethod.create(op.substring(1))); // java method
+		} else if (exp instanceof String) {
+			return compileSymbol(exp, lambdaArgs); // (... abc "a" add .puts ...)
+		} else
+			return InstructionSetEnum.ldc.create(exp); // (... 1 2 3.4 \a ...)
+	}
 
-			int symbolIndexOfArgs = findArgIndex(lambdaArgs, exp);
-			if (symbolIndexOfArgs == -1) {
-				if (InstructionSetEnum.contains(op))
-					return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(op).create()); // instruction
-				else
-					return InstructionSetEnum.ldv.create(op); // symbol
-			} else {
-				return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
-			}
-		} else // (... 1 2 3.4 \a ...)
-			return InstructionSetEnum.ldc.create(exp);
+	protected static Serializable compileSymbol(final Serializable exp, Node lambdaArgs) {
+		String op = (String) exp;
+		if (op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"')
+			return InstructionSetEnum.ldc.create(op.substring(1, op.length() - 1)); // String
+		else if (op.charAt(0) == '.')
+			return InstructionSetEnum.ldc.create(JavaMethod.create(op.substring(1))); // java method
+
+		int symbolIndexOfArgs = findArgIndex(lambdaArgs, exp);
+		if (symbolIndexOfArgs == -1) {
+			if (InstructionSetEnum.contains(op))
+				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(op).create()); // instruction
+			else
+				return InstructionSetEnum.ldv.create(op); // symbol
+		} else {
+			return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
+		}
 	}
 
 	protected static int findArgIndex(Node lambdaArgs, final Serializable op) {

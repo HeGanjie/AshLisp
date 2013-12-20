@@ -13,8 +13,13 @@ public class MacroExpander {
 
 	private MacroExpander() {}
 	
-	public static boolean hasMacro(String symbol) {
-		return MARCOS_MAP.containsKey(symbol);
+	public static boolean hasMacro(String symbol, Node ast) {
+		Node pAndt = MARCOS_MAP.get(symbol);
+		if (pAndt != null) {
+			Node pattern = (Node) pAndt.left;
+			return match(pattern, ast);
+		}
+		return false;
 	}
 
 	public static Node expand(Node ast) {
@@ -22,8 +27,6 @@ public class MacroExpander {
 		Node pAndt = MARCOS_MAP.get(macroName);
 		Node pattern = (Node) pAndt.left;
 		Node template = (Node) pAndt.next.left;
-		
-		if (!match(pattern, ast)) return Node.NIL;
 		
 		PersistentMap<String, Serializable> mapping = findMapping(pattern.next, ast.next);
 		Node moreElem = (Node) mapping.get(MORE_ELEM);
