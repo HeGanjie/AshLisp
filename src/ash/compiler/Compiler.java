@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import bruce.common.functional.LambdaUtils;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -64,14 +63,14 @@ public final class Compiler {
 				}
 			} else if (op instanceof String && MacroExpander.hasMacro((String) op, node)) {
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
-			} else { // (+ ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
-				int argsCount = LambdaUtils.count(node.next, null);
-				InstructionSetEnum callMethod = op instanceof String && op.toString().charAt(0) == '.'
+			} else { // (func ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
+				int argsCount = ListUtils.count(node.next);
+				InstructionSetEnum callMethod = op instanceof String && ((String) op).charAt(0) == '.'
 						? InstructionSetEnum.java_call
 						: InstructionSetEnum.call;
 				return listInstruction(
 						compileArgs(node.next, lambdaArgs, startIndex),
-						callMethod == InstructionSetEnum.tail ? Node.NIL : compile(op, lambdaArgs, startIndex),
+						compile(op, lambdaArgs, startIndex),
 						callMethod.create(argsCount));
 			}
 		} else if (exp instanceof String) {
@@ -141,7 +140,7 @@ public final class Compiler {
 
 	private static int countInstruction(Serializable ins) {
 		if (ins instanceof Instruction) return 1;
-		return LambdaUtils.count((Node) ins, null);
+		return ListUtils.count((Node) ins);
 	}
 	
 	public static Node listInstruction(Serializable... ins) { return listInstructionRecur(0, ins); }
