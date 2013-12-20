@@ -2,7 +2,9 @@ package ash.vm;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import bruce.common.functional.Func1;
 import bruce.common.functional.LambdaUtils;
@@ -51,6 +53,12 @@ public enum InstructionSetEnum {
 //	rem,
 //	dup;
 	
+	private static final Set<String> INST_NAME_CACHE = new HashSet<>(LambdaUtils.select(Arrays.asList(values()),
+			new Func1<String, InstructionSetEnum>() {
+		@Override
+		public String call(InstructionSetEnum ins) { return ins.name(); }
+	}));
+	
 	private static final List<Instruction> INST_CACHES = LambdaUtils.select(Arrays.asList(values()),
 			new Func1<Instruction, InstructionSetEnum>() {
 		@Override
@@ -64,11 +72,6 @@ public enum InstructionSetEnum {
 	public final Instruction create(Serializable... args) { return new Instruction(this, args); }
 
 	public static boolean contains(String op) {
-		try {
-			valueOf(op);
-			return true;
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
+		return INST_NAME_CACHE.contains(op);
 	}
 }
