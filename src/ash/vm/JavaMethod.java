@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import ash.compiler.Compiler;
+import ash.lang.BasicType;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -53,7 +54,7 @@ public final class JavaMethod implements Serializable {
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodName);
 		}
-		return Node.NIL;
+		return BasicType.NIL;
 	}
 
 }

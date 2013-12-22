@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 public class BasicType {
+	public static final String T = "t";
+	public static final Node NIL = new Node(null, null);
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?\\d+");
 	private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?(?:\\d+)?\\.\\d+");
 	

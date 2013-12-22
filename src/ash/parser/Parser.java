@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ash.lang.BasicType;
 import ash.lang.Node;
 
 public final class Parser {
@@ -26,7 +27,7 @@ public final class Parser {
 
 	public static Node split(String str) {
 		String trim = str.trim();
-		if (trim.length() == 0) return Node.NIL;
+		if (trim.length() == 0) return BasicType.NIL;
 		
 		if (trim.charAt(0) == QUOTE_CHAR) {
 			String first = getFirst(trim.substring(1));

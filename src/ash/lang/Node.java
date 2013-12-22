@@ -9,16 +9,12 @@ import bruce.common.utils.CommonUtils;
 
 public final class Node implements ISeq {
 	private static final long serialVersionUID = -3802355140695976127L;
-	
-	public static final String T = "t";
-	public static final Node NIL = new Node(null, null);
-	
 	private final Serializable left;
 	private final ISeq next;
 	
-	public Node(Serializable val) { this(val, NIL); }
+	public Node(Serializable val) { this(val, BasicType.NIL); }
 
-	public Node(Node node) { this(node, NIL); }
+	public Node(Node node) { this(node, BasicType.NIL); }
 
 	public Node(Serializable l, ISeq n) {
 		left = l instanceof String ? BasicType.realType((String) l) : l;
@@ -32,7 +28,7 @@ public final class Node implements ISeq {
 		else if (left != null)
 			sb.append(BasicType.asString(left));
 		
-		if (NIL != next && NIL != this) {
+		if (BasicType.NIL != next && BasicType.NIL != this) {
 			sb.append(' ');
 			sb.append(((Node) next).innerToString());
 		}
@@ -75,7 +71,7 @@ public final class Node implements ISeq {
 		return new Iterator<ISeq>() {
 			ISeq head = Node.this;
 			@Override
-			public boolean hasNext() { return NIL != head; }
+			public boolean hasNext() { return BasicType.NIL != head; }
 			@Override
 			public ISeq next() {
 				ISeq curr = head;

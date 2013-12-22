@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import ash.lang.BasicType;
 import ash.lang.ISeq;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
@@ -24,8 +25,8 @@ public final class Compiler {
 	private Compiler() {}
 	
 	public static Node astsToInsts(ISeq parseResult) {
-		if (parseResult == Node.NIL) return Node.NIL;
-		Serializable instNode = compile(parseResult.head(), Node.NIL, 0);
+		if (parseResult == BasicType.NIL) return BasicType.NIL;
+		Serializable instNode = compile(parseResult.head(), BasicType.NIL, 0);
 		if (!(instNode instanceof Node)) {
 			instNode = new Node(instNode); // ensure no raw instructions in the returned list
 		}
@@ -114,12 +115,12 @@ public final class Compiler {
 	}
 	
 	private static Node compileArgs(ISeq args, Node lambdaArgs, int startIndex) {
-		if (args == Node.NIL) return Node.NIL;
+		if (args == BasicType.NIL) return BasicType.NIL;
 		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
 	private static Serializable compileCond(ISeq pairList, Node lambdaArgs, int startIndex) {
-		if (pairList == Node.NIL) return listInstruction(InstructionSetEnum.quote.create(Node.NIL));
+		if (pairList == BasicType.NIL) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();
 		
@@ -147,7 +148,7 @@ public final class Compiler {
 	public static Node listInstruction(Serializable... ins) { return listInstructionRecur(0, ins); }
 
 	public static Node listInstructionRecur(int skipParams, Serializable... ins) {
-		if (ins.length == skipParams) return Node.NIL;
+		if (ins.length == skipParams) return BasicType.NIL;
 		Serializable s = ins[skipParams];
 		if (s instanceof Node)
 			return ListUtils.append((Node) s, listInstructionRecur(skipParams + 1, ins));

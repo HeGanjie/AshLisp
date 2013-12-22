@@ -6,9 +6,10 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
-import bruce.common.utils.CommonUtils;
+import ash.lang.BasicType;
 import ash.lang.ListUtils;
 import ash.lang.Node;
+import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
 	private static final long serialVersionUID = 3322385890943332297L;
@@ -114,7 +115,7 @@ public final class VMFrame implements Serializable {
 					if (ordinal < 10) {
 						if (ordinal == 8) { // jz
 							Serializable pop = popWorkingStack();
-							if (pop == Node.NIL) runIndex = (Integer) args[0];
+							if (pop == BasicType.NIL) runIndex = (Integer) args[0];
 						} else { // tail
 							callArgs = createCallingArgs((Integer) args[0]);
 							workingStack.clear();
@@ -141,7 +142,7 @@ public final class VMFrame implements Serializable {
 							prevFrame = null;
 						} else { // halt
 							if (workingStack.isEmpty())
-								pushWorkingStack(Node.NIL);
+								pushWorkingStack(BasicType.NIL);
 							if (prevFrame != null)
 								prevFrame.pushWorkingStack(popWorkingStack());
 							prevFrame = null;
@@ -174,7 +175,7 @@ public final class VMFrame implements Serializable {
 						} else { // neq
 							Serializable elem2 = popWorkingStack();
 							Serializable elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(ListUtils.eq(elem, elem2) == Node.NIL));
+							pushWorkingStack(ListUtils.transformBoolean(ListUtils.eq(elem, elem2) == BasicType.NIL));
 						}
 					}
 				} else { // 20...24
@@ -182,16 +183,16 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 20) { // and
 							Serializable elem2 = popWorkingStack();
 							Serializable elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem != Node.NIL && elem2 != Node.NIL));
+							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL && elem2 != BasicType.NIL));
 						} else { // or
 							Serializable elem2 = popWorkingStack();
 							Serializable elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem != Node.NIL || elem2 != Node.NIL));
+							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL || elem2 != BasicType.NIL));
 						}
 					} else {
 						if (ordinal == 22) { // not
 							Serializable elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem == Node.NIL));
+							pushWorkingStack(ListUtils.transformBoolean(elem == BasicType.NIL));
 						} else { // add
 							Number n2 = (Number) popWorkingStack();
 							Number n1 = (Number) popWorkingStack();

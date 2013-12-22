@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import junit.framework.TestCase;
 import ash.compiler.Compiler;
+import ash.lang.BasicType;
 import ash.lang.Node;
 import ash.parser.Parser;
 import ash.vm.VM;
@@ -16,25 +17,25 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testQuote() throws Exception {
-		assertEquals(Node.NIL, exec("'()"));
+		assertEquals(BasicType.NIL, exec("'()"));
 		assertEquals("(quote a)", exec("''a").toString());
 		
 		assertEquals("(1 + () a 1)", exec("(list '1 '+ '() 'a 1)").toString());
 	}
 	
 	public void testAtom() throws Exception {
-		assertEquals(Node.T, exec("(atom 'a)"));
-		assertEquals(Node.T, exec("(atom '())"));
-		assertEquals(Node.NIL, exec("(atom '(a))"));
+		assertEquals(BasicType.T, exec("(atom 'a)"));
+		assertEquals(BasicType.T, exec("(atom '())"));
+		assertEquals(BasicType.NIL, exec("(atom '(a))"));
 	}
 	
 	public void testEq() throws Exception {
-		assertEquals(Node.T, exec("(eq 'a 'a)"));
-		assertEquals(Node.T, exec("(eq 1 1)"));
-		assertEquals(Node.NIL, exec("(eq 2 1)"));
-		assertEquals(Node.T, exec("(eq '1 1)"));
-		assertEquals(Node.T, exec("(eq '(a b (c)) '(a b (c)))"));
-		assertEquals(Node.NIL, exec("(= 1 1 2)"));
+		assertEquals(BasicType.T, exec("(eq 'a 'a)"));
+		assertEquals(BasicType.T, exec("(eq 1 1)"));
+		assertEquals(BasicType.NIL, exec("(eq 2 1)"));
+		assertEquals(BasicType.T, exec("(eq '1 1)"));
+		assertEquals(BasicType.T, exec("(eq '(a b (c)) '(a b (c)))"));
+		assertEquals(BasicType.NIL, exec("(= 1 1 2)"));
 	}
 	
 	public void testCar() throws Exception {
@@ -46,7 +47,7 @@ public final class VMTest extends TestCase {
 	public void testCdr() throws Exception {
 		assertEquals(new Node("b", new Node("c")), exec("(cdr '(a b c))"));
 		assertEquals(new Node(new Node("b"), new Node("c")), exec("(cdr '(a (b) c))"));
-		assertEquals(Node.NIL, exec("(cdr '(a))"));
+		assertEquals(BasicType.NIL, exec("(cdr '(a))"));
 	}
 	
 	public void testCons() throws Exception {
@@ -60,7 +61,7 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testLambda() throws Exception {
-		assertEquals(Node.T, exec("((lambda (x) (eq 1 x)) 1)"));
+		assertEquals(BasicType.T, exec("((lambda (x) (eq 1 x)) 1)"));
 		
 		assertEquals(0, exec("(((lambda (f) f) add) 1 -1)"));
 	}

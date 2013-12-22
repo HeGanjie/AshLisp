@@ -36,7 +36,7 @@ public class MacroExpander {
 	}
 	
 	private static boolean match(ISeq pattern, ISeq ast) {
-		if (pattern == Node.NIL) return ast == Node.NIL; // pattern ending
+		if (pattern == BasicType.NIL) return ast == BasicType.NIL; // pattern ending
 		
 		if (pattern.head() instanceof Node) { // inner Node
 			return ast.head() instanceof Node
@@ -44,14 +44,14 @@ public class MacroExpander {
 					&& match(pattern.rest(), ast.rest());
 		} else if (pattern.head() instanceof String) { // * x
 			return MORE_ELEM.equals(pattern.head())
-					|| ast != Node.NIL && match(pattern.rest(), ast.rest());
+					|| ast != BasicType.NIL && match(pattern.rest(), ast.rest());
 		} else {
 			throw new IllegalArgumentException("Pattern Illegal!");
 		}
 	}
 
 	private static Node createAstByTemplate(PersistentMap<String, Serializable> mapping, ISeq template, ISeq moreElem, Node stack) {
-		if (template == Node.NIL) return Node.NIL;
+		if (template == BasicType.NIL) return BasicType.NIL;
 		
 		Serializable leftReplacement = null;
 		if (template.head() instanceof Node)
@@ -86,7 +86,7 @@ public class MacroExpander {
 
 	private static Node createAstRecur(PersistentMap<String, Serializable> mapping,
 			Node template, ISeq moreElem, Node stack, int replacementCount) {
-		if (moreElem == Node.NIL) return stack;
+		if (moreElem == BasicType.NIL) return stack;
 		
 		Node res = createAstByTemplate(mapping, template, moreElem, stack);
 		if (replacementCount == 0) return res;
@@ -94,7 +94,7 @@ public class MacroExpander {
 	}
 
 	private static PersistentMap<String, Serializable> findMapping(ISeq pattern, ISeq ast) {
-		if (pattern == Node.NIL) return new PersistentMap<>();
+		if (pattern == BasicType.NIL) return new PersistentMap<>();
 		
 		PersistentMap<String, Serializable> leftMap;
 		if (pattern.head() instanceof Node)
@@ -108,7 +108,7 @@ public class MacroExpander {
 	}
 
 	private static int countReplacementRequire(ISeq template) {
-		if (template == Node.NIL) return 0;
+		if (template == BasicType.NIL) return 0;
 		int leftTreeCount = 0;
 		if (template.head() instanceof Node)
 			leftTreeCount = countReplacementRequire((Node) template.head());
