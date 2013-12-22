@@ -35,7 +35,7 @@ public class MacroExpander {
 		return createAstRecur(mapping.dissoc(MORE_ELEM), template, moreElem, null, countReplacementRequire(template));
 	}
 	
-	private static boolean match(ISeq pattern, ISeq ast) {
+	private static boolean match(PersistentList pattern, PersistentList ast) {
 		if (pattern == BasicType.NIL) return ast == BasicType.NIL; // pattern ending
 		
 		if (pattern.head() instanceof Node) { // inner Node
@@ -50,7 +50,7 @@ public class MacroExpander {
 		}
 	}
 
-	private static Node createAstByTemplate(PersistentMap<String, Serializable> mapping, ISeq template, ISeq moreElem, Node stack) {
+	private static Node createAstByTemplate(PersistentMap<String, Serializable> mapping, PersistentList template, PersistentList moreElem, Node stack) {
 		if (template == BasicType.NIL) return BasicType.NIL;
 		
 		Serializable leftReplacement = null;
@@ -72,7 +72,7 @@ public class MacroExpander {
 		return new Node(leftReplacement, createAstByTemplate(mapping, template.rest(), moreElem, stack));
 	}
 	
-	private static Serializable getRequiringReplacement(String symbol, ISeq moreElem) {
+	private static Serializable getRequiringReplacement(String symbol, PersistentList moreElem) {
 		if (PLACE_HERE_ELEM.equals(symbol)) {
 			return moreElem.head();
 		} else {
@@ -85,7 +85,7 @@ public class MacroExpander {
 	}
 
 	private static Node createAstRecur(PersistentMap<String, Serializable> mapping,
-			Node template, ISeq moreElem, Node stack, int replacementCount) {
+			Node template, PersistentList moreElem, Node stack, int replacementCount) {
 		if (moreElem == BasicType.NIL) return stack;
 		
 		Node res = createAstByTemplate(mapping, template, moreElem, stack);
@@ -93,7 +93,7 @@ public class MacroExpander {
 		return createAstRecur(mapping, template, ListUtils.drop(replacementCount, moreElem), res, replacementCount);
 	}
 
-	private static PersistentMap<String, Serializable> findMapping(ISeq pattern, ISeq ast) {
+	private static PersistentMap<String, Serializable> findMapping(PersistentList pattern, PersistentList ast) {
 		if (pattern == BasicType.NIL) return new PersistentMap<>();
 		
 		PersistentMap<String, Serializable> leftMap;
@@ -107,7 +107,7 @@ public class MacroExpander {
 		return leftMap.merge(findMapping(pattern.rest(), ast.rest()));
 	}
 
-	private static int countReplacementRequire(ISeq template) {
+	private static int countReplacementRequire(PersistentList template) {
 		if (template == BasicType.NIL) return 0;
 		int leftTreeCount = 0;
 		if (template.head() instanceof Node)

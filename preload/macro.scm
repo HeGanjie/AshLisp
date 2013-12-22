@@ -4,6 +4,9 @@
 
 (defmacro '(comment *) ''())
 
+(defmacro '(lazy-cons head body)
+  '(.stream head (lambda () body)))
+
 (defmacro '(defn fname args body)
   '(def fname (lambda args body)))
 
@@ -14,8 +17,15 @@
   '(cond (test true)
 	 ('t else)))
 
+(defmacro '(if-not test true else)
+  '(cond ((not test) true)
+	 ('t else)))
+
 (defmacro '(when test true)
   '(cond (test true)))
+
+(defmacro '(when-not test true)
+  '(cond ((not test) true)))
 
 (defmacro '(+ x *) '(add @x %))
 (defmacro '(- x *) '(sub @x %))

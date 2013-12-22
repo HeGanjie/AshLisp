@@ -90,3 +90,12 @@
 
 (defn identity (x) x)
 
+(defn take (n seq)
+      (when seq 
+	(when-not (zero? n)
+		  (cons (car seq) (take (dec n) (cdr seq))))))
+
+(defn drop (n seq)
+      (when seq
+	(if (zero? n) seq
+	  (drop (dec n) (cdr seq)))))

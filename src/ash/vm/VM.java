@@ -13,7 +13,7 @@ import bruce.common.functional.Func2;
 import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
-import ash.lang.ISeq;
+import ash.lang.PersistentList;
 import ash.lang.Node;
 import ash.parser.Parser;
 
@@ -27,6 +27,7 @@ public final class VM implements Serializable {
 	static {
 		VM vm = new VM();
 		vm.load("macro.scm");
+		vm.load("lazy.scm");
 		vm.load("maths.scm");
 		vm.load("utils.scm");
 		vm.load("funs.scm");
@@ -36,11 +37,11 @@ public final class VM implements Serializable {
 		runInMain(Compiler.astsToInsts(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
-	public Serializable runInMain(ISeq compiledCodes) {
+	public Serializable runInMain(PersistentList compiledCodes) {
 		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
-				new Func2<List<Instruction>, List<Instruction>, ISeq>() {
+				new Func2<List<Instruction>, List<Instruction>, PersistentList>() {
 			@Override
-			public List<Instruction> call(List<Instruction> insts, ISeq instList) {
+			public List<Instruction> call(List<Instruction> insts, PersistentList instList) {
 				insts.addAll(((Node) instList.head()).toList(Instruction.class));
 				return insts;
 			}

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
+import ash.lang.LazyNode;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -35,6 +36,8 @@ public final class JavaMethod implements Serializable {
 
 	public Serializable call(Serializable[] args) {
 		switch (methodName) {
+		case "stream":
+			return LazyNode.create(args[0], (Closure) args[1]);
 		case "num?":
 			return ListUtils.transformBoolean(args[0] instanceof Number);
 		case "puts":

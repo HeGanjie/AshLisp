@@ -1,26 +1,29 @@
 package ash.lang;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import bruce.common.utils.CommonUtils;
 
-public final class Node implements ISeq {
+public final class Node extends PersistentList {
 	private static final long serialVersionUID = -3802355140695976127L;
 	private final Serializable left;
-	private final ISeq next;
+	private final PersistentList next;
 	
 	public Node(Serializable val) { this(val, BasicType.NIL); }
 
 	public Node(Node node) { this(node, BasicType.NIL); }
 
-	public Node(Serializable l, ISeq n) {
+	public Node(Serializable l, PersistentList n) {
 		left = l instanceof String ? BasicType.realType((String) l) : l;
 		next = n;
 	}
 
+	@Override
+	public Serializable head() { return left; }
+
+	@Override
+	public PersistentList rest() { return next; }
+	
 	private String innerToString() {
 		StringBuilder sb = new StringBuilder();
 		if (left instanceof Node)
@@ -34,7 +37,7 @@ public final class Node implements ISeq {
 		}
 		return sb.toString();
 	}
-
+	
 	@Override
 	public String toString() {
 		return CommonUtils.buildString('(', innerToString(), ')');
@@ -54,51 +57,15 @@ public final class Node implements ISeq {
 		if (getClass() != obj.getClass()) return false;
 		Node other = (Node) obj;
 		if (left == null) {
-			if (other.left != null)
+			if (other.head() != null)
 				return false;
-		} else if (!left.equals(other.left))
+		} else if (!left.equals(other.head()))
 			return false;
 		if (next == null) {
-			if (other.next != null)
+			if (other.rest() != null)
 				return false;
-		} else if (!next.equals(other.next))
+		} else if (!next.equals(other.rest()))
 			return false;
 		return true;
-	}
-
-	@Override
-	public Iterator<ISeq> iterator() {
-		return new Iterator<ISeq>() {
-			ISeq head = Node.this;
-			@Override
-			public boolean hasNext() { return BasicType.NIL != head; }
-			@Override
-			public ISeq next() {
-				ISeq curr = head;
-				head = head.rest();
-				return curr;
-			}
-			@Override
-			public void remove() { throw new UnsupportedOperationException(); }
-		};
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> List<T> toList(Class<T> c) {
-		List<T> arrayList = new ArrayList<>();
-		for (ISeq n : this) {
-			arrayList.add((T) n.head());
-		}
-		return arrayList;
-	}
-
-	@Override
-	public Serializable head() {
-		return left;
-	}
-
-	@Override
-	public ISeq rest() {
-		return next;
 	}
 }

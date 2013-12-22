@@ -9,6 +9,7 @@ import java.util.Map;
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
 import ash.lang.Node;
+import ash.lang.PersistentList;
 import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
@@ -92,6 +93,8 @@ public final class VMFrame implements Serializable {
 				} else { // 4...8
 					if (ordinal < 6) {
 						if (ordinal == 4) { //asn
+							if (tempVar.containsKey(args[0]))
+								System.out.println("Warnning: Redefining " + args[0]);
 							tempVar.put((String) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
@@ -151,7 +154,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 14) { //atom
 							pushWorkingStack(ListUtils.atom(popWorkingStack()));
 						} else { // car
-							pushWorkingStack(ListUtils.car((Node) popWorkingStack()));
+							pushWorkingStack(ListUtils.car((PersistentList) popWorkingStack()));
 						}
 					}
 				}
@@ -161,7 +164,7 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 20) { // 16...20
 					if (ordinal < 18) {
 						if (ordinal == 16) { //cdr
-							pushWorkingStack(ListUtils.cdr((Node) popWorkingStack()));
+							pushWorkingStack(ListUtils.cdr((PersistentList) popWorkingStack()));
 						} else { // cons
 							Serializable elem2 = popWorkingStack();
 							Serializable elem = popWorkingStack();

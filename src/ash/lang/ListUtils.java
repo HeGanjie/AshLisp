@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 
 public final class ListUtils {
-	public static ISeq pair(ISeq keys, ISeq vals) {
+	public static PersistentList pair(PersistentList keys, PersistentList vals) {
 		if (".".equals(keys.head())) // (. x) -> (1 2 3 ...) 
 			return new Node(new Node(keys.rest().head(), new Node(vals)));
 		else if (BasicType.NIL != keys && BasicType.NIL != vals)
@@ -13,17 +13,17 @@ public final class ListUtils {
 		return BasicType.NIL;
 	}
 
-	public static int count(ISeq seq) {
+	public static int count(PersistentList seq) {
 		if (seq == BasicType.NIL) return 0;
 		return 1 + count(seq.rest());
 	}
 	
-	public static Node take(int count, ISeq seq) {
+	public static Node take(int count, PersistentList seq) {
 		if (seq == BasicType.NIL) return BasicType.NIL;
 		return count == 0 ? BasicType.NIL : new Node(seq.head(), take(count - 1, seq.rest()));
 	}
 	
-	public static ISeq drop(int count, ISeq seq) {
+	public static PersistentList drop(int count, PersistentList seq) {
 		if (seq == BasicType.NIL) return BasicType.NIL;
 		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
@@ -38,12 +38,12 @@ public final class ListUtils {
 		return new Node(tailNodeSeq[skipElems], toNode(skipElems + 1, tailNodeSeq));
 	}
 	
-	public static Node append(ISeq left, Node right) {
+	public static Node append(PersistentList left, Node right) {
 		if (left == BasicType.NIL) return right;
 		return new Node(left.head(), append(left.rest(), right));
 	}
 	
-	public static Serializable assoc(String varName, ISeq environment) {
+	public static Serializable assoc(String varName, PersistentList environment) {
 		final Node headNode = (Node) environment.head();
 		if (headNode == null)
 			return BasicType.NIL;
@@ -53,7 +53,7 @@ public final class ListUtils {
 			return assoc(varName, environment.rest());
 	}
 	
-	public static int indexOf(ISeq seq, Object targetVal, int skiped) {
+	public static int indexOf(PersistentList seq, Object targetVal, int skiped) {
 		if (seq == BasicType.NIL) {
 			return -1;
 		} else if (seq.head().equals(targetVal)) {
@@ -71,9 +71,9 @@ public final class ListUtils {
 	
 	public static Serializable eq(Serializable a, Serializable b) { return a.equals(b) ? BasicType.T : BasicType.NIL; }
 	
-	public static Serializable car(Node arg) { return arg.head(); }
+	public static Serializable car(PersistentList arg) { return arg.head(); }
 	
-	public static ISeq cdr(Node arg) { return arg.rest(); }
+	public static PersistentList cdr(PersistentList arg) { return arg.rest(); }
 
 	public static Node cons(Serializable a, Node b) { return new Node(a, b); }
 	

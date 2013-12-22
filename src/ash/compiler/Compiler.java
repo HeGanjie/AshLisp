@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ash.lang.BasicType;
-import ash.lang.ISeq;
+import ash.lang.PersistentList;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -24,7 +24,7 @@ public final class Compiler {
 	
 	private Compiler() {}
 	
-	public static Node astsToInsts(ISeq parseResult) {
+	public static Node astsToInsts(PersistentList parseResult) {
 		if (parseResult == BasicType.NIL) return BasicType.NIL;
 		Serializable instNode = compile(parseResult.head(), BasicType.NIL, 0);
 		if (!(instNode instanceof Node)) {
@@ -114,12 +114,12 @@ public final class Compiler {
 		return (Serializable) ((Node) instrNodes).toList(Instruction.class);
 	}
 	
-	private static Node compileArgs(ISeq args, Node lambdaArgs, int startIndex) {
+	private static Node compileArgs(PersistentList args, Node lambdaArgs, int startIndex) {
 		if (args == BasicType.NIL) return BasicType.NIL;
 		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
-	private static Serializable compileCond(ISeq pairList, Node lambdaArgs, int startIndex) {
+	private static Serializable compileCond(PersistentList pairList, Node lambdaArgs, int startIndex) {
 		if (pairList == BasicType.NIL) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();
