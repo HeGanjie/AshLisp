@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import ash.lang.ISeq;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -22,54 +23,54 @@ public final class Compiler {
 	
 	private Compiler() {}
 	
-	public static Node astsToInsts(Node parseResult) {
+	public static Node astsToInsts(ISeq parseResult) {
 		if (parseResult == Node.NIL) return Node.NIL;
-		Serializable instNode = compile(parseResult.left, Node.NIL, 0);
+		Serializable instNode = compile(parseResult.head(), Node.NIL, 0);
 		if (!(instNode instanceof Node)) {
 			instNode = new Node(instNode); // ensure no raw instructions in the returned list
 		}
-		return new Node(instNode, astsToInsts(parseResult.next));
+		return new Node(instNode, astsToInsts(parseResult.rest()));
 	}
 	
 	private static Serializable compile(final Serializable exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
-			final Serializable op = node.left;
+			final Serializable op = node.head();
 			if (NORMAL_INSTRUCTION_SET.contains(op)) {
 				switch (((String) op).toLowerCase()) {
 				case "def":
 					return listInstruction(
-							compile(node.next.next.left, lambdaArgs, startIndex),
-							InstructionSetEnum.asn.create(node.next.left));
+							compile(node.rest().rest().head(), lambdaArgs, startIndex),
+							InstructionSetEnum.asn.create(node.rest().head()));
 				case "quote":
-					return listInstruction(InstructionSetEnum.quote.create(node.next.left));
+					return listInstruction(InstructionSetEnum.quote.create(node.rest().head()));
 				case "cond":
-					return compileCond(node.next, lambdaArgs, startIndex);
+					return compileCond(node.rest(), lambdaArgs, startIndex);
 				case "lambda":
-					int dotIndex = ListUtils.indexOf((Node) node.next.left, MULTI_ARGS_SIGNAL, 0);
+					int dotIndex = ListUtils.indexOf((Node) node.rest().head(), MULTI_ARGS_SIGNAL, 0);
 					boolean notCombineArgs = dotIndex == -1;
 					return listInstruction(
 							InstructionSetEnum.closure.create(
 									expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 											InstructionSetEnum.cons_args.create(dotIndex),
-											compile(node.next.next.left,
-													ListUtils.append((Node) node.next.left, lambdaArgs),
+											compile(node.rest().rest().head(),
+													ListUtils.append((Node) node.rest().head(), lambdaArgs),
 													notCombineArgs ? 0 : 1),
 													InstructionSetEnum.ret.create()))));
 				default:
 					return listInstruction(
-							compileArgs(node.next, lambdaArgs, startIndex),
+							compileArgs(node.rest(), lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf((String) op).create());
 				}
 			} else if (op instanceof String && MacroExpander.hasMacro((String) op, node)) {
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
-				int argsCount = ListUtils.count(node.next);
+				int argsCount = ListUtils.count(node.rest());
 				InstructionSetEnum callMethod = op instanceof String && ((String) op).charAt(0) == '.'
 						? InstructionSetEnum.java_call
 						: InstructionSetEnum.call;
 				return listInstruction(
-						compileArgs(node.next, lambdaArgs, startIndex),
+						compileArgs(node.rest(), lambdaArgs, startIndex),
 						compile(op, lambdaArgs, startIndex),
 						callMethod.create(argsCount));
 			}
@@ -112,23 +113,23 @@ public final class Compiler {
 		return (Serializable) ((Node) instrNodes).toList(Instruction.class);
 	}
 	
-	private static Node compileArgs(Node args, Node lambdaArgs, int startIndex) {
+	private static Node compileArgs(ISeq args, Node lambdaArgs, int startIndex) {
 		if (args == Node.NIL) return Node.NIL;
-		return listInstruction(compile(args.left, lambdaArgs, startIndex), compileArgs(args.next, lambdaArgs, startIndex));
+		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
-	private static Serializable compileCond(Node pairList, Node lambdaArgs, int startIndex) {
+	private static Serializable compileCond(ISeq pairList, Node lambdaArgs, int startIndex) {
 		if (pairList == Node.NIL) return listInstruction(InstructionSetEnum.quote.create(Node.NIL));
 		
-		Node headPair = (Node) pairList.left;
+		Node headPair = (Node) pairList.head();
 		
-		Serializable condition = compile(headPair.left, lambdaArgs, startIndex);
+		Serializable condition = compile(headPair.head(), lambdaArgs, startIndex);
 		int condInstCount = countInstruction(condition) + 1;
 		
-		Serializable exp = compile(headPair.next.left, lambdaArgs, startIndex + condInstCount);
+		Serializable exp = compile(headPair.rest().head(), lambdaArgs, startIndex + condInstCount);
 		int nextCaseStartIndex = startIndex + condInstCount + countInstruction(exp) + 1;
 		
-		Serializable nextCase = compileCond(pairList.next, lambdaArgs, nextCaseStartIndex);
+		Serializable nextCase = compileCond(pairList.rest(), lambdaArgs, nextCaseStartIndex);
 		
 		return listInstruction(
 				condition,

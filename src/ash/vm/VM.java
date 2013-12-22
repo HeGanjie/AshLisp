@@ -13,6 +13,7 @@ import bruce.common.functional.Func2;
 import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
+import ash.lang.ISeq;
 import ash.lang.Node;
 import ash.parser.Parser;
 
@@ -35,12 +36,12 @@ public final class VM implements Serializable {
 		runInMain(Compiler.astsToInsts(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
-	public Serializable runInMain(Node compiledCodes) {
+	public Serializable runInMain(ISeq compiledCodes) {
 		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
-				new Func2<List<Instruction>, List<Instruction>, Node>() {
+				new Func2<List<Instruction>, List<Instruction>, ISeq>() {
 			@Override
-			public List<Instruction> call(List<Instruction> insts, Node instList) {
-				insts.addAll(((Node) instList.left).toList(Instruction.class));
+			public List<Instruction> call(List<Instruction> insts, ISeq instList) {
+				insts.addAll(((Node) instList.head()).toList(Instruction.class));
 				return insts;
 			}
 		});

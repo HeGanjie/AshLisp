@@ -5,27 +5,27 @@ import java.util.Iterator;
 
 
 public final class ListUtils {
-	public static Node pair(Node keys, Node vals) {
-		if (".".equals(keys.left)) // (. x) -> (1 2 3 ...) 
-			return new Node(new Node(keys.next.left, new Node(vals)));
+	public static ISeq pair(ISeq keys, ISeq vals) {
+		if (".".equals(keys.head())) // (. x) -> (1 2 3 ...) 
+			return new Node(new Node(keys.rest().head(), new Node(vals)));
 		else if (Node.NIL != keys && Node.NIL != vals)
-			return new Node(new Node(keys.left, new Node(vals.left)), pair(keys.next, vals.next));
+			return new Node(new Node(keys.head(), new Node(vals.head())), pair(keys.rest(), vals.rest()));
 		return Node.NIL;
 	}
 
-	public static int count(Node src) {
-		if (src == Node.NIL) return 0;
-		return 1 + count(src.next);
+	public static int count(ISeq seq) {
+		if (seq == Node.NIL) return 0;
+		return 1 + count(seq.rest());
 	}
 	
-	public static Node take(int count, Node src) {
-		if (src == Node.NIL) return Node.NIL;
-		return count == 0 ? Node.NIL : new Node(src.left, take(count - 1, src.next));
+	public static Node take(int count, ISeq seq) {
+		if (seq == Node.NIL) return Node.NIL;
+		return count == 0 ? Node.NIL : new Node(seq.head(), take(count - 1, seq.rest()));
 	}
 	
-	public static Node drop(int count, Node src) {
-		if (src == Node.NIL) return Node.NIL;
-		return count == 0 ? src : drop(count - 1, src.next);
+	public static ISeq drop(int count, ISeq seq) {
+		if (seq == Node.NIL) return Node.NIL;
+		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
 	
 	public static Node toNode(Iterator<? extends Serializable> tailNodeSeq) {
@@ -38,28 +38,28 @@ public final class ListUtils {
 		return new Node(tailNodeSeq[skipElems], toNode(skipElems + 1, tailNodeSeq));
 	}
 	
-	public static Node append(Node left, Node right) {
+	public static Node append(ISeq left, Node right) {
 		if (left == Node.NIL) return right;
-		return new Node(left.left, append(left.next, right));
+		return new Node(left.head(), append(left.rest(), right));
 	}
 	
-	public static Serializable assoc(String varName, Node environment) {
-		final Node headNode = (Node) environment.left;
+	public static Serializable assoc(String varName, ISeq environment) {
+		final Node headNode = (Node) environment.head();
 		if (headNode == null)
 			return Node.NIL;
-		else if (varName.equals(headNode.left))
-			return headNode.next.left;
+		else if (varName.equals(headNode.head()))
+			return headNode.rest().head();
 		else
-			return assoc(varName, environment.next);
+			return assoc(varName, environment.rest());
 	}
 	
-	public static int indexOf(Node node, Object targetVal, int skiped) {
-		if (node == Node.NIL) {
+	public static int indexOf(ISeq seq, Object targetVal, int skiped) {
+		if (seq == Node.NIL) {
 			return -1;
-		} else if (node.left.equals(targetVal)) {
+		} else if (seq.head().equals(targetVal)) {
 			return skiped;
 		} else {
-			return indexOf(node.next, targetVal, skiped + 1);
+			return indexOf(seq.rest(), targetVal, skiped + 1);
 		}
 	}
 	
@@ -71,9 +71,9 @@ public final class ListUtils {
 	
 	public static Serializable eq(Serializable a, Serializable b) { return a.equals(b) ? Node.T : Node.NIL; }
 	
-	public static Serializable car(Node arg) { return arg.left; }
+	public static Serializable car(Node arg) { return arg.head(); }
 	
-	public static Node cdr(Node arg) { return arg.next; }
+	public static ISeq cdr(Node arg) { return arg.rest(); }
 
 	public static Node cons(Serializable a, Node b) { return new Node(a, b); }
 	

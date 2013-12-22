@@ -7,20 +7,20 @@ import java.util.List;
 
 import bruce.common.utils.CommonUtils;
 
-public final class Node implements Iterable<Node>, Serializable {
+public final class Node implements ISeq {
 	private static final long serialVersionUID = -3802355140695976127L;
 	
 	public static final String T = "t";
 	public static final Node NIL = new Node(null, null);
 	
-	public final Serializable left;
-	public final Node next;
+	private final Serializable left;
+	private final ISeq next;
 	
 	public Node(Serializable val) { this(val, NIL); }
 
 	public Node(Node node) { this(node, NIL); }
 
-	public Node(Serializable l, Node n) {
+	public Node(Serializable l, ISeq n) {
 		left = l instanceof String ? BasicType.realType((String) l) : l;
 		next = n;
 	}
@@ -34,7 +34,7 @@ public final class Node implements Iterable<Node>, Serializable {
 		
 		if (NIL != next && NIL != this) {
 			sb.append(' ');
-			sb.append(next.innerToString());
+			sb.append(((Node) next).innerToString());
 		}
 		return sb.toString();
 	}
@@ -71,15 +71,15 @@ public final class Node implements Iterable<Node>, Serializable {
 	}
 
 	@Override
-	public Iterator<Node> iterator() {
-		return new Iterator<Node>() {
-			Node head = Node.this;
+	public Iterator<ISeq> iterator() {
+		return new Iterator<ISeq>() {
+			ISeq head = Node.this;
 			@Override
 			public boolean hasNext() { return NIL != head; }
 			@Override
-			public Node next() {
-				Node curr = head;
-				head = head.next;
+			public ISeq next() {
+				ISeq curr = head;
+				head = head.rest();
 				return curr;
 			}
 			@Override
@@ -90,9 +90,19 @@ public final class Node implements Iterable<Node>, Serializable {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> toList(Class<T> c) {
 		List<T> arrayList = new ArrayList<>();
-		for (Node n : this) {
-			arrayList.add((T) n.left);
+		for (ISeq n : this) {
+			arrayList.add((T) n.head());
 		}
 		return arrayList;
+	}
+
+	@Override
+	public Serializable head() {
+		return left;
+	}
+
+	@Override
+	public ISeq rest() {
+		return next;
 	}
 }
