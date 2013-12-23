@@ -3,6 +3,7 @@ package ash.vm;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
@@ -32,9 +33,7 @@ public final class JavaMethod implements Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return '.' + methodName;
-	}
+	public String toString() { return '.' + methodName; }
 
 	@SuppressWarnings("unchecked")
 	public Serializable call(Serializable[] args) {
@@ -51,16 +50,17 @@ public final class JavaMethod implements Serializable {
 		case "str":
 			return CommonUtils.displayArray(args, "");
 		case "seq":
-			if (args[0] instanceof String)
-				return CharNode.create((String) args[0]);
-			else
-				return ListUtils.toSeq(((Iterable<Serializable>) args[0]).iterator());
+			return args[0] instanceof String
+					? CharNode.create((String) args[0])
+					: ListUtils.toSeq(((Iterable<Serializable>) args[0]).iterator());
 		case "parse":
 			return Parser.split((String) args[0]);
 		case "compile":
 			return Compiler.astsToInsts(new Node(args[0]));
 		case "vmexec":
 			return new VM().runInMain((Node) args[0]);
+		case "regex":
+			return Pattern.compile((String) args[0]);
 		case "new-macro":
 			MacroExpander.MARCOS_MAP.put((String)args[0], (Node)args[1]);
 			break;
