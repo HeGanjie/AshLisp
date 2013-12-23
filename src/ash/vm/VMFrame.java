@@ -98,11 +98,16 @@ public final class VMFrame implements Serializable {
 							tempVar.put((String) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
-							callArgs[dotIndex] = ListUtils.toNode(dotIndex, callArgs);
-							if (dotIndex + 1 < callArgs.length) {
-								Serializable[] sorterArgs = new Serializable[dotIndex + 1];
-								System.arraycopy(callArgs, 0, sorterArgs, 0, sorterArgs.length);
-								callArgs = sorterArgs;
+							Node consArgs = ListUtils.toNode(dotIndex, callArgs);
+							if (callArgs.length == 0) {
+								callArgs = new Serializable[] {consArgs};
+							} else {
+								callArgs[dotIndex] = consArgs;
+								if (dotIndex + 1 < callArgs.length) {
+									Serializable[] sorterArgs = new Serializable[dotIndex + 1];
+									System.arraycopy(callArgs, 0, sorterArgs, 0, sorterArgs.length);
+									callArgs = sorterArgs;
+								}
 							}
 						}
 					} else {

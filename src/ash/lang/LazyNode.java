@@ -18,11 +18,10 @@ public final class LazyNode extends PersistentList {
 		func = tail;
 	}
 
-	public static Serializable create(Serializable head, Closure tail) {
-		if (head == null && tail == null) return BasicType.NIL;
-		else if (tail == null)
+	public static Serializable create(Serializable head, Serializable tail) {
+		if (tail == BasicType.NIL)
 			return new Node(head);
-		return new LazyNode(head, tail);
+		return new LazyNode(head, (Closure) tail);
 	}
 
 	@Override

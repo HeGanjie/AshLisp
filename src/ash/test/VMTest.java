@@ -135,6 +135,7 @@ public final class VMTest extends TestCase {
 	public void testLazySeq() throws Exception {
 		assertEquals("(0 1 2 3 4 5 6 7 8 9)", exec("(take 10 (iterate inc 0))").toString());
 		assertEquals("(0 0 0 0 0 0 0 0 0 0)", exec("(take 10 (repeat 0))").toString());
+		assertEquals("(0 1 2 3)", exec("(take 10 (stream-make 0 1 2 3))").toString());
 	}
 	
 	protected static Serializable exec(String code) {

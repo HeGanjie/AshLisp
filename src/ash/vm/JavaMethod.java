@@ -37,7 +37,9 @@ public final class JavaMethod implements Serializable {
 	public Serializable call(Serializable[] args) {
 		switch (methodName) {
 		case "stream":
-			return LazyNode.create(args[0], (Closure) args[1]);
+			if (args.length == 1)
+				return LazyNode.create(args[0], BasicType.NIL);
+			return LazyNode.create(args[0], args[1]);
 		case "num?":
 			return ListUtils.transformBoolean(args[0] instanceof Number);
 		case "puts":
