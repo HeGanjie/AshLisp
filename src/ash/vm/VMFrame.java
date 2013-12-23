@@ -8,7 +8,6 @@ import java.util.Map;
 
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
-import ash.lang.Node;
 import ash.lang.PersistentList;
 import bruce.common.utils.CommonUtils;
 
@@ -98,7 +97,7 @@ public final class VMFrame implements Serializable {
 							tempVar.put((String) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
-							Node consArgs = ListUtils.toNode(dotIndex, callArgs);
+							PersistentList consArgs = ListUtils.toSeq(dotIndex, callArgs);
 							if (callArgs.length == 0) {
 								callArgs = new Serializable[] {consArgs};
 							} else {
@@ -173,7 +172,7 @@ public final class VMFrame implements Serializable {
 						} else { // cons
 							Serializable elem2 = popWorkingStack();
 							Serializable elem = popWorkingStack();
-							pushWorkingStack(ListUtils.cons(elem, (Node) elem2));
+							pushWorkingStack(ListUtils.cons(elem, (PersistentList) elem2));
 						}
 					} else {
 						if (ordinal == 18) { // eq

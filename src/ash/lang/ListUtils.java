@@ -28,16 +28,16 @@ public final class ListUtils {
 		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
 	
-	public static Node toNode(Iterator<? extends Serializable> tailNodeSeq) {
+	public static PersistentList toSeq(Iterator<? extends Serializable> tailNodeSeq) {
 		if (!tailNodeSeq.hasNext()) return BasicType.NIL;
-		return new Node(tailNodeSeq.next(), toNode(tailNodeSeq));
-	}
-
-	public static Node toNode(int skipElems, Serializable... tailNodeSeq) {
-		if (tailNodeSeq.length == skipElems) return BasicType.NIL;
-		return new Node(tailNodeSeq[skipElems], toNode(skipElems + 1, tailNodeSeq));
+		return new Node(((PersistentList) tailNodeSeq.next()).head(), toSeq(tailNodeSeq));
 	}
 	
+	public static PersistentList toSeq(int skipElems, Serializable... tailNodeSeq) {
+		if (tailNodeSeq.length == skipElems) return BasicType.NIL;
+		return new Node(tailNodeSeq[skipElems], toSeq(skipElems + 1, tailNodeSeq));
+	}
+		
 	public static Node append(PersistentList left, Node right) {
 		if (left == BasicType.NIL) return right;
 		return new Node(left.head(), append(left.rest(), right));
@@ -75,7 +75,7 @@ public final class ListUtils {
 	
 	public static PersistentList cdr(PersistentList arg) { return arg.rest(); }
 
-	public static Node cons(Serializable a, Node b) { return new Node(a, b); }
+	public static PersistentList cons(Serializable a, PersistentList b) { return new Node(a, b); }
 	
 	public static final Serializable transformBoolean(boolean bl) { return bl ? BasicType.T : BasicType.NIL; }
 }

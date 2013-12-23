@@ -31,6 +31,7 @@ public final class VM implements Serializable {
 		vm.load("maths.scm");
 		vm.load("lazy.scm");
 		vm.load("utils.scm");
+		vm.load("jni.scm");
 		vm.load("user.scm");
 	}
 

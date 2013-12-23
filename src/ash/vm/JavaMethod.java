@@ -6,6 +6,7 @@ import java.util.Map;
 
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
+import ash.lang.CharNode;
 import ash.lang.LazyNode;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
@@ -35,6 +36,7 @@ public final class JavaMethod implements Serializable {
 		return '.' + methodName;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Serializable call(Serializable[] args) {
 		switch (methodName) {
 		case "stream":
@@ -48,6 +50,11 @@ public final class JavaMethod implements Serializable {
 			break;
 		case "str":
 			return CommonUtils.displayArray(args, "");
+		case "seq":
+			if (args[0] instanceof String)
+				return CharNode.create((String) args[0]);
+			else
+				return ListUtils.toSeq(((Iterable<Serializable>) args[0]).iterator());
 		case "parse":
 			return Parser.split((String) args[0]);
 		case "compile":

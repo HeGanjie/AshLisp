@@ -139,6 +139,11 @@ public final class VMTest extends TestCase {
 		assertEquals("(0 1 2 3)", exec("(stream-make 0 1 2 3)").toString());
 	}
 	
+	public void testStringSeq() throws Exception {
+		assertEquals("(\\a \\s \\d \\f)", exec("(seq \"asdf\")").toString());
+		assertEquals("asdf", exec("(apply str (seq \"asdf\"))").toString());
+	}
+	
 	protected static Serializable exec(String code) {
 		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}
