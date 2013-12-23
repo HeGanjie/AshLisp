@@ -10,6 +10,7 @@ import ash.lang.LazyNode;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
+import ash.parser.Parser;
 import bruce.common.utils.CommonUtils;
 
 public final class JavaMethod implements Serializable {
@@ -47,6 +48,8 @@ public final class JavaMethod implements Serializable {
 			break;
 		case "str":
 			return CommonUtils.displayArray(args, "");
+		case "parse":
+			return Parser.split((String) args[0]);
 		case "compile":
 			return Compiler.astsToInsts(new Node(args[0]));
 		case "vmexec":

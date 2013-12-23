@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import ash.lang.BasicType;
 import ash.lang.Node;
+import ash.lang.PersistentList;
 
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
@@ -25,7 +26,7 @@ public final class Parser {
 		throw new UnsupportedOperationException("Can not Unwrap:" + exp);
 	}
 
-	public static Node split(String str) {
+	public static PersistentList split(String str) {
 		String trim = str.trim();
 		if (trim.length() == 0) return BasicType.NIL;
 		
