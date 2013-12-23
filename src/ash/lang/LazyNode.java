@@ -7,6 +7,7 @@ import bruce.common.utils.CommonUtils;
 import ash.compiler.Compiler;
 import ash.vm.Closure;
 import ash.vm.VM;
+import ash.vm.VMFrame;
 
 public final class LazyNode extends PersistentList {
 	private static final long serialVersionUID = -2645887899648828103L;
@@ -34,6 +35,8 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString('(', left, " ...)");
+		if (VMFrame.debugging)
+			return CommonUtils.buildString('(', left, " ...)");
+		return super.toString();
 	}
 }
