@@ -9,3 +9,6 @@
 
 (defmacro '(lazy-cons head body)
   '(.stream head (lambda () body)))
+  
+(defmacro '(lazy-seq body)
+  '(.lazy-seq (lambda () body)))

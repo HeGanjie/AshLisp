@@ -27,6 +27,10 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public PersistentList rest() {
+		return callFunc(func);
+	}
+
+	private static PersistentList callFunc(Closure func) {
 		return (PersistentList) new VM().runInMain(Compiler.astsToInsts(new Node(new Node(func))));
 	}
 
@@ -35,5 +39,22 @@ public final class LazyNode extends PersistentList {
 		if (VMFrame.debugging)
 			return CommonUtils.buildString('(', left, " ...)");
 		return super.toString();
+	}
+
+	public static PersistentList createHead(final Closure func) {
+		return new PersistentList() {
+			private static final long serialVersionUID = 4490409812743283951L;
+			private PersistentList callFunc;
+			
+			private PersistentList valid() {
+				return callFunc == null ? callFunc = callFunc(func) : callFunc;
+			}
+			
+			@Override
+			public Object head() { return valid().head(); }
+
+			@Override
+			public PersistentList rest() { return valid().rest(); }
+		};
 	}
 }
