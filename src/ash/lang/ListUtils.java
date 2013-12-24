@@ -1,6 +1,5 @@
 package ash.lang;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 
@@ -28,12 +27,12 @@ public final class ListUtils {
 		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
 	
-	public static PersistentList toSeq(Iterator<? extends Serializable> tailNodeSeq) {
+	public static PersistentList toSeq(Iterator<PersistentList> tailNodeSeq) {
 		if (!tailNodeSeq.hasNext()) return BasicType.NIL;
-		return new Node(((PersistentList) tailNodeSeq.next()).head(), toSeq(tailNodeSeq));
+		return new Node(tailNodeSeq.next().head(), toSeq(tailNodeSeq));
 	}
 	
-	public static PersistentList toSeq(int skipElems, Serializable... tailNodeSeq) {
+	public static PersistentList toSeq(int skipElems, Object... tailNodeSeq) {
 		if (tailNodeSeq.length == skipElems) return BasicType.NIL;
 		return new Node(tailNodeSeq[skipElems], toSeq(skipElems + 1, tailNodeSeq));
 	}
@@ -43,7 +42,7 @@ public final class ListUtils {
 		return new Node(left.head(), append(left.rest(), right));
 	}
 	
-	public static Serializable assoc(String varName, PersistentList environment) {
+	public static Object assoc(String varName, PersistentList environment) {
 		final Node headNode = (Node) environment.head();
 		if (headNode == null)
 			return BasicType.NIL;
@@ -63,19 +62,19 @@ public final class ListUtils {
 		}
 	}
 	
-	public static Serializable atom(Object evalRes) {
+	public static Object atom(Object evalRes) {
 		return evalRes instanceof Node
 				? ((BasicType.NIL == evalRes ? BasicType.T : BasicType.NIL))
 				: BasicType.T;
 	}
 	
-	public static Serializable eq(Serializable a, Serializable b) { return a.equals(b) ? BasicType.T : BasicType.NIL; }
+	public static Object eq(Object a, Object b) { return a.equals(b) ? BasicType.T : BasicType.NIL; }
 	
-	public static Serializable car(PersistentList arg) { return arg.head(); }
+	public static Object car(PersistentList arg) { return arg.head(); }
 	
 	public static PersistentList cdr(PersistentList arg) { return arg.rest(); }
 
-	public static PersistentList cons(Serializable a, PersistentList b) { return new Node(a, b); }
+	public static PersistentList cons(Object a, PersistentList b) { return new Node(a, b); }
 	
-	public static final Serializable transformBoolean(boolean bl) { return bl ? BasicType.T : BasicType.NIL; }
+	public static final Object transformBoolean(boolean bl) { return bl ? BasicType.T : BasicType.NIL; }
 }

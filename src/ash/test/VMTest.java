@@ -1,7 +1,5 @@
 package ash.test;
 
-import java.io.Serializable;
-
 import junit.framework.TestCase;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
@@ -144,7 +142,7 @@ public final class VMTest extends TestCase {
 		assertEquals("asdf", exec("(apply str (seq \"asdf\"))").toString());
 	}
 	
-	protected static Serializable exec(String code) {
+	protected static Object exec(String code) {
 		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}
 }

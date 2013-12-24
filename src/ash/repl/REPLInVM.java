@@ -2,13 +2,12 @@ package ash.repl;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 
-import bruce.common.utils.CommonUtils;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
 import ash.parser.Parser;
 import ash.vm.VM;
+import bruce.common.utils.CommonUtils;
 
 public final class REPLInVM {
 
@@ -23,7 +22,7 @@ public final class REPLInVM {
 				readIn = br.readLine();
 				if (readIn == null) break;
 				long start = System.currentTimeMillis();
-				Serializable val = vm.runInMain(Compiler.astsToInsts(Parser.split(readIn)));
+				Object val = vm.runInMain(Compiler.astsToInsts(Parser.split(readIn)));
 				System.out.println(BasicType.asString(val));
 				reportElapse(System.currentTimeMillis() - start);
 			} catch (Exception e) {

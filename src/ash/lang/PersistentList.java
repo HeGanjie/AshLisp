@@ -9,7 +9,7 @@ import bruce.common.utils.CommonUtils;
 
 public abstract class PersistentList implements Serializable, Iterable<PersistentList> {
 	private static final long serialVersionUID = -4993574552940681092L;
-	public abstract Serializable head();
+	public abstract Object head();
 	public abstract PersistentList rest();
 	
 	@Override
@@ -40,7 +40,7 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 	
 	private String innerToString() {
 		StringBuilder sb = new StringBuilder();
-		Serializable left = head();
+		Object left = head();
 		PersistentList next = rest();
 		
 		if (left instanceof Node)
@@ -63,7 +63,7 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		Serializable left = head();
+		Object left = head();
 		PersistentList next = rest();
 		int result = prime + ((left == null) ? 0 : left.hashCode());
 		return prime * result + ((next == null) ? 0 : next.hashCode());
@@ -76,7 +76,7 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 		if (getClass() != obj.getClass()) return false;
 		Node other = (Node) obj;
 		
-		Serializable left = head();
+		Object left = head();
 		if (left == null) {
 			if (other.head() != null)
 				return false;

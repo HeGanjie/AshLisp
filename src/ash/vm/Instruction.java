@@ -10,14 +10,14 @@ public final class Instruction implements Serializable {
 	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
 	final int ins;
-	final Serializable [] args;
+	final Object [] args;
 	
 	public Instruction(InstructionSetEnum instruction) {
 		ins = instruction.ordinal();
 		args = null;
 	}
 	
-	public Instruction(InstructionSetEnum instruction, Serializable... instructionArgs) {
+	public Instruction(InstructionSetEnum instruction, Object... instructionArgs) {
 		ins = instruction.ordinal();
 		args = instructionArgs;
 	}

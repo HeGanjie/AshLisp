@@ -1,6 +1,5 @@
 package ash.lang;
 
-import java.io.Serializable;
 import java.util.regex.Pattern;
 
 public class BasicType {
@@ -9,7 +8,7 @@ public class BasicType {
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?\\d+");
 	private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?(?:\\d+)?\\.\\d+");
 	
-	public static Serializable realType(String val) {
+	public static Object realType(String val) {
 		if (NUMBER_PATTERN.matcher(val).matches())
 			return Integer.parseInt(val);
 		else if (DECIMAL_PATTERN.matcher(val).matches())
@@ -30,7 +29,7 @@ public class BasicType {
 		throw new IllegalArgumentException("Invalid Char:" + val);
 	}
 	
-	public static Object asString(Serializable val) {
+	public static Object asString(Object val) {
 		if (val instanceof Character) {
 			if ((Character)val == ' ')
 				return "\\space";

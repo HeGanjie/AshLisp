@@ -26,17 +26,17 @@ public final class Compiler {
 	
 	public static Node astsToInsts(PersistentList parseResult) {
 		if (parseResult == BasicType.NIL) return BasicType.NIL;
-		Serializable instNode = compile(parseResult.head(), BasicType.NIL, 0);
+		Object instNode = compile(parseResult.head(), BasicType.NIL, 0);
 		if (!(instNode instanceof Node)) {
 			instNode = new Node(instNode); // ensure no raw instructions in the returned list
 		}
 		return new Node(instNode, astsToInsts(parseResult.rest()));
 	}
 	
-	private static Serializable compile(final Serializable exp, Node lambdaArgs, int startIndex) {
+	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
-			final Serializable op = node.head();
+			final Object op = node.head();
 			if (NORMAL_INSTRUCTION_SET.contains(op)) {
 				switch (((String) op).toLowerCase()) {
 				case "def":
@@ -81,7 +81,7 @@ public final class Compiler {
 			return InstructionSetEnum.ldc.create(exp); // (... 1 2 3.4 \a ...)
 	}
 
-	protected static Serializable compileSymbol(final Serializable exp, Node lambdaArgs) {
+	protected static Serializable compileSymbol(final Object exp, Node lambdaArgs) {
 		String op = (String) exp;
 		if (op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"')
 			return InstructionSetEnum.ldc.create(op.substring(1, op.length() - 1)); // String
@@ -99,7 +99,7 @@ public final class Compiler {
 		}
 	}
 
-	protected static int findArgIndex(Node lambdaArgs, final Serializable op) {
+	protected static int findArgIndex(Node lambdaArgs, final Object op) {
 		assert(!MULTI_ARGS_SIGNAL.equals(op));
 		int dotIndex = ListUtils.indexOf(lambdaArgs, MULTI_ARGS_SIGNAL, 0);
 		int opPos = ListUtils.indexOf(lambdaArgs, op, 0);

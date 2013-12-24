@@ -1,6 +1,5 @@
 package ash.vm;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +68,7 @@ public enum InstructionSetEnum {
 		
 	public final Instruction create() { return INST_CACHES.get(ordinal()); }
 	
-	public final Instruction create(Serializable... args) { return new Instruction(this, args); }
+	public final Instruction create(Object... args) { return new Instruction(this, args); }
 
 	public static boolean contains(String op) {
 		return INST_NAME_CACHE.contains(op);

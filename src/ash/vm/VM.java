@@ -20,7 +20,7 @@ import ash.parser.Parser;
 public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;
 
-	public static final Map<String, Serializable> tempVar = new HashMap<>();
+	public static final Map<String, Object> tempVar = new HashMap<>();
 	protected final Deque<VMFrame> frameStack = new ArrayDeque<>();
 	public VMFrame headFrame;
 	
@@ -39,7 +39,7 @@ public final class VM implements Serializable {
 		runInMain(Compiler.astsToInsts(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
-	public Serializable runInMain(PersistentList compiledCodes) {
+	public Object runInMain(PersistentList compiledCodes) {
 		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
 				new Func2<List<Instruction>, List<Instruction>, PersistentList>() {
 			@Override
@@ -54,7 +54,7 @@ public final class VM implements Serializable {
 		return run();
 	}
 	
-	private Serializable run() {
+	private Object run() {
 		while (!frameStack.isEmpty()) {
 			headFrame = frameStack.peek();
 			headFrame.execUntilStackChange();
@@ -64,7 +64,7 @@ public final class VM implements Serializable {
 				popFrame();
 		}
 		
-		Serializable mainRtn = headFrame.popWorkingStack();
+		Object mainRtn = headFrame.popWorkingStack();
 		headFrame = null;
 		return mainRtn;
 	}

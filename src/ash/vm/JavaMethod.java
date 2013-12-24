@@ -12,6 +12,7 @@ import ash.lang.LazyNode;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
+import ash.lang.PersistentList;
 import ash.parser.Parser;
 import bruce.common.utils.CommonUtils;
 
@@ -36,7 +37,7 @@ public final class JavaMethod implements Serializable {
 	public String toString() { return '.' + methodName; }
 
 	@SuppressWarnings("unchecked")
-	public Serializable call(Serializable[] args) {
+	public Object call(Object[] args) {
 		switch (methodName) {
 		case "stream":
 			if (args.length == 1)
@@ -52,7 +53,7 @@ public final class JavaMethod implements Serializable {
 		case "seq":
 			return args[0] instanceof String
 					? CharNode.create((String) args[0])
-					: ListUtils.toSeq(((Iterable<Serializable>) args[0]).iterator());
+					: ListUtils.toSeq(((Iterable<PersistentList>) args[0]).iterator());
 		case "parse":
 			return Parser.split((String) args[0]);
 		case "compile":

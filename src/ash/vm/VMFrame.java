@@ -16,11 +16,11 @@ public final class VMFrame implements Serializable {
 	public static final boolean debugging = false;
 	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
-	public static final Map<String, Serializable> tempVar = VM.tempVar;
+	public static final Map<String, Object> tempVar = VM.tempVar;
 	private Scope myScope;
-	public Serializable[] callArgs;
+	public Object[] callArgs;
 	
-	public final Deque<Serializable> workingStack = new ArrayDeque<>();
+	public final Deque<Object> workingStack = new ArrayDeque<>();
 	public final List<Instruction> executingInsts;
 	public int runIndex;
 	VMFrame prevFrame;
@@ -31,17 +31,17 @@ public final class VMFrame implements Serializable {
 		myScope = parentScope;
 	}
 
-	private void pushWorkingStack(Serializable ser) { workingStack.push(ser); }
+	private void pushWorkingStack(Object ser) { workingStack.push(ser); }
 
-	public Serializable popWorkingStack() { return workingStack.pop(); }
+	public Object popWorkingStack() { return workingStack.pop(); }
 
 	public void prepareNextFrame(Closure closure, int paramsCount) {
 		nextFrame = new VMFrame(closure.ins, closure.env);
 		nextFrame.callArgs = createCallingArgs(paramsCount);
 	}
 
-	private Serializable[] createCallingArgs(int paramsCount) {
-		Serializable[] args = new Serializable[paramsCount];
+	private Object[] createCallingArgs(int paramsCount) {
+		Object[] args = new Object[paramsCount];
 		for (int i = args.length - 1; -1 < i; i--)
 			args[i] = popWorkingStack();
 		return args;
@@ -72,7 +72,7 @@ public final class VMFrame implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void exec(int ordinal, Serializable[] args) {
+	private void exec(int ordinal, Object[] args) {
 		if (ordinal < 16) {
 			if (ordinal < 8) {
 				if (ordinal < 4) { // 0...4
@@ -99,11 +99,11 @@ public final class VMFrame implements Serializable {
 							int dotIndex = (Integer) args[0];
 							PersistentList consArgs = ListUtils.toSeq(dotIndex, callArgs);
 							if (callArgs.length == 0) {
-								callArgs = new Serializable[] {consArgs};
+								callArgs = new Object[] {consArgs};
 							} else {
 								callArgs[dotIndex] = consArgs;
 								if (dotIndex + 1 < callArgs.length) {
-									Serializable[] sorterArgs = new Serializable[dotIndex + 1];
+									Object[] sorterArgs = new Object[dotIndex + 1];
 									System.arraycopy(callArgs, 0, sorterArgs, 0, sorterArgs.length);
 									callArgs = sorterArgs;
 								}
@@ -121,7 +121,7 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 12) { // 8...12
 					if (ordinal < 10) {
 						if (ordinal == 8) { // jz
-							Serializable pop = popWorkingStack();
+							Object pop = popWorkingStack();
 							if (pop == BasicType.NIL) runIndex = (Integer) args[0];
 						} else { // tail
 							callArgs = createCallingArgs((Integer) args[0]);
@@ -132,7 +132,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 10) { // java_call
 							pushWorkingStack(((JavaMethod) popWorkingStack()).call(createCallingArgs((Integer) args[0])));
 						} else { // call
-							Serializable func = popWorkingStack();
+							Object func = popWorkingStack();
 							if (func instanceof Closure) { // symbol
 								prepareNextFrame((Closure) func, (Integer) args[0]);
 							} else if (func instanceof Instruction) { // instruction
@@ -170,35 +170,35 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 16) { //cdr
 							pushWorkingStack(ListUtils.cdr((PersistentList) popWorkingStack()));
 						} else { // cons
-							Serializable elem2 = popWorkingStack();
-							Serializable elem = popWorkingStack();
+							Object elem2 = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.cons(elem, (PersistentList) elem2));
 						}
 					} else {
 						if (ordinal == 18) { // eq
-							Serializable elem2 = popWorkingStack();
-							Serializable elem = popWorkingStack();
+							Object elem2 = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.eq(elem, elem2));
 						} else { // neq
-							Serializable elem2 = popWorkingStack();
-							Serializable elem = popWorkingStack();
+							Object elem2 = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.transformBoolean(ListUtils.eq(elem, elem2) == BasicType.NIL));
 						}
 					}
 				} else { // 20...24
 					if (ordinal < 22) {
 						if (ordinal == 20) { // and
-							Serializable elem2 = popWorkingStack();
-							Serializable elem = popWorkingStack();
+							Object elem2 = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL && elem2 != BasicType.NIL));
 						} else { // or
-							Serializable elem2 = popWorkingStack();
-							Serializable elem = popWorkingStack();
+							Object elem2 = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL || elem2 != BasicType.NIL));
 						}
 					} else {
 						if (ordinal == 22) { // not
-							Serializable elem = popWorkingStack();
+							Object elem = popWorkingStack();
 							pushWorkingStack(ListUtils.transformBoolean(elem == BasicType.NIL));
 						} else { // add
 							Number n2 = (Number) popWorkingStack();
