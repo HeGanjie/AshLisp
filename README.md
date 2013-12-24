@@ -90,6 +90,13 @@ public class AshLispUsage {
 		trace(eval("(let (a 1 b 2) (+ a b))")); // 3
 ```
 
+### LazySeq
+```Java
+		// lazy.scm show you how to define lazySeq
+		trace(eval("(take 10 (iterate inc 0))")); // (0 1 2 3 4 5 6 7 8 9)
+		trace(eval("(take 10 (repeat 0))")); // (0 0 0 0 0 0 0 0 0 0)
+```
+
 ### Misc
 ```Java
 		// eval

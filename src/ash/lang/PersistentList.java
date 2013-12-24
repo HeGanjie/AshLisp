@@ -91,4 +91,10 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 			return false;
 		return true;
 	}
+	
+	public static PersistentList cast(Object val) {
+		if (val instanceof String)
+			return CharNode.create((String) val);
+		return (PersistentList) val;
+	}
 }

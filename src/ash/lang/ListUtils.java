@@ -63,7 +63,7 @@ public final class ListUtils {
 	}
 	
 	public static Object atom(Object evalRes) {
-		return evalRes instanceof Node
+		return evalRes instanceof PersistentList
 				? ((BasicType.NIL == evalRes ? BasicType.T : BasicType.NIL))
 				: BasicType.T;
 	}

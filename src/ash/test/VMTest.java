@@ -140,6 +140,9 @@ public final class VMTest extends TestCase {
 	public void testStringSeq() throws Exception {
 		assertEquals("(\\a \\s \\d \\f)", exec("(seq \"asdf\")").toString());
 		assertEquals("asdf", exec("(apply str (seq \"asdf\"))").toString());
+		assertEquals("a", exec("(car \"asdf\")").toString());
+		assertEquals("\\a", BasicType.asString(exec("(car \"asdf\")")));
+		assertEquals("(\\s \\d \\f)", exec("(cdr \"asdf\")").toString());
 	}
 	
 	protected static Object exec(String code) {

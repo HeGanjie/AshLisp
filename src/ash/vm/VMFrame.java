@@ -158,7 +158,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 14) { //atom
 							pushWorkingStack(ListUtils.atom(popWorkingStack()));
 						} else { // car
-							pushWorkingStack(ListUtils.car((PersistentList) popWorkingStack()));
+							pushWorkingStack(ListUtils.car(PersistentList.cast(popWorkingStack())));
 						}
 					}
 				}
@@ -168,11 +168,11 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 20) { // 16...20
 					if (ordinal < 18) {
 						if (ordinal == 16) { //cdr
-							pushWorkingStack(ListUtils.cdr((PersistentList) popWorkingStack()));
+							pushWorkingStack(ListUtils.cdr(PersistentList.cast(popWorkingStack())));
 						} else { // cons
 							Object elem2 = popWorkingStack();
 							Object elem = popWorkingStack();
-							pushWorkingStack(ListUtils.cons(elem, (PersistentList) elem2));
+							pushWorkingStack(ListUtils.cons(elem, PersistentList.cast(elem2)));
 						}
 					} else {
 						if (ordinal == 18) { // eq
