@@ -60,8 +60,12 @@ public final class VMTest extends TestCase {
 	
 	public void testLambda() throws Exception {
 		assertEquals(BasicType.T, exec("((lambda (x) (eq 1 x)) 1)"));
-		
 		assertEquals(0, exec("(((lambda (f) f) add) 1 -1)"));
+		
+		assertEquals(BasicType.NIL, exec("(list)"));
+		assertEquals("(1 2 3)", exec("(list 1 2 3)").toString());
+		assertEquals("1 2 (3)", exec("((lambda (a b . c) (.str a \\space b \\space c)) 1 2 3)").toString());
+		assertEquals("1 2 ()", exec("((lambda (a b . c) (.str a \\space b \\space c)) 1 2)").toString());
 	}
 	
 	public void testMaths() throws Exception {

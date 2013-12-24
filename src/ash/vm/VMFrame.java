@@ -97,17 +97,10 @@ public final class VMFrame implements Serializable {
 							tempVar.put((String) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
-							PersistentList consArgs = ListUtils.toSeq(dotIndex, callArgs);
-							if (callArgs.length == 0) {
-								callArgs = new Object[] {consArgs};
-							} else {
-								callArgs[dotIndex] = consArgs;
-								if (dotIndex + 1 < callArgs.length) {
-									Object[] sorterArgs = new Object[dotIndex + 1];
-									System.arraycopy(callArgs, 0, sorterArgs, 0, sorterArgs.length);
-									callArgs = sorterArgs;
-								}
-							}
+							Object[] newArgs = new Object[dotIndex + 1];
+							System.arraycopy(callArgs, 0, newArgs, 0, dotIndex);
+							newArgs[dotIndex] = ListUtils.toSeq(dotIndex, callArgs);
+							callArgs = newArgs;
 						}
 					} else {
 						if (ordinal == 6) { // closure
