@@ -81,8 +81,8 @@
 (defn do (. things) (last things))
 
 (defn range (low high)
-      (when (< low high)
-	(cons low (range (inc low) high))))
+	(when (< low high)
+	  (lazy-cons low (range (inc low) high))))
 
 (defn apply (func args) (eval (cons func args)))
 
@@ -91,10 +91,9 @@
 (defn identity (x) x)
 
 (defn take (n seq)
-      (lazy-seq
-	(when seq 
-	  (when-not (zero? n)
-		    (cons (car seq) (take (dec n) (cdr seq)))))))
+      (when seq 
+	(when-not (zero? n)
+		  (cons (car seq) (take (dec n) (cdr seq))))))
 
 (defn drop (n seq)
       (when seq
