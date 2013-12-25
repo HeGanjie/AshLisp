@@ -40,9 +40,7 @@ public final class JavaMethod implements Serializable {
 	public Object call(Object[] args) {
 		switch (methodName) {
 		case "lazy-seq":
-			return LazyNode.createHead((Closure) args[0]);
-		case "stream":
-			return LazyNode.create(args[0], args.length == 1 ? BasicType.NIL : args[1]);
+			return new LazyNode((Closure) args[0]);
 		case "num?":
 			return ListUtils.transformBoolean(args[0] instanceof Number);
 		case "puts":

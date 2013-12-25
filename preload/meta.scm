@@ -7,8 +7,5 @@
 (defmacro '(defn fname args body)
   '(def fname (lambda args body)))
 
-(defmacro '(lazy-cons head body)
-  '(.stream head (lambda () body)))
-  
 (defmacro '(lazy-seq body)
   '(.lazy-seq (lambda () body)))
