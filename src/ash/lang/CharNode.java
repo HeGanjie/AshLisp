@@ -1,6 +1,5 @@
 package ash.lang;
 
-import java.io.Serializable;
 
 public class CharNode extends PersistentList {
 	private static final long serialVersionUID = 2474414112862800452L;
@@ -13,7 +12,7 @@ public class CharNode extends PersistentList {
 	}
 
 	@Override
-	public Serializable head() {
+	public Character head() {
 		return src.charAt(pos);
 	}
 

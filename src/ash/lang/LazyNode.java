@@ -29,7 +29,15 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public PersistentList rest() {
-		return valid().rest();
+		PersistentList valid = valid();
+		if (valid == BasicType.NIL) {
+			return BasicType.NIL;
+		}
+		LazyNode rest = (LazyNode) valid.rest();
+		if (rest.seq == BasicType.NIL) {
+			return BasicType.NIL;
+		}
+		return rest;
 	}
 
 	private static PersistentList callFunc(Closure func) {

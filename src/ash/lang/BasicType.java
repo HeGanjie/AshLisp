@@ -2,6 +2,8 @@ package ash.lang;
 
 import java.util.regex.Pattern;
 
+import bruce.common.utils.CommonUtils;
+
 public class BasicType {
 	public static final String T = "t";
 	public static final Node NIL = new Node(null, null);
@@ -30,7 +32,9 @@ public class BasicType {
 	}
 	
 	public static Object asString(Object val) {
-		if (val instanceof Character) {
+		if (val instanceof String) {
+			return CommonUtils.buildString('\"', val, '\"');
+		} else if (val instanceof Character) {
 			if ((Character)val == ' ')
 				return "\\space";
 			else if ((Character)val == '\n')
