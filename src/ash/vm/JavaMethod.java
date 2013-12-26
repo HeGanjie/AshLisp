@@ -13,6 +13,7 @@ import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
 import ash.lang.PersistentList;
+import ash.lang.Symbol;
 import ash.parser.Parser;
 import bruce.common.utils.CommonUtils;
 
@@ -61,7 +62,7 @@ public final class JavaMethod implements Serializable {
 		case "regex":
 			return Pattern.compile((String) args[0]);
 		case "new-macro":
-			MacroExpander.MARCOS_MAP.put((String)args[0], (Node)args[1]);
+			MacroExpander.MARCOS_MAP.put((Symbol) args[0], (Node)args[1]);
 			break;
 		case "expand-macro":
 			return MacroExpander.expand((Node) args[0]);

@@ -9,6 +9,7 @@ import java.util.Map;
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
 import ash.lang.PersistentList;
+import ash.lang.Symbol;
 import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
@@ -16,7 +17,7 @@ public final class VMFrame implements Serializable {
 	public static final boolean debugging = false;
 	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
-	public static final Map<String, Object> tempVar = VM.tempVar;
+	public static final Map<Symbol, Object> tempVar = VM.tempVar;
 	private Scope myScope;
 	public Object[] callArgs;
 	
@@ -94,7 +95,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 4) { //asn
 							if (tempVar.containsKey(args[0]))
 								System.out.println("Warnning: Redefining " + args[0]);
-							tempVar.put((String) args[0], popWorkingStack());
+							tempVar.put((Symbol) args[0], popWorkingStack());
 						} else { // cons_args
 							int dotIndex = (Integer) args[0];
 							Object[] newArgs = new Object[dotIndex + 1];
@@ -114,8 +115,8 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 12) { // 8...12
 					if (ordinal < 10) {
 						if (ordinal == 8) { // jz
-							Object pop = popWorkingStack();
-							if (pop == BasicType.NIL) runIndex = (Integer) args[0];
+							if (ListUtils.transformBoolean(popWorkingStack()))
+								runIndex = (Integer) args[0];
 						} else { // tail
 							callArgs = createCallingArgs((Integer) args[0]);
 							workingStack.clear();

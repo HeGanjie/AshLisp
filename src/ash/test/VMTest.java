@@ -37,8 +37,8 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testCar() throws Exception {
-		assertEquals("a", exec("(car '(a b c))"));
-		assertEquals("+", exec("(car '(+ b c))"));
+		assertEquals("a", BasicType.asString(exec("(car '(a b c))")));
+		assertEquals("+", BasicType.asString(exec("(car '(+ b c))")));
 		assertEquals(new Node("a"), exec("(car '((a) b c))"));
 	}
 	
@@ -55,7 +55,7 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testCond() throws Exception {
-		assertEquals("c", exec("(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))"));
+		assertEquals("c", BasicType.asString(exec("(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))")));
 	}
 	
 	public void testLambda() throws Exception {

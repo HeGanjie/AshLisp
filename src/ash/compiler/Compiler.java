@@ -10,12 +10,13 @@ import ash.lang.PersistentList;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
+import ash.lang.Symbol;
 import ash.vm.Instruction;
 import ash.vm.InstructionSetEnum;
 import ash.vm.JavaMethod;
 
 public final class Compiler {
-	private static final String MULTI_ARGS_SIGNAL = ".";
+	private static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda",
 			"atom", "car", "cdr", "not",
@@ -37,8 +38,8 @@ public final class Compiler {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
 			final Object op = node.head();
-			if (NORMAL_INSTRUCTION_SET.contains(op)) {
-				switch (((String) op).toLowerCase()) {
+			if (NORMAL_INSTRUCTION_SET.contains(op.toString())) {
+				switch (op.toString()) {
 				case "def":
 					return listInstruction(
 							compile(node.rest().rest().head(), lambdaArgs, startIndex),
@@ -61,13 +62,13 @@ public final class Compiler {
 				default:
 					return listInstruction(
 							compileArgs(node.rest(), lambdaArgs, startIndex),
-							InstructionSetEnum.valueOf((String) op).create());
+							InstructionSetEnum.valueOf(op.toString()).create());
 				}
-			} else if (op instanceof String && MacroExpander.hasMacro((String) op, node)) {
+			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op, node)) {
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
 				int argsCount = ListUtils.count(node.rest());
-				InstructionSetEnum callMethod = op instanceof String && ((String) op).charAt(0) == '.'
+				InstructionSetEnum callMethod = op instanceof Symbol && op.toString().charAt(0) == '.'
 						? InstructionSetEnum.java_call
 						: InstructionSetEnum.call;
 				return listInstruction(
@@ -75,31 +76,29 @@ public final class Compiler {
 						compile(op, lambdaArgs, startIndex),
 						callMethod.create(argsCount));
 			}
-		} else if (exp instanceof String) {
-			return compileSymbol(exp, lambdaArgs); // (... abc "a" add .puts ...)
+		} else if (exp instanceof Symbol) {
+			return compileSymbol((Symbol) exp, lambdaArgs); // (... a add .puts ...)
 		} else
-			return InstructionSetEnum.ldc.create(exp); // (... 1 2 3.4 \a ...)
+			return InstructionSetEnum.ldc.create(exp); // (... 1 2 3.4 \a "b" ...)
 	}
 
-	protected static Serializable compileSymbol(final Object exp, Node lambdaArgs) {
-		String op = (String) exp;
-		if (op.charAt(0) == '\"' && op.charAt(op.length() - 1) == '\"')
-			return InstructionSetEnum.ldc.create(op.substring(1, op.length() - 1)); // String
-		else if (op.charAt(0) == '.')
-			return InstructionSetEnum.ldc.create(JavaMethod.create(op.substring(1))); // java method
+	protected static Serializable compileSymbol(final Symbol symbol, Node lambdaArgs) {
+		String symbolName = symbol.name;
+		if (symbolName.charAt(0) == '.')
+			return InstructionSetEnum.ldc.create(JavaMethod.create(symbolName.substring(1))); // java method
 
-		int symbolIndexOfArgs = findArgIndex(lambdaArgs, exp);
+		int symbolIndexOfArgs = findArgIndex(lambdaArgs, symbol);
 		if (symbolIndexOfArgs == -1) {
-			if (InstructionSetEnum.contains(op))
-				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(op).create()); // instruction
+			if (InstructionSetEnum.contains(symbolName))
+				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(symbolName).create()); // instruction
 			else
-				return InstructionSetEnum.ldv.create(op); // symbol
+				return InstructionSetEnum.ldv.create(symbol); // symbol
 		} else {
 			return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
 		}
 	}
 
-	protected static int findArgIndex(Node lambdaArgs, final Object op) {
+	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {
 		assert(!MULTI_ARGS_SIGNAL.equals(op));
 		int dotIndex = ListUtils.indexOf(lambdaArgs, MULTI_ARGS_SIGNAL, 0);
 		int opPos = ListUtils.indexOf(lambdaArgs, op, 0);

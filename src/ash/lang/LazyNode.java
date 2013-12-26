@@ -29,15 +29,7 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public PersistentList rest() {
-		PersistentList valid = valid();
-		if (valid == BasicType.NIL) {
-			return BasicType.NIL;
-		}
-		LazyNode rest = (LazyNode) valid.rest();
-		if (rest.seq == BasicType.NIL) {
-			return BasicType.NIL;
-		}
-		return rest;
+		return valid().rest();
 	}
 
 	private static PersistentList callFunc(Closure func) {
@@ -48,4 +40,5 @@ public final class LazyNode extends PersistentList {
 	public String toString() {
 		return VMFrame.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
 	}
+
 }

@@ -76,5 +76,11 @@ public final class ListUtils {
 
 	public static PersistentList cons(Object a, PersistentList b) { return new Node(a, b); }
 	
-	public static final Object transformBoolean(boolean bl) { return bl ? BasicType.T : BasicType.NIL; }
+	public static final Object transformBoolean(boolean bl) {
+		return bl ? BasicType.T : BasicType.NIL;
+	}
+	
+	public static final boolean transformBoolean(Object bl) {
+		return bl instanceof PersistentList && ((PersistentList) bl).isEndingNode();
+	}
 }

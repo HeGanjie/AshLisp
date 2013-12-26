@@ -15,12 +15,13 @@ import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
 import ash.lang.PersistentList;
 import ash.lang.Node;
+import ash.lang.Symbol;
 import ash.parser.Parser;
 
 public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;
 
-	public static final Map<String, Object> tempVar = new HashMap<>();
+	public static final Map<Symbol, Object> tempVar = new HashMap<>();
 	protected final Deque<VMFrame> frameStack = new ArrayDeque<>();
 	public VMFrame headFrame;
 	

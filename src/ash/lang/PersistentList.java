@@ -48,11 +48,15 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 		else if (left != null)
 			sb.append(BasicType.asString(left));
 		
-		if (!(BasicType.NIL == next || BasicType.NIL == this/*|| next == null || next.rest() == null*/)) {
+		if (!(isEndingNode() || next.isEndingNode())) {
 			sb.append(' ');
 			sb.append(next.innerToString());
 		}
 		return sb.toString();
+	}
+	
+	public boolean isEndingNode() {
+		return rest() == null;
 	}
 	
 	@Override

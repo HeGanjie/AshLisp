@@ -5,14 +5,14 @@ import java.util.Map;
 
 
 public class MacroExpander {
-	private static final String MORE_ELEM = "*";
+	private static final Symbol MORE_ELEM = Symbol.create("*");
 	private static final String PLACE_HERE_ELEM = "%";
 	private static final String STACK_POINT_ELEM = "@";
-	public static final Map<String, Node> MARCOS_MAP = new HashMap<>();
+	public static final Map<Symbol, Node> MARCOS_MAP = new HashMap<>();
 
 	private MacroExpander() {}
 	
-	public static boolean hasMacro(String symbol, Node ast) {
+	public static boolean hasMacro(Symbol symbol, Node ast) {
 		Node pAndt = MARCOS_MAP.get(symbol);
 		if (pAndt != null) {
 			Node pattern = (Node) pAndt.head();
@@ -22,12 +22,12 @@ public class MacroExpander {
 	}
 
 	public static Node expand(Node ast) {
-		String macroName = (String) ast.head();
+		Symbol macroName = (Symbol) ast.head();
 		Node pAndt = MARCOS_MAP.get(macroName);
 		Node pattern = (Node) pAndt.head();
 		Node template = (Node) pAndt.rest().head();
 		
-		PersistentMap<String, Object> mapping = findMapping(pattern.rest(), ast.rest());
+		PersistentMap<Symbol, Object> mapping = findMapping(pattern.rest(), ast.rest());
 		Node moreElem = (Node) mapping.get(MORE_ELEM);
 		if (moreElem == null)
 			return createAstByTemplate(mapping, template, null, null);
@@ -41,7 +41,7 @@ public class MacroExpander {
 			return ast.head() instanceof Node
 					&& match((Node) pattern.head(), (Node) ast.head())
 					&& match(pattern.rest(), ast.rest());
-		} else if (pattern.head() instanceof String) { // * x
+		} else if (pattern.head() instanceof Symbol) { // * x
 			return MORE_ELEM.equals(pattern.head())
 					|| ast != BasicType.NIL && match(pattern.rest(), ast.rest());
 		} else {
@@ -49,19 +49,19 @@ public class MacroExpander {
 		}
 	}
 
-	private static Node createAstByTemplate(PersistentMap<String, Object> mapping, PersistentList template, PersistentList moreElem, Node stack) {
+	private static Node createAstByTemplate(PersistentMap<Symbol, Object> mapping, PersistentList template, PersistentList moreElem, Node stack) {
 		if (template == BasicType.NIL) return BasicType.NIL;
 		
 		Object leftReplacement = null;
 		if (template.head() instanceof Node)
 			leftReplacement = createAstByTemplate(mapping, (Node) template.head(), moreElem, stack);
 		else {
-			if (template.head() instanceof String) {
-				String symbol = (String) template.head();
-				if (symbol.startsWith(PLACE_HERE_ELEM)) // %
+			if (template.head() instanceof Symbol) {
+				Symbol symbol = (Symbol) template.head();
+				if (symbol.name.startsWith(PLACE_HERE_ELEM)) // %
 					leftReplacement = getRequiringReplacement(symbol, moreElem);
-				else if (symbol.startsWith(STACK_POINT_ELEM)) // @x
-					leftReplacement = stack == null ? mapping.get(symbol.substring(1)) : stack;
+				else if (symbol.name.startsWith(STACK_POINT_ELEM)) // @x
+					leftReplacement = stack == null ? mapping.get(Symbol.create(symbol.name.substring(1))) : stack;
 				else
 					leftReplacement = mapping.get(symbol);
 			}
@@ -71,11 +71,11 @@ public class MacroExpander {
 		return new Node(leftReplacement, createAstByTemplate(mapping, template.rest(), moreElem, stack));
 	}
 	
-	private static Object getRequiringReplacement(String symbol, PersistentList moreElem) {
-		if (PLACE_HERE_ELEM.equals(symbol)) {
+	private static Object getRequiringReplacement(Symbol symbol, PersistentList moreElem) {
+		if (PLACE_HERE_ELEM.equals(symbol.name)) {
 			return moreElem.head();
 		} else {
-			int drop = Integer.parseInt(symbol.substring(1)) - 1;
+			int drop = Integer.parseInt(symbol.name.substring(1)) - 1;
 			Object replacement = ListUtils.drop(drop, moreElem).head();
 			if (replacement == null)
 				throw new IllegalArgumentException("Ast Illegal!");
@@ -83,7 +83,7 @@ public class MacroExpander {
 		}
 	}
 
-	private static Node createAstRecur(PersistentMap<String, Object> mapping,
+	private static Node createAstRecur(PersistentMap<Symbol, Object> mapping,
 			Node template, PersistentList moreElem, Node stack, int replacementCount) {
 		if (moreElem == BasicType.NIL) return stack;
 		
@@ -92,14 +92,14 @@ public class MacroExpander {
 		return createAstRecur(mapping, template, ListUtils.drop(replacementCount, moreElem), res, replacementCount);
 	}
 
-	private static PersistentMap<String, Object> findMapping(PersistentList pattern, PersistentList ast) {
+	private static PersistentMap<Symbol, Object> findMapping(PersistentList pattern, PersistentList ast) {
 		if (pattern == BasicType.NIL) return new PersistentMap<>();
 		
-		PersistentMap<String, Object> leftMap;
+		PersistentMap<Symbol, Object> leftMap;
 		if (pattern.head() instanceof Node)
 			leftMap = findMapping((Node) pattern.head(), (Node) ast.head());
 		else {
-			String symbol = (String) pattern.head();
+			Symbol symbol = (Symbol) pattern.head();
 			leftMap = new PersistentMap<>(symbol, MORE_ELEM.equals(symbol) ? ast : ast.head());
 		}
 		
@@ -113,7 +113,7 @@ public class MacroExpander {
 			leftTreeCount = countReplacementRequire((Node) template.head());
 		else {
 			Object val = template.head();
-			if (val instanceof String && ((String) val).startsWith(PLACE_HERE_ELEM))
+			if (val instanceof Symbol && val.toString().startsWith(PLACE_HERE_ELEM))
 				leftTreeCount = 1;
 		}
 		return leftTreeCount + countReplacementRequire(template.rest());

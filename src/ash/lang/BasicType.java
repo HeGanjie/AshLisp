@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import bruce.common.utils.CommonUtils;
 
 public class BasicType {
-	public static final String T = "t";
+	public static final Symbol T = Symbol.create("t");
 	public static final Node NIL = new Node(null, null);
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("[+-]?\\d+");
 	private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?(?:\\d+)?\\.\\d+");
@@ -17,8 +17,10 @@ public class BasicType {
 			return Double.parseDouble(val);
 		else if (val.charAt(0) == '\\') {
 			return parseChar(val);
+		} else if (val.charAt(0) == '\"' && val.charAt(val.length() - 1) == '\"') {
+			return val.substring(1, val.length() - 1);
 		}
-		return val;
+		return Symbol.create(val);
 	}
 
 	private static char parseChar(String val) {
@@ -42,6 +44,6 @@ public class BasicType {
 			else
 				return '\\' + val.toString();
 		}
-		return val;
+		return val.toString();
 	}
 }
