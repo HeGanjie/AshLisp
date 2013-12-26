@@ -34,7 +34,7 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 	}
 
 	@Override
-	public boolean contains(Object o) {
+	public boolean contains(E o) {
 		return set.contains(o);
 	}
 
@@ -54,7 +54,7 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 	}
 
 	@Override
-	public PersistentSet<E> disj(Object o) {
+	public PersistentSet<E> disj(E o) {
 		Set<E> newSet = new HashSet<>(set);
 		newSet.remove(o);
 		return new PersistentSet<E>(newSet);

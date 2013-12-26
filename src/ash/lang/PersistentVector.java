@@ -51,7 +51,7 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 	}
 
 	@Override
-	public boolean contains(Object o) {
+	public boolean contains(E o) {
 		return ls.contains(o);
 	}
 
@@ -64,7 +64,7 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 		return ls.get(index);
 	}
 
-	public int indexOf(Object o) {
+	public int indexOf(E o) {
 		return ls.indexOf(o);
 	}
 
@@ -78,7 +78,7 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 		return ls.iterator();
 	}
 
-	public int lastIndexOf(Object o) {
+	public int lastIndexOf(E o) {
 		return ls.lastIndexOf(o);
 	}
 
@@ -91,7 +91,7 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 	}
 
 	@Override
-	public PersistentVector<E> disj(Object o) {
+	public PersistentVector<E> disj(E o) {
 		List<E> newLs = new ArrayList<>(ls);
 		newLs.remove(o);
 		return new PersistentVector<E>(newLs);

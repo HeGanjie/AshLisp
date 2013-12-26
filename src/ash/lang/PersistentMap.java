@@ -23,11 +23,11 @@ public class PersistentMap<K, V> implements Serializable {
 		map.put(key, val);
 	}
 	
-	public boolean containsKey(Object key) {
+	public boolean containsKey(K key) {
 		return map.containsKey(key);
 	}
 
-	public boolean containsValue(Object value) {
+	public boolean containsValue(V value) {
 		return map.containsValue(value);
 	}
 
@@ -35,7 +35,7 @@ public class PersistentMap<K, V> implements Serializable {
 		return new PersistentSet<Entry<K, V>>(map.entrySet());
 	}
 
-	public V get(Object key) {
+	public V get(K key) {
 		return map.get(key);
 	}
 
@@ -59,7 +59,7 @@ public class PersistentMap<K, V> implements Serializable {
 		return new PersistentMap<K, V>(newMap);
 	}
 
-	public PersistentMap<K, V> dissoc(Object key) {
+	public PersistentMap<K, V> dissoc(K key) {
 		Map<K, V> newMap = new HashMap<>(map);
 		newMap.remove(key);
 		return new PersistentMap<K, V>(newMap);

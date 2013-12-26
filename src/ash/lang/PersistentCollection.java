@@ -10,7 +10,7 @@ public interface PersistentCollection<E> {
 
 	public PersistentCollection<E> merge(PersistentCollection<? extends E> c);
 
-	public boolean contains(Object o);
+	public boolean contains(E o);
 
 	public boolean containsAll(PersistentCollection<? extends E> c);
 
@@ -18,7 +18,7 @@ public interface PersistentCollection<E> {
 
 	public Iterator<E> iterator();
 
-	public PersistentCollection<E> disj(Object o);
+	public PersistentCollection<E> disj(E o);
 
 	public PersistentCollection<E> disjAll(PersistentCollection<? extends E> c);
 
