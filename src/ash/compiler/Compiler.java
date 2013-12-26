@@ -26,7 +26,7 @@ public final class Compiler {
 	private Compiler() {}
 	
 	public static Node astsToInsts(PersistentList parseResult) {
-		if (parseResult == BasicType.NIL) return BasicType.NIL;
+		if (parseResult.isEndingNode()) return BasicType.NIL;
 		Object instNode = compile(parseResult.head(), BasicType.NIL, 0);
 		if (!(instNode instanceof Node)) {
 			instNode = new Node(instNode); // ensure no raw instructions in the returned list
@@ -114,12 +114,12 @@ public final class Compiler {
 	}
 	
 	private static Node compileArgs(PersistentList args, Node lambdaArgs, int startIndex) {
-		if (args == BasicType.NIL) return BasicType.NIL;
+		if (args.isEndingNode()) return BasicType.NIL;
 		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
 	private static Serializable compileCond(PersistentList pairList, Node lambdaArgs, int startIndex) {
-		if (pairList == BasicType.NIL) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
+		if (pairList.isEndingNode()) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();
 		

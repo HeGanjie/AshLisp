@@ -5,25 +5,25 @@ import java.util.Iterator;
 
 public final class ListUtils {
 	public static PersistentList pair(PersistentList keys, PersistentList vals) {
-		if (".".equals(keys.head())) // (. x) -> (1 2 3 ...) 
+		if (Symbol.create(".").equals(keys.head())) // (. x) -> (1 2 3 ...) 
 			return new Node(new Node(keys.rest().head(), new Node(vals)));
-		else if (BasicType.NIL != keys && BasicType.NIL != vals)
+		else if (!keys.isEndingNode() && !vals.isEndingNode())
 			return new Node(new Node(keys.head(), new Node(vals.head())), pair(keys.rest(), vals.rest()));
 		return BasicType.NIL;
 	}
 
 	public static int count(PersistentList seq) {
-		if (seq == BasicType.NIL) return 0;
+		if (seq.isEndingNode()) return 0;
 		return 1 + count(seq.rest());
 	}
 	
 	public static Node take(int count, PersistentList seq) {
-		if (seq == BasicType.NIL) return BasicType.NIL;
+		if (seq.isEndingNode()) return BasicType.NIL;
 		return count == 0 ? BasicType.NIL : new Node(seq.head(), take(count - 1, seq.rest()));
 	}
 	
 	public static PersistentList drop(int count, PersistentList seq) {
-		if (seq == BasicType.NIL) return BasicType.NIL;
+		if (seq.isEndingNode()) return BasicType.NIL;
 		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
 	
@@ -38,7 +38,7 @@ public final class ListUtils {
 	}
 		
 	public static Node append(PersistentList left, Node right) {
-		if (left == BasicType.NIL) return right;
+		if (left.isEndingNode()) return right;
 		return new Node(left.head(), append(left.rest(), right));
 	}
 	
@@ -53,7 +53,7 @@ public final class ListUtils {
 	}
 	
 	public static int indexOf(PersistentList seq, Object targetVal, int skiped) {
-		if (seq == BasicType.NIL) {
+		if (seq.isEndingNode()) {
 			return -1;
 		} else if (seq.head().equals(targetVal)) {
 			return skiped;
@@ -64,11 +64,11 @@ public final class ListUtils {
 	
 	public static Object atom(Object evalRes) {
 		return evalRes instanceof PersistentList
-				? ((BasicType.NIL == evalRes ? BasicType.T : BasicType.NIL))
+				? transformBoolean(((PersistentList) evalRes).isEndingNode())
 				: BasicType.T;
 	}
 	
-	public static Object eq(Object a, Object b) { return a.equals(b) ? BasicType.T : BasicType.NIL; }
+	public static Object eq(Object a, Object b) { return transformBoolean(a.equals(b)); }
 	
 	public static Object car(PersistentList arg) { return arg.head(); }
 	
@@ -80,7 +80,7 @@ public final class ListUtils {
 		return bl ? BasicType.T : BasicType.NIL;
 	}
 	
-	public static final boolean transformBoolean(Object bl) {
-		return bl instanceof PersistentList && ((PersistentList) bl).isEndingNode();
+	public static final boolean transformBoolean(Object val) {
+		return !(val instanceof PersistentList && ((PersistentList) val).isEndingNode());
 	}
 }

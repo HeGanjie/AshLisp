@@ -115,7 +115,7 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 12) { // 8...12
 					if (ordinal < 10) {
 						if (ordinal == 8) { // jz
-							if (ListUtils.transformBoolean(popWorkingStack()))
+							if (!ListUtils.transformBoolean(popWorkingStack()))
 								runIndex = (Integer) args[0];
 						} else { // tail
 							callArgs = createCallingArgs((Integer) args[0]);
@@ -176,24 +176,24 @@ public final class VMFrame implements Serializable {
 						} else { // neq
 							Object elem2 = popWorkingStack();
 							Object elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(ListUtils.eq(elem, elem2) == BasicType.NIL));
+							pushWorkingStack(ListUtils.transformBoolean(!elem.equals(elem2)));
 						}
 					}
 				} else { // 20...24
 					if (ordinal < 22) {
 						if (ordinal == 20) { // and
-							Object elem2 = popWorkingStack();
-							Object elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL && elem2 != BasicType.NIL));
+							boolean elem2 = ListUtils.transformBoolean(popWorkingStack());
+							boolean elem = ListUtils.transformBoolean(popWorkingStack());
+							pushWorkingStack(ListUtils.transformBoolean(elem && elem2));
 						} else { // or
-							Object elem2 = popWorkingStack();
-							Object elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem != BasicType.NIL || elem2 != BasicType.NIL));
+							boolean elem2 = ListUtils.transformBoolean(popWorkingStack());
+							boolean elem = ListUtils.transformBoolean(popWorkingStack());
+							pushWorkingStack(ListUtils.transformBoolean(elem || elem2));
 						}
 					} else {
 						if (ordinal == 22) { // not
-							Object elem = popWorkingStack();
-							pushWorkingStack(ListUtils.transformBoolean(elem == BasicType.NIL));
+							boolean elem = ListUtils.transformBoolean(popWorkingStack());
+							pushWorkingStack(ListUtils.transformBoolean(!elem));
 						} else { // add
 							Number n2 = (Number) popWorkingStack();
 							Number n1 = (Number) popWorkingStack();

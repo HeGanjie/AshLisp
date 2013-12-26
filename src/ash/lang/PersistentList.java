@@ -17,7 +17,7 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 		return new Iterator<PersistentList>() {
 			PersistentList head = PersistentList.this;
 			@Override
-			public boolean hasNext() { return BasicType.NIL != head; }
+			public boolean hasNext() { return !head.isEndingNode(); }
 			@Override
 			public PersistentList next() {
 				PersistentList curr = head;
