@@ -149,6 +149,10 @@ public final class VMTest extends TestCase {
 		assertEquals("(\\s \\d \\f)", exec("(cdr \"asdf\")").toString());
 	}
 	
+	public void testJavaMethod() throws Exception {
+		assertEquals(10, exec("(java.lang.Math/abs -10)"));
+	}
+	
 	protected static Object exec(String code) {
 		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
 	}

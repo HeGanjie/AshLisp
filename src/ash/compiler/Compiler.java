@@ -64,11 +64,11 @@ public final class Compiler {
 							compileArgs(node.rest(), lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf(op.toString()).create());
 				}
-			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op, node)) {
+			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op, node)) { // (let ...)
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
 				int argsCount = ListUtils.count(node.rest());
-				InstructionSetEnum callMethod = op instanceof Symbol && op.toString().charAt(0) == '.'
+				InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
 						? InstructionSetEnum.java_call
 						: InstructionSetEnum.call;
 				return listInstruction(
@@ -83,19 +83,23 @@ public final class Compiler {
 	}
 
 	protected static Serializable compileSymbol(final Symbol symbol, Node lambdaArgs) {
-		String symbolName = symbol.name;
-		if (symbolName.charAt(0) == '.')
-			return InstructionSetEnum.ldc.create(JavaMethod.create(symbolName.substring(1))); // java method
+		String methodName = symbol.name;
+		if (isJavaCallSymbol(methodName))
+			return InstructionSetEnum.ldc.create(JavaMethod.create(symbol)); // java method
 
 		int symbolIndexOfArgs = findArgIndex(lambdaArgs, symbol);
 		if (symbolIndexOfArgs == -1) {
-			if (InstructionSetEnum.contains(symbolName))
-				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(symbolName).create()); // instruction
+			if (InstructionSetEnum.contains(methodName))
+				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(methodName).create()); // instruction
 			else
 				return InstructionSetEnum.ldv.create(symbol); // symbol
 		} else {
 			return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
 		}
+	}
+
+	private static boolean isJavaCallSymbol(final String op) {
+		return op.charAt(0) == '.' || op.indexOf('/') != -1;
 	}
 
 	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {
