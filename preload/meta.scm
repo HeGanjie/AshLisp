@@ -8,4 +8,4 @@
   '(def fname (lambda args body)))
 
 (defmacro '(lazy-seq body)
-  '(.lazy-seq (lambda () body)))
+  '(.new 'ash.lang.LazyNode (lambda () body)))

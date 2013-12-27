@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
 import ash.lang.Node;
+import ash.lang.Symbol;
 import ash.parser.Parser;
 import ash.vm.VM;
 
@@ -25,6 +26,7 @@ public final class VMTest extends TestCase {
 		assertEquals(BasicType.T, exec("(atom 'a)"));
 		assertEquals(BasicType.T, exec("(atom '())"));
 		assertEquals(BasicType.NIL, exec("(atom '(a))"));
+		assertEquals(BasicType.T, exec("(atom \"asdf\")"));
 	}
 	
 	public void testEq() throws Exception {
@@ -37,8 +39,8 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testCar() throws Exception {
-		assertEquals("a", BasicType.asString(exec("(car '(a b c))")));
-		assertEquals("+", BasicType.asString(exec("(car '(+ b c))")));
+		assertEquals(Symbol.create("a"), exec("(car '(a b c))"));
+		assertEquals(Symbol.create("+"), exec("(car '(+ b c))"));
 		assertEquals(new Node("a"), exec("(car '((a) b c))"));
 	}
 	
@@ -55,7 +57,7 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testCond() throws Exception {
-		assertEquals("c", BasicType.asString(exec("(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))")));
+		assertEquals(Symbol.create("c"), exec("(cond ((eq 1 2) 'a) ((eq 0 1) 'b) ('t 'c))"));
 	}
 	
 	public void testLambda() throws Exception {
@@ -150,6 +152,7 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testJavaMethod() throws Exception {
+		assertEquals(BasicType.T, exec("(.num? -10)"));
 		assertEquals(10, exec("(java.lang.Math/abs -10)"));
 	}
 	

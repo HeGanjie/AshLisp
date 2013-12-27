@@ -1,6 +1,7 @@
 package ash.vm;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import java.util.regex.Pattern;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
 import ash.lang.CharNode;
-import ash.lang.LazyNode;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
@@ -47,7 +47,8 @@ public final class JavaMethod implements Serializable {
 	private List<Method> loadCandidateMethod() {
 		if (clazz != null && candidateMethods == null) {
 			final String methodName = getStaticMethodName();
-			candidateMethods = LambdaUtils.where(Arrays.asList(clazz.getMethods()), new Func1<Boolean, Method>() {
+			candidateMethods = LambdaUtils.where(Arrays.asList(clazz.getMethods()),
+					new Func1<Boolean, Method>() {
 				@Override
 				public Boolean call(Method method) {
 					return method.getName().equals(methodName);
@@ -73,61 +74,11 @@ public final class JavaMethod implements Serializable {
 		return callCustomMethod(args);
 	}
 
-	private Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
-		return LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
-			@Override
-			public Boolean call(Method m) {
-				return allMatch(m.getParameterTypes(), targetParameterTypes);
-			}
-		});
-	}
-	
-	private static final PersistentMap<Class<?>, Class<?>> PRIMITIVE_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
-		private static final long serialVersionUID = -6095060982667447960L;
-
-	{
-		put(boolean.class, Boolean.class);
-		put(byte.class, Byte.class);
-		put(short.class, Short.class);
-		put(int.class, Integer.class);
-		put(long.class, Long.class);
-		put(float.class, Float.class);
-		put(double.class, Double.class);
-	}});
-	
-	private static final PersistentMap<Class<?>, Class<?>> BOX_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
-		private static final long serialVersionUID = 1198282101259361358L;
-
-	{
-		put(Boolean.class, boolean.class);
-		put(Byte.class, byte.class);
-		put(Short.class, short.class);
-		put(Integer.class, int.class);
-		put(Long.class, long.class);
-		put(Float.class, float.class);
-		put(Double.class, double.class);
-	}});
-
-	private boolean allMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
-		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[0] == targetParameterTypes[0]) {
-				continue;
-			} else if (PRIMITIVE_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0] ||
-					BOX_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0]) {
-				continue;
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-
 	@SuppressWarnings("unchecked")
 	private Object callCustomMethod(Object[] args) {
 		switch (methodFullName.substring(1)) {
-		case "lazy-seq":
-			return new LazyNode((Closure) args[0]);
+		case "new":
+			return reflectCreateObject(args);
 		case "num?":
 			return ListUtils.transformBoolean(args[0] instanceof Number);
 		case "puts":
@@ -158,12 +109,58 @@ public final class JavaMethod implements Serializable {
 		return BasicType.NIL;
 	}
 
+	private Object reflectCreateObject(Object[] args) {
+		try {
+			Class<?> clazz = Class.forName(args[0].toString());
+			Object[] newArgs = new Object[args.length - 1];
+			System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+			Constructor<?>[] constructors = clazz.getConstructors();
+			if (constructors.length == 1) {
+				return constructors[0].newInstance(newArgs);
+			} else {
+				return matchConstructor(Arrays.asList(constructors), getParameterTypes(newArgs)).newInstance(newArgs);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
+		return LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
+			@Override
+			public Boolean call(Method m) {
+				return allMatch(m.getParameterTypes(), targetParameterTypes);
+			}
+		});
+	}
+
+	private Constructor<?> matchConstructor(List<Constructor<?>> candidateConstructors, final Class<?>[] targetParameterTypes) {
+		return LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
+			@Override
+			public Boolean call(Constructor<?> m) {
+				return allMatch(m.getParameterTypes(), targetParameterTypes);
+			}
+		});
+	}
+	
+	private boolean allMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
+		for (int i = 0; i < targetParameterTypes.length; i++) {
+			if (methodParameterTypes[0] == targetParameterTypes[0]) {
+				continue;
+			} else if (PRIMITIVE_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0] ||
+					BOX_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0]) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private Class<?>[] getParameterTypes(Object[] args) {
 		return LambdaUtils.select(Arrays.asList(args), new Func1<Class<?>, Object>() {
 			@Override
-			public Class<?> call(Object val) {
-				return val.getClass();
-			}
+			public Class<?> call(Object val) { return val.getClass(); }
 		}).toArray(EMPTY_CLASSES);
 	}
 
@@ -183,6 +180,29 @@ public final class JavaMethod implements Serializable {
 	}
 
 	@Override
-	public String toString() { return '.' + methodFullName; }
+	public String toString() { return methodFullName; }
 
+	private static final PersistentMap<Class<?>, Class<?>> PRIMITIVE_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
+		private static final long serialVersionUID = -6095060982667447960L;
+	{
+		put(boolean.class, Boolean.class);
+		put(byte.class, Byte.class);
+		put(short.class, Short.class);
+		put(int.class, Integer.class);
+		put(long.class, Long.class);
+		put(float.class, Float.class);
+		put(double.class, Double.class);
+	}});
+	
+	private static final PersistentMap<Class<?>, Class<?>> BOX_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
+		private static final long serialVersionUID = 1198282101259361358L;
+	{
+		put(Boolean.class, boolean.class);
+		put(Byte.class, byte.class);
+		put(Short.class, short.class);
+		put(Integer.class, int.class);
+		put(Long.class, long.class);
+		put(Float.class, float.class);
+		put(Double.class, double.class);
+	}});
 }

@@ -96,18 +96,14 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		return prime + ((set == null) ? 0 : set.hashCode());
+		return 31 + ((set == null) ? 0 : set.hashCode());
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		PersistentSet<?> other = (PersistentSet<?>) obj;
 		if (set == null) {
 			if (other.set != null)

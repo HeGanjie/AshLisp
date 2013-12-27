@@ -149,18 +149,14 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		return prime + ((ls == null) ? 0 : ls.hashCode());
+		return 31 + ((ls == null) ? 0 : ls.hashCode());
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
 		PersistentVector<?> other = (PersistentVector<?>) obj;
 		if (ls == null) {
 			if (other.ls != null)

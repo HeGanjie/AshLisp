@@ -75,8 +75,7 @@ public class PersistentMap<K, V> implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		return prime + ((map == null) ? 0 : map.hashCode());
+		return 31 + ((map == null) ? 0 : map.hashCode());
 	}
 
 	@Override
