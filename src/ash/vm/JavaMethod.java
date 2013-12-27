@@ -58,6 +58,10 @@ public final class JavaMethod implements Serializable {
 		return candidateMethods;
 	}
 
+	private String getStaticMethodName() {
+		return methodFullName.substring(methodFullName.indexOf('/') + 1);
+	}
+
 	public Object call(Object[] args) {
 		List<Method> candidateMethods = loadCandidateMethod();
 		if (candidateMethods != null && 0 < candidateMethods.size()) {
@@ -77,10 +81,10 @@ public final class JavaMethod implements Serializable {
 	@SuppressWarnings("unchecked")
 	private Object callCustomMethod(Object[] args) {
 		switch (methodFullName.substring(1)) {
+		case "instance?":
+			return checkTypeEquivalence(args);
 		case "new":
 			return reflectCreateObject(args);
-		case "num?":
-			return ListUtils.transformBoolean(args[0] instanceof Number);
 		case "puts":
 			System.out.println(CommonUtils.displayArray(args, ""));
 			break;
@@ -109,7 +113,17 @@ public final class JavaMethod implements Serializable {
 		return BasicType.NIL;
 	}
 
-	private Object reflectCreateObject(Object[] args) {
+	private Object checkTypeEquivalence(Object[] args) {
+		try {
+			Class<?> clazz = Class.forName(args[0].toString());
+			Class<?> valClass = args[1].getClass();
+			return ListUtils.transformBoolean(clazz == valClass || clazz.isAssignableFrom(valClass));
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Object reflectCreateObject(Object[] args) {
 		try {
 			Class<?> clazz = Class.forName(args[0].toString());
 			Object[] newArgs = new Object[args.length - 1];
@@ -125,7 +139,7 @@ public final class JavaMethod implements Serializable {
 		}
 	}
 
-	private Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
+	private static Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
 		return LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
 			@Override
 			public Boolean call(Method m) {
@@ -134,7 +148,7 @@ public final class JavaMethod implements Serializable {
 		});
 	}
 
-	private Constructor<?> matchConstructor(List<Constructor<?>> candidateConstructors, final Class<?>[] targetParameterTypes) {
+	private static Constructor<?> matchConstructor(List<Constructor<?>> candidateConstructors, final Class<?>[] targetParameterTypes) {
 		return LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
 			@Override
 			public Boolean call(Constructor<?> m) {
@@ -143,7 +157,7 @@ public final class JavaMethod implements Serializable {
 		});
 	}
 	
-	private boolean allMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
+	private static boolean allMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		for (int i = 0; i < targetParameterTypes.length; i++) {
 			if (methodParameterTypes[0] == targetParameterTypes[0]) {
 				continue;
@@ -157,15 +171,11 @@ public final class JavaMethod implements Serializable {
 		return true;
 	}
 
-	private Class<?>[] getParameterTypes(Object[] args) {
+	private static Class<?>[] getParameterTypes(Object[] args) {
 		return LambdaUtils.select(Arrays.asList(args), new Func1<Class<?>, Object>() {
 			@Override
 			public Class<?> call(Object val) { return val.getClass(); }
 		}).toArray(EMPTY_CLASSES);
-	}
-
-	private String getStaticMethodName() {
-		return methodFullName.substring(methodFullName.indexOf('/') + 1);
 	}
 
 	public static JavaMethod create(Symbol symbol) {
