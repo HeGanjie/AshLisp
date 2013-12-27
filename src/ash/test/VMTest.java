@@ -152,7 +152,7 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testJavaMethod() throws Exception {
-		assertEquals(BasicType.T, exec("(.num? -10)"));
+		assertEquals(BasicType.T, exec("(num? -10)"));
 		assertEquals(10, exec("(java.lang.Math/abs -10)"));
 		
 		assertEquals(BasicType.T, exec("(.instance? 'java.lang.Number 1)"));

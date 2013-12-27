@@ -86,6 +86,9 @@ public final class Compiler {
 		String methodName = symbol.name;
 		if (isJavaCallSymbol(methodName))
 			return InstructionSetEnum.ldc.create(JavaMethod.create(symbol)); // java method
+		else if (isJavaClassPathSymbol(methodName)) {
+			return InstructionSetEnum.ldc.create(symbol); // java class path
+		}
 
 		int symbolIndexOfArgs = findArgIndex(lambdaArgs, symbol);
 		if (symbolIndexOfArgs == -1) {
@@ -100,6 +103,10 @@ public final class Compiler {
 
 	private static boolean isJavaCallSymbol(final String op) {
 		return op.charAt(0) == '.' || op.indexOf('/') != -1;
+	}
+	
+	private static boolean isJavaClassPathSymbol(final String op) {
+		return op.charAt(0) != '.' && op.indexOf('.') != -1;
 	}
 
 	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {
