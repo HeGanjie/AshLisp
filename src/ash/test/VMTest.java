@@ -154,10 +154,14 @@ public final class VMTest extends TestCase {
 	public void testJavaMethod() throws Exception {
 		assertEquals(BasicType.T, exec("(num? -10)"));
 		assertEquals(10, exec("(java.lang.Math/abs -10)"));
+		assertEquals(1.5, exec("(java.lang.Math/abs -1.5)"));
 		
 		assertEquals(BasicType.T, exec("(.instance? 'java.lang.Number 1)"));
 		assertEquals(BasicType.T, exec("(.instance? 'java.lang.Number 1.0)"));
 		assertEquals(BasicType.NIL, exec("(.instance? 'java.lang.Number \\1)"));
+		
+		assertEquals(12, exec("(. \"Hello World!\" 'length)"));
+		assertEquals(1, exec("(. \"Hello World!\" 'indexOf \\e)"));
 	}
 	
 	protected static Object exec(String code) {

@@ -1,6 +1,7 @@
 package ash.lang;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +14,11 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 	
 	public PersistentSet() {
 		set = new HashSet<>();
+	}
+	
+	@SafeVarargs
+	public PersistentSet(E... initSet) {
+		set = new HashSet<>(Arrays.asList(initSet));
 	}
 
 	public PersistentSet(Set<E> initSet) {

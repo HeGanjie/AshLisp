@@ -2,6 +2,7 @@ package ash.lang;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +15,11 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 	
 	public PersistentVector() {
 		ls = new ArrayList<>();
+	}
+	
+	@SafeVarargs
+	public PersistentVector(E... es) {
+		ls = Arrays.asList(es);
 	}
 
 	public PersistentVector(List<E> initls) {

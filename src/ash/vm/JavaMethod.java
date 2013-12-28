@@ -17,6 +17,7 @@ import ash.lang.MacroExpander;
 import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.PersistentMap;
+import ash.lang.PersistentSet;
 import ash.lang.Symbol;
 import ash.parser.Parser;
 import bruce.common.functional.Func1;
@@ -32,6 +33,17 @@ public final class JavaMethod implements Serializable {
 	private Class<?> clazz;
 	transient private List<Method> candidateMethods;
 
+	public static JavaMethod create(Symbol symbol) {
+		String methodName = symbol.name;
+		
+		JavaMethod javaMethod = CACHE.get(methodName);
+		if (javaMethod == null) {
+			javaMethod = new JavaMethod(methodName);
+			CACHE.put(methodName, javaMethod);
+		}
+		return javaMethod;
+	}
+
 	private JavaMethod(String name) {
 		methodFullName = name;
 		if (name.charAt(0) == '.') return;
@@ -44,21 +56,27 @@ public final class JavaMethod implements Serializable {
 		}
 	}
 	
+	@Override
+	public String toString() { return methodFullName; }
+
 	private List<Method> loadCandidateMethod() {
 		if (clazz != null && candidateMethods == null) {
-			final String methodName = getStaticMethodName();
-			candidateMethods = LambdaUtils.where(Arrays.asList(clazz.getMethods()),
-					new Func1<Boolean, Method>() {
-				@Override
-				public Boolean call(Method method) {
-					return method.getName().equals(methodName);
-				}
-			});
+			final String methodName = getStaticMemberName();
+			candidateMethods = filterMethod(clazz.getMethods() ,methodName);
 		}
 		return candidateMethods;
 	}
 
-	private String getStaticMethodName() {
+	private static List<Method> filterMethod(Method[] methods, final String methodName) {
+		return LambdaUtils.where(Arrays.asList(methods), new Func1<Boolean, Method>() {
+			@Override
+			public Boolean call(Method method) {
+				return method.getName().equals(methodName);
+			}
+		});
+	}
+
+	private String getStaticMemberName() {
 		return methodFullName.substring(methodFullName.indexOf('/') + 1);
 	}
 
@@ -81,8 +99,10 @@ public final class JavaMethod implements Serializable {
 	@SuppressWarnings("unchecked")
 	private Object callCustomMethod(Object[] args) {
 		switch (methodFullName.substring(1)) {
+		case "":
+			return callInstanceMethod(args);
 		case "instance?":
-			return checkTypeEquivalence(args);
+			return checkInstanceOf(args);
 		case "new":
 			return reflectCreateObject(args);
 		case "puts":
@@ -113,7 +133,18 @@ public final class JavaMethod implements Serializable {
 		return BasicType.NIL;
 	}
 
-	private Object checkTypeEquivalence(Object[] args) {
+	private static Object callInstanceMethod(Object[] args) {
+		try {
+			Object[] subArray = subArray(args, 2);
+			Method[] methods = args[0].getClass().getMethods();
+			return matchMethod(filterMethod(methods, args[1].toString()), getParameterTypes(subArray))
+					.invoke(args[0], subArray);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Object checkInstanceOf(Object[] args) {
 		try {
 			Class<?> clazz = Class.forName(args[0].toString());
 			Class<?> valClass = args[1].getClass();
@@ -126,8 +157,7 @@ public final class JavaMethod implements Serializable {
 	private static Object reflectCreateObject(Object[] args) {
 		try {
 			Class<?> clazz = Class.forName(args[0].toString());
-			Object[] newArgs = new Object[args.length - 1];
-			System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+			Object[] newArgs = subArray(args, 1);
 			Constructor<?>[] constructors = clazz.getConstructors();
 			if (constructors.length == 1) {
 				return constructors[0].newInstance(newArgs);
@@ -139,30 +169,69 @@ public final class JavaMethod implements Serializable {
 		}
 	}
 
+	private static Object[] subArray(Object[] args, int startIndex) {
+		Object[] newArgs = new Object[args.length - startIndex];
+		System.arraycopy(args, startIndex, newArgs, 0, newArgs.length);
+		return newArgs;
+	}
+
 	private static Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
+		Method firstMatch = LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
+			@Override
+			public Boolean call(Method m) {
+				return strictMatch(m.getParameterTypes(), targetParameterTypes);
+			}
+		});
+		if (firstMatch != null) return firstMatch;
 		return LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
 			@Override
 			public Boolean call(Method m) {
-				return allMatch(m.getParameterTypes(), targetParameterTypes);
+				return fuzzyMatch(m.getParameterTypes(), targetParameterTypes);
 			}
 		});
 	}
 
 	private static Constructor<?> matchConstructor(List<Constructor<?>> candidateConstructors, final Class<?>[] targetParameterTypes) {
+		Constructor<?> firstMatch = LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
+			@Override
+			public Boolean call(Constructor<?> m) {
+				return strictMatch(m.getParameterTypes(), targetParameterTypes);
+			}
+		});
+		if (firstMatch != null) return firstMatch;
 		return LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
 			@Override
 			public Boolean call(Constructor<?> m) {
-				return allMatch(m.getParameterTypes(), targetParameterTypes);
+				return fuzzyMatch(m.getParameterTypes(), targetParameterTypes);
 			}
 		});
 	}
 	
-	private static boolean allMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
+	private static Class<?>[] getParameterTypes(Object[] args) {
+		return LambdaUtils.select(Arrays.asList(args), new Func1<Class<?>, Object>() {
+			@Override
+			public Class<?> call(Object val) { return val.getClass(); }
+		}).toArray(EMPTY_CLASSES);
+	}
+
+	private static boolean strictMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
+		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[0] == targetParameterTypes[0]) {
+			if (methodParameterTypes[i] == targetParameterTypes[i] ||
+					STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
 				continue;
-			} else if (PRIMITIVE_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0] ||
-					BOX_CLASS_MAP.get(methodParameterTypes[0]) == targetParameterTypes[0]) {
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static boolean fuzzyMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
+		if (methodParameterTypes.length != targetParameterTypes.length) return false;
+		for (int i = 0; i < targetParameterTypes.length; i++) {
+			if (methodParameterTypes[i] == targetParameterTypes[i] ||
+					PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
 				continue;
 			} else {
 				return false;
@@ -171,48 +240,25 @@ public final class JavaMethod implements Serializable {
 		return true;
 	}
 
-	private static Class<?>[] getParameterTypes(Object[] args) {
-		return LambdaUtils.select(Arrays.asList(args), new Func1<Class<?>, Object>() {
-			@Override
-			public Class<?> call(Object val) { return val.getClass(); }
-		}).toArray(EMPTY_CLASSES);
-	}
-
-	public static JavaMethod create(Symbol symbol) {
-		String methodName = symbol.name;
-		
-		JavaMethod javaMethod = CACHE.get(methodName);
-		if (javaMethod == null) {
-			javaMethod = new JavaMethod(methodName);
-			CACHE.put(methodName, javaMethod);
-		}
-		return javaMethod;
-	}
-
-	@Override
-	public String toString() { return methodFullName; }
-
-	private static final PersistentMap<Class<?>, Class<?>> PRIMITIVE_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
-		private static final long serialVersionUID = -6095060982667447960L;
-	{
-		put(boolean.class, Boolean.class);
-		put(byte.class, Byte.class);
-		put(short.class, Short.class);
-		put(int.class, Integer.class);
-		put(long.class, Long.class);
-		put(float.class, Float.class);
-		put(double.class, Double.class);
-	}});
+	private static final PersistentMap<Class<?>, Class<?>> STRICT_PRIMITIVE_CLASS_MAP = new PersistentMap<>(
+			boolean.class, Boolean.class,
+			byte.class, Byte.class,
+			char.class, Character.class,
+			short.class, Short.class,
+			int.class, Integer.class,
+			long.class, Long.class,
+			float.class, Float.class,
+			double.class, Double.class
+		);
 	
-	private static final PersistentMap<Class<?>, Class<?>> BOX_CLASS_MAP = new PersistentMap<>(new HashMap<Class<?>, Class<?>>(){
-		private static final long serialVersionUID = 1198282101259361358L;
-	{
-		put(Boolean.class, boolean.class);
-		put(Byte.class, byte.class);
-		put(Short.class, short.class);
-		put(Integer.class, int.class);
-		put(Long.class, long.class);
-		put(Float.class, float.class);
-		put(Double.class, double.class);
-	}});
+	private static final PersistentMap<Class<?>, PersistentSet<Class<?>>> PRIMITIVE_CLASS_MAP = new PersistentMap<>(
+		boolean.class, new PersistentSet<>(Boolean.class),
+		byte.class, new PersistentSet<>(Byte.class, Character.class),
+		char.class, new PersistentSet<>(Byte.class, Character.class),
+		short.class, new PersistentSet<>(Byte.class, Character.class, Short.class),
+		int.class, new PersistentSet<>(Byte.class, Character.class, Short.class, Integer.class),
+		long.class, new PersistentSet<>(Byte.class, Character.class, Short.class, Integer.class, Long.class),
+		float.class, new PersistentSet<>(Byte.class, Character.class, Short.class, Integer.class, Float.class),
+		double.class, new PersistentSet<>(Byte.class, Character.class, Short.class, Integer.class, Float.class, Double.class)
+	);
 }

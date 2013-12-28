@@ -18,9 +18,12 @@ public class PersistentMap<K, V> implements Serializable {
 		map = initMap;
 	}
 
-	public PersistentMap(K key, V val) {
+	@SuppressWarnings("unchecked")
+	public PersistentMap(Object... initVal) {
 		this();
-		map.put(key, val);
+		for (int i = 0; i < initVal.length; i += 2) {
+			map.put((K) initVal[i], (V) initVal[i + 1]);
+		}
 	}
 	
 	public boolean containsKey(K key) {
