@@ -30,22 +30,35 @@ public final class JavaMethod implements Serializable {
 		
 		JavaMethod javaMethod = CACHE.get(methodName);
 		if (javaMethod == null) {
-			javaMethod = new JavaMethod(methodName);
+			javaMethod = new JavaMethod(symbol);
 			CACHE.put(methodName, javaMethod);
 		}
 		return javaMethod;
 	}
 
-	private JavaMethod(String name) {
-		methodFullName = name;
-		if (name.charAt(0) == '.') return;
+	private JavaMethod(Symbol symbol) {
+		methodFullName = symbol.name;
+		if (methodFullName.charAt(0) == '.') return;
 		
 		try {
-			clazz = Class.forName(methodFullName.substring(0, methodFullName.indexOf('/')));
+			clazz = loadClassBySymbol(symbol);
 			loadCandidateMethod();
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static Class<?> loadClassBySymbol(Symbol symbolName) throws ClassNotFoundException {
+		return Class.forName(getFullClassPath(symbolName.name));
+	}
+
+	private static String getFullClassPath(String classpath) {
+		int sepPos = classpath.indexOf('/');
+		String path = sepPos != -1 ? classpath.substring(0, sepPos) : classpath;
+		if (Character.isUpperCase(path.charAt(0)) && path.indexOf('.') == -1) {
+			return "java.lang." + path;
+		}
+		return path;
 	}
 	
 	@Override
@@ -53,8 +66,7 @@ public final class JavaMethod implements Serializable {
 
 	private List<Method> loadCandidateMethod() {
 		if (clazz != null && candidateMethods == null) {
-			final String methodName = getStaticMemberName();
-			candidateMethods = filterMethod(clazz.getMethods(), methodName);
+			candidateMethods = filterMethod(clazz.getMethods(), getStaticMemberName());
 		}
 		return candidateMethods;
 	}
@@ -84,10 +96,10 @@ public final class JavaMethod implements Serializable {
 	}
 
 	private Object callCustomMethod(Object[] args) {
-		switch (methodFullName.substring(1)) {
-		case "":
+		switch (methodFullName) {
+		case ".":
 			return callInstanceMethod(args);
-		case "new":
+		case ".new":
 			return reflectCreateObject(args);
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodFullName);
@@ -123,7 +135,7 @@ public final class JavaMethod implements Serializable {
 
 	private static Object reflectCreateObject(Object[] args) {
 		try {
-			Class<?> clazz = Class.forName(args[0].toString());
+			Class<?> clazz = loadClassBySymbol((Symbol) args[0]);
 			Object[] newArgs = subArray(args, 1);
 			Constructor<?>[] constructors = clazz.getConstructors();
 			if (constructors.length == 1) {
@@ -181,12 +193,14 @@ public final class JavaMethod implements Serializable {
 		}).toArray(EMPTY_CLASSES);
 	}
 
+	// int match to Integer ignore Float
 	private static boolean strictMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
+			if (methodParameterTypes[i].isPrimitive() &&
+					STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
 				continue;
-			} else if (STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
+			} else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
 				continue;
 			} else {
 				return false;
@@ -198,9 +212,10 @@ public final class JavaMethod implements Serializable {
 	private static boolean fuzzyMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
+			if (methodParameterTypes[i].isPrimitive() &&
+					PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
 				continue;
-			} else if (PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
+			} else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
 				continue;
 			} else {
 				return false;

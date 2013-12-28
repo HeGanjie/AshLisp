@@ -106,7 +106,8 @@ public final class Compiler {
 	}
 	
 	private static boolean isJavaClassPathSymbol(final String op) {
-		return op.charAt(0) != '.' && op.indexOf('.') != -1;
+		return Character.isUpperCase(op.charAt(0)) ||
+				op.charAt(0) != '.' && op.indexOf('.') != -1;
 	}
 
 	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {

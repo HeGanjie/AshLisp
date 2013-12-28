@@ -53,9 +53,9 @@ public class AshLispUsage {
 		
 		// java native invoke
 		trace(eval("(. x 'toString)")); // "10"
-		trace(eval("(java.lang.Math/abs -10)")); // 10
-		trace(eval("(.new java.lang.Double \"-100\")")); // -100.0
-		trace(eval("(instance? java.lang.Number 1)")); // t
+		trace(eval("(Math/abs -10)")); // 10
+		trace(eval("(.new Double \"-100\")")); // -100.0
+		trace(eval("(instance? Number 1)")); // t
 ```
 
 ### Lisp operations

@@ -1,4 +1,4 @@
-(defn num? (x) (instance? java.lang.Number x))
+(defn num? (x) (instance? Number x))
 
 (defn str (. x) (bruce.common.utils.CommonUtils/displayArray (. x 'toArray) ""))
 
@@ -9,5 +9,5 @@
 (defn instance? (clazz val)
   (ash.vm.JavaMethod/instanceOf
 	(. val 'getClass)
-	(java.lang.Class/forName (. clazz 'toString))))
+	(ash.vm.JavaMethod/loadClassBySymbol clazz)))
 	
