@@ -7,22 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import ash.compiler.Compiler;
 import ash.lang.BasicType;
-import ash.lang.CharNode;
 import ash.lang.ListUtils;
-import ash.lang.MacroExpander;
-import ash.lang.Node;
-import ash.lang.PersistentList;
 import ash.lang.PersistentMap;
 import ash.lang.PersistentSet;
 import ash.lang.Symbol;
-import ash.parser.Parser;
 import bruce.common.functional.Func1;
 import bruce.common.functional.LambdaUtils;
-import bruce.common.utils.CommonUtils;
 
 public final class JavaMethod implements Serializable {
 	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[]{};
@@ -62,7 +54,7 @@ public final class JavaMethod implements Serializable {
 	private List<Method> loadCandidateMethod() {
 		if (clazz != null && candidateMethods == null) {
 			final String methodName = getStaticMemberName();
-			candidateMethods = filterMethod(clazz.getMethods() ,methodName);
+			candidateMethods = filterMethod(clazz.getMethods(), methodName);
 		}
 		return candidateMethods;
 	}
@@ -82,55 +74,36 @@ public final class JavaMethod implements Serializable {
 
 	public Object call(Object[] args) {
 		List<Method> candidateMethods = loadCandidateMethod();
-		if (candidateMethods != null && 0 < candidateMethods.size()) {
-			try {
-				if (candidateMethods.size() == 1) {
-					return candidateMethods.get(0).invoke(null, args);
-				} else {
-					return matchMethod(candidateMethods, getParameterTypes(args)).invoke(null, args);
-				}
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return callCustomMethod(args);
+		Object rst = candidateMethods != null && 0 < candidateMethods.size()
+				? callReflectMethod(args, candidateMethods)
+				: callCustomMethod(args);
+		if (rst == null) return BasicType.NIL;
+		else if (rst instanceof Boolean)
+			return ListUtils.transformBoolean(((Boolean) rst).booleanValue());
+		return rst;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Object callCustomMethod(Object[] args) {
 		switch (methodFullName.substring(1)) {
 		case "":
 			return callInstanceMethod(args);
-		case "instance?":
-			return checkInstanceOf(args);
 		case "new":
 			return reflectCreateObject(args);
-		case "puts":
-			System.out.println(CommonUtils.displayArray(args, ""));
-			break;
-		case "str":
-			return CommonUtils.displayArray(args, "");
-		case "seq":
-			return args[0] instanceof String
-					? CharNode.create((String) args[0])
-							: ListUtils.toSeq(((Iterable<PersistentList>) args[0]).iterator());
-		case "parse":
-			return Parser.split((String) args[0]);
-		case "compile":
-			return Compiler.astsToInsts(new Node(args[0]));
-		case "vmexec":
-			return new VM().runInMain((Node) args[0]);
-		case "regex":
-			return Pattern.compile((String) args[0]);
-		case "new-macro":
-			MacroExpander.MARCOS_MAP.put((Symbol) args[0], (Node)args[1]);
-			break;
-		case "expand-macro":
-			return MacroExpander.expand((Node) args[0]);
 		default:
 			throw new UnsupportedOperationException("Unsupport Java Call:" + methodFullName);
 		}
-		return BasicType.NIL;
+	}
+
+	private static Object callReflectMethod(Object[] args, List<Method> candidateMethods) {
+		try {
+			if (candidateMethods.size() == 1) {
+				return candidateMethods.get(0).invoke(null, args);
+			} else {
+				return matchMethod(candidateMethods, getParameterTypes(args)).invoke(null, args);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private static Object callInstanceMethod(Object[] args) {
@@ -144,14 +117,8 @@ public final class JavaMethod implements Serializable {
 		}
 	}
 
-	private static Object checkInstanceOf(Object[] args) {
-		try {
-			Class<?> clazz = Class.forName(args[0].toString());
-			Class<?> valClass = args[1].getClass();
-			return ListUtils.transformBoolean(clazz == valClass || clazz.isAssignableFrom(valClass));
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+	public static boolean instanceOf(Class<?> valClass, Class<?> clazz) {
+		return clazz == valClass || clazz.isAssignableFrom(valClass);
 	}
 
 	private static Object reflectCreateObject(Object[] args) {
@@ -217,8 +184,9 @@ public final class JavaMethod implements Serializable {
 	private static boolean strictMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[i] == targetParameterTypes[i] ||
-					STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
+			if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
+				continue;
+			} else if (STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
 				continue;
 			} else {
 				return false;
@@ -230,8 +198,9 @@ public final class JavaMethod implements Serializable {
 	private static boolean fuzzyMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[i] == targetParameterTypes[i] ||
-					PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
+			if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
+				continue;
+			} else if (PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
 				continue;
 			} else {
 				return false;

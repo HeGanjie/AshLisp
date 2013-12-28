@@ -38,6 +38,10 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 		return arrayList;
 	}
 	
+	public Object[] toArray() {
+		return toList(Object.class).toArray();
+	}
+	
 	private String innerToString() {
 		StringBuilder sb = new StringBuilder();
 		Object left = head();

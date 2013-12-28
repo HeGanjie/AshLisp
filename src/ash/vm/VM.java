@@ -13,6 +13,7 @@ import bruce.common.functional.Func2;
 import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
 import ash.compiler.Compiler;
+import ash.lang.MacroExpander;
 import ash.lang.PersistentList;
 import ash.lang.Node;
 import ash.lang.Symbol;
@@ -27,6 +28,8 @@ public final class VM implements Serializable {
 	
 	static {
 		VM vm = new VM();
+		tempVar.put(Symbol.create("*out*"), System.out);
+		tempVar.put(Symbol.create("macrosMap"), MacroExpander.MARCOS_MAP);
 		vm.load("meta.scm");
 		vm.load("macro.scm");
 		vm.load("maths.scm");

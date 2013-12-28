@@ -1,5 +1,7 @@
+(def new-macro (lambda (symbol pAndt) (. macrosMap 'put symbol pAndt)))
+
 (def defmacro (lambda (pattern template)
-		(.new-macro (car pattern)
+		(new-macro (car pattern)
 			    (cons pattern (cons template '())))))
 
 (defmacro '(comment *) ''())

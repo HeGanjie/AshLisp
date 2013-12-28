@@ -51,8 +51,11 @@ public class AshLispUsage {
 		// define
 		trace(eval("(def x 10)")); // ()
 		
-		// java native invoke, with dot prefix (define by yourself in ash.vm.JavaMethod)
-		trace(eval("(.num? x)")); // t
+		// java native invoke
+		trace(eval("(. x 'toString)")); // "10"
+		trace(eval("(java.lang.Math/abs -10)")); // 10
+		trace(eval("(.new java.lang.Double \"-100\")")); // -100.0
+		trace(eval("(instance? java.lang.Number 1)")); // t
 ```
 
 ### Lisp operations
@@ -86,7 +89,7 @@ public class AshLispUsage {
 ```Java
 		// macro.scm show you how to define macros using "defmacro"
 		trace(eval("'(let (a 1) a)")); // (let (a 1) a)
-		trace(eval("(.expand-macro '(let (a 1) a))")); // ((lambda (a) a) 1)
+		trace(eval("(expand-macro '(let (a 1) a))")); // ((lambda (a) a) 1)
 		trace(eval("(let (a 1 b 2) (+ a b))")); // 3
 ```
 
@@ -110,7 +113,7 @@ public class AshLispUsage {
     	trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
     	
         // build string 
-    	trace(eval("(.str \"No.\" 1)")); // No.1
+    	trace(eval("(str \"No.\" 1)")); // No.1
 ```
 
 ### REPL

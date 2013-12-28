@@ -66,8 +66,8 @@ public final class VMTest extends TestCase {
 		
 		assertEquals(BasicType.NIL, exec("(list)"));
 		assertEquals("(1 2 3)", exec("(list 1 2 3)").toString());
-		assertEquals("1 2 (3)", exec("((lambda (a b . c) (.str a \\space b \\space c)) 1 2 3)").toString());
-		assertEquals("1 2 ()", exec("((lambda (a b . c) (.str a \\space b \\space c)) 1 2)").toString());
+		assertEquals("1 2 (3)", exec("((lambda (a b . c) (str a \\space b \\space c)) 1 2 3)").toString());
+		assertEquals("1 2 ()", exec("((lambda (a b . c) (str a \\space b \\space c)) 1 2)").toString());
 	}
 	
 	public void testMaths() throws Exception {
@@ -114,9 +114,9 @@ public final class VMTest extends TestCase {
 	}
 	
 	public void testString() throws Exception {
-		assertEquals(" a 1", exec("(.str \" a \" 1)"));
-		assertEquals(" ) 1", exec("(.str \" ) \" 1)"));
-		assertEquals(" ( 1", exec("(.str \" ( \" 1)"));
+		assertEquals(" a 1", exec("(str \" a \" 1)"));
+		assertEquals(" ) 1", exec("(str \" ) \" 1)"));
+		assertEquals(" ( 1", exec("(str \" ( \" 1)"));
 		assertEquals(" a b c ", exec("\" a b c \""));
 	}
 	
@@ -126,13 +126,13 @@ public final class VMTest extends TestCase {
 	
 	public void testMacro() throws Exception {
 		assertEquals("(let (a 1) a)", exec("'(let (a 1) a)").toString());
-		assertEquals("((lambda (a) a) 1)", exec("(.expand-macro '(let (a 1) a))").toString());
+		assertEquals("((lambda (a) a) 1)", exec("(expand-macro '(let (a 1) a))").toString());
 		assertEquals(100, exec("(let (a 100) a)"));
 		
 		// advanced
-		assertEquals("(add (add 1 2) 3)", exec("(.expand-macro '(+ 1 2 3))").toString());
+		assertEquals("(add (add 1 2) 3)", exec("(expand-macro '(+ 1 2 3))").toString());
 		assertEquals("((lambda (b) ((lambda (a) (+ a b)) 1)) 2)",
-				exec("(.expand-macro '(let (a 1 b 2) (+ a b)))").toString());
+				exec("(expand-macro '(let (a 1 b 2) (+ a b)))").toString());
 		assertEquals(3, exec("(let (a 1 b 2) (+ a b))"));
 	}
 	
@@ -156,9 +156,9 @@ public final class VMTest extends TestCase {
 		assertEquals(10, exec("(java.lang.Math/abs -10)"));
 		assertEquals(1.5, exec("(java.lang.Math/abs -1.5)"));
 		
-		assertEquals(BasicType.T, exec("(.instance? 'java.lang.Number 1)"));
-		assertEquals(BasicType.T, exec("(.instance? 'java.lang.Number 1.0)"));
-		assertEquals(BasicType.NIL, exec("(.instance? 'java.lang.Number \\1)"));
+		assertEquals(BasicType.T, exec("(instance? java.lang.Number 1)"));
+		assertEquals(BasicType.T, exec("(instance? java.lang.Number 1.0)"));
+		assertEquals(BasicType.NIL, exec("(instance? java.lang.Number \\1)"));
 		
 		assertEquals(12, exec("(. \"Hello World!\" 'length)"));
 		assertEquals(1, exec("(. \"Hello World!\" 'indexOf \\e)"));

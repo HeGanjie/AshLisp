@@ -87,7 +87,17 @@
 
 (defn apply (func args) (eval (cons func args)))
 
-(defn eval (ast) (.vmexec (.compile ast)))
+(defn eval (ast) (vmexec (compile ast)))
+
+(defn compile (ast) (ash.compiler.Compiler/astsToInsts (cons ast '())))
+
+(defn vmexec (insts) (. (.new ash.vm.VM) 'runInMain insts))
+
+(defn parse (code) (ash.parser.Parser/split code))
+
+(defn regex (s) (java.util.regex.Pattern/compile s))
+
+(defn expand-macro (ast) (ash.lang.MacroExpander/expand ast))
 
 (defn identity (x) x)
 
