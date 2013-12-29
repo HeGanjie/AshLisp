@@ -2,6 +2,7 @@ package ash.vm;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -99,6 +100,8 @@ public final class JavaMethod implements Serializable {
 		switch (methodFullName) {
 		case ".":
 			return callInstanceMethod(args);
+		case ".$":
+			return readStaticField(args);
 		case ".new":
 			return reflectCreateObject(args);
 		default:
@@ -124,6 +127,16 @@ public final class JavaMethod implements Serializable {
 			Method[] methods = args[0].getClass().getMethods();
 			return matchMethod(filterMethod(methods, args[1].toString()), getParameterTypes(subArray))
 					.invoke(args[0], subArray);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static Object readStaticField(Object[] args) {
+		try {
+			Class<?> clazz = loadClassBySymbol((Symbol) args[0]);
+			Field field = clazz.getField(args[1].toString());
+			return field.get(null);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -1,3 +1,6 @@
+(def *out* (.$ System 'out))
+(def macrosMap (.$ ash.lang.MacroExpander 'MARCOS_MAP))
+
 (def new-macro (lambda (symbol pAndt) (. macrosMap 'put symbol pAndt)))
 
 (def defmacro (lambda (pattern template)

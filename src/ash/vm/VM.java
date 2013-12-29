@@ -9,15 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ash.compiler.Compiler;
+import ash.lang.Node;
+import ash.lang.PersistentList;
+import ash.lang.Symbol;
+import ash.parser.Parser;
 import bruce.common.functional.Func2;
 import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
-import ash.compiler.Compiler;
-import ash.lang.MacroExpander;
-import ash.lang.PersistentList;
-import ash.lang.Node;
-import ash.lang.Symbol;
-import ash.parser.Parser;
 
 public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;
@@ -28,8 +27,6 @@ public final class VM implements Serializable {
 	
 	static {
 		VM vm = new VM();
-		tempVar.put(Symbol.create("*out*"), System.out);
-		tempVar.put(Symbol.create("macrosMap"), MacroExpander.MARCOS_MAP);
 		vm.load("meta.scm");
 		vm.load("macro.scm");
 		vm.load("maths.scm");
