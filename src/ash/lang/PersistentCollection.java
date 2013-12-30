@@ -1,9 +1,10 @@
 package ash.lang;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface PersistentCollection<E> {
+public interface PersistentCollection<E> extends Serializable {
 	public Collection<E> getCollection();
 
 	public PersistentCollection<E> conj(E e);

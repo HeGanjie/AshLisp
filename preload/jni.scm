@@ -1,6 +1,6 @@
 (defn num? (x) (instance? Number x))
 
-(defn str (. x) (bruce.common.utils.CommonUtils/displayArray (. x 'toArray) ""))
+(defn str (. x) (bruce.common.utils.CommonUtils/displayArray (. (. x 'toList) 'toArray) ""))
 
 (defn puts (. x) (. *out* 'println (apply str x)))
 

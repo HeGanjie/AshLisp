@@ -1,14 +1,16 @@
 package ash.lang;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import ash.parser.Parser;
+import bruce.common.utils.CommonUtils;
+
 //TODO : make more efficient
-public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
+public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
 	private static final long serialVersionUID = 7284417629409750270L;
 	private final Set<E> set;
 	
@@ -18,9 +20,13 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 	
 	@SafeVarargs
 	public PersistentSet(E... initSet) {
-		set = new HashSet<>(Arrays.asList(initSet));
+		this(Arrays.asList(initSet));
 	}
 
+	public PersistentSet(Collection<E> initColl) {
+		this(new HashSet<>(initColl));
+	}
+	
 	public PersistentSet(Set<E> initSet) {
 		set = initSet;
 	}
@@ -121,7 +127,8 @@ public class PersistentSet<E> implements Serializable, PersistentCollection<E> {
 
 	@Override
 	public String toString() {
-		return set.toString();
+		return CommonUtils.buildString(Parser.HASH_SET_START,
+				CommonUtils.displayArray(set.toArray(), " "),
+				Parser.HASH_SET_END);
 	}
-	
 }

@@ -111,3 +111,8 @@
 	(if (zero? n) seq
 	  (drop (dec n) (cdr seq)))))
 
+(defn lazy-iterator (iter)
+      (lazy-seq
+	(when (. iter 'hasNext)
+	  (cons (. iter 'next) (lazy-iterator iter)))))
+

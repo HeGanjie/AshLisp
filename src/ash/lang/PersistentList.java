@@ -38,11 +38,11 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 		return arrayList;
 	}
 	
-	public Object[] toArray() {
-		return toList(Object.class).toArray();
+	public List<Object> toList() {
+		return toList(Object.class);
 	}
-	
-	private String innerToString() {
+		
+	String innerToString() {
 		StringBuilder sb = new StringBuilder();
 		Object left = head();
 		PersistentList next = rest();
@@ -103,6 +103,11 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 	public static PersistentList cast(Object val) {
 		if (val instanceof String)
 			return CharNode.create((String) val);
-		return (PersistentList) val;
+		else if (val instanceof PersistentList) {
+			return (PersistentList) val;
+		} else if (val instanceof Iterable<?>) {
+			return LazyNode.create(((Iterable<?>) val).iterator());
+		}
+		throw new IllegalArgumentException(val.getClass() + " Should Be Iterable at least.");
 	}
 }

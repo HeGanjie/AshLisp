@@ -13,6 +13,9 @@ public final class Parser {
 	private static final char ESCAPE_CHAR = '\\';
 	private static final char STRING_WRAPPING_CHAR = '\"';
 	private static final char QUOTE_CHAR = '\'';
+	public static final char VECTOR_START = '[', VECTOR_END = ']';
+	public static final char HASH_SET_START = '<', HASH_SET_END = '>';
+	public static final char HASH_MAP_START = '{', HASH_MAP_END = '}';
 
 	private Parser() {}
 	

@@ -2,22 +2,31 @@ package ash.lang;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ash.parser.Parser;
+import bruce.common.utils.CommonUtils;
+
 // TODO : make more efficient
-public class PersistentMap<K, V> implements Serializable {
+public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> {
 	private static final long serialVersionUID = -434275790068739365L;
 	private final Map<K, V> map;
 	
 	public PersistentMap() {
-		map = new HashMap<>();
+		this(new HashMap<K, V>());
 	}
 	
 	public PersistentMap(Map<K, V> initMap) {
 		map = initMap;
 	}
 
+	public PersistentMap(List<?> initVal) {
+		this(initVal.toArray());
+	}
+	
 	@SuppressWarnings("unchecked")
 	public PersistentMap(Object... initVal) {
 		this();
@@ -97,7 +106,68 @@ public class PersistentMap<K, V> implements Serializable {
 
 	@Override
 	public String toString() {
-		return map.toString();
+		return CommonUtils.buildString(Parser.HASH_MAP_START,
+				PersistentList.cast(this).innerToString(),
+				Parser.HASH_MAP_END);
+	}
+
+	@Override
+	public Iterator<Entry<K, V>> iterator() {
+		return new Iterator<Entry<K, V>>() {
+			Iterator<Entry<K, V>> origin = map.entrySet().iterator();
+			
+			@Override
+			public boolean hasNext() { return origin.hasNext(); }
+
+			@Override
+			public PersistentEntry<K, V> next() {
+				return new PersistentEntry<>(origin.next());
+			}
+
+			@Override
+			public void remove() { throw new UnsupportedOperationException(); }
+		};
 	}
 	
+	static class PersistentEntry<K, V> implements Entry<K, V> {
+		private Entry<K, V> entry;
+		
+		public PersistentEntry(Entry<K, V> mapEntry) { entry = mapEntry; }
+
+		@Override
+		public K getKey() { return entry.getKey(); }
+
+		@Override
+		public V getValue() { return entry.getValue(); }
+
+		@Override
+		public V setValue(V value) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int hashCode() {
+			return 31 + ((entry == null) ? 0 : entry.hashCode());
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			PersistentEntry<?, ?> other = (PersistentEntry<?, ?>) obj;
+			if (entry == null) {
+				if (other.entry != null)
+					return false;
+			} else if (!entry.equals(other.entry))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return CommonUtils.buildString(BasicType.asString(getKey()),
+					' ', BasicType.asString(getValue()));
+		}
+	}
 }

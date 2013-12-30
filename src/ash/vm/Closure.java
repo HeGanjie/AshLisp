@@ -13,6 +13,4 @@ public final class Closure implements Serializable {
 		ins = instructions;
 		env = environment;
 	}
-	
-	
 }

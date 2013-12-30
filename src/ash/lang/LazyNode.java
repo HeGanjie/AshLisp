@@ -1,5 +1,7 @@
 package ash.lang;
 
+import java.util.Iterator;
+
 import ash.compiler.Compiler;
 import ash.vm.Closure;
 import ash.vm.VM;
@@ -17,7 +19,7 @@ public final class LazyNode extends PersistentList {
 
 	private PersistentList valid() {
 		if (seq == null) {
-			seq = callFunc(func);
+			seq = callFunc(new Node(func)); // (f)
 		}
 		return seq;
 	}
@@ -32,8 +34,8 @@ public final class LazyNode extends PersistentList {
 		return valid().rest();
 	}
 
-	private static PersistentList callFunc(Closure func) {
-		return (PersistentList) new VM().runInMain(Compiler.astsToInsts(new Node(new Node(func))));
+	private static PersistentList callFunc(Node ast) {
+		return (PersistentList) new VM().runInMain(Compiler.astsToInsts(new Node(ast)));
 	}
 
 	@Override
@@ -41,4 +43,8 @@ public final class LazyNode extends PersistentList {
 		return VMFrame.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
 	}
 
+	public static PersistentList create(Iterator<?> iter) {
+		// (lazy-iterator iter)
+		return callFunc(new Node(Symbol.create("lazy-iterator"), new Node(iter)));
+	}
 }

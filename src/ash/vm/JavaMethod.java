@@ -125,8 +125,9 @@ public final class JavaMethod implements Serializable {
 		try {
 			Object[] subArray = subArray(args, 2);
 			Method[] methods = args[0].getClass().getMethods();
-			return matchMethod(filterMethod(methods, args[1].toString()), getParameterTypes(subArray))
-					.invoke(args[0], subArray);
+			Method matchMethod = matchMethod(filterMethod(methods, args[1].toString()), getParameterTypes(subArray));
+			matchMethod.setAccessible(true);
+			return matchMethod.invoke(args[0], subArray);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

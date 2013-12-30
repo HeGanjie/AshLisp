@@ -1,6 +1,5 @@
 package ash.lang;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,18 +7,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import ash.parser.Parser;
+import bruce.common.utils.CommonUtils;
+
 //TODO : make more efficient
-public class PersistentVector<E> implements Serializable, PersistentCollection<E> {
+public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E> {
 	private static final long serialVersionUID = 7068696961107511500L;
 	private final List<E> ls;
 	
 	public PersistentVector() {
-		ls = new ArrayList<>();
+		this(new ArrayList<E>());
 	}
 	
 	@SafeVarargs
 	public PersistentVector(E... es) {
-		ls = Arrays.asList(es);
+		this(Arrays.asList(es));
 	}
 
 	public PersistentVector(List<E> initls) {
@@ -174,7 +176,8 @@ public class PersistentVector<E> implements Serializable, PersistentCollection<E
 
 	@Override
 	public String toString() {
-		return ls.toString();
+		return CommonUtils.buildString(Parser.VECTOR_START,
+				CommonUtils.displayArray(toArray(), " "),
+				Parser.VECTOR_END);
 	}
-	
 }

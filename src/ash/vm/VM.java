@@ -28,6 +28,7 @@ public final class VM implements Serializable {
 	static {
 		VM vm = new VM();
 		vm.load("meta.scm");
+		vm.load("AinA.scm");
 		vm.load("macro.scm");
 		vm.load("maths.scm");
 		vm.load("lazy.scm");
