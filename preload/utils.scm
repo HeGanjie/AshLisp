@@ -91,7 +91,7 @@
 
 (defn compile (ast) (ash.compiler.Compiler/astsToInsts (cons ast '())))
 
-(defn vmexec (insts) (. (.new ash.vm.VM) 'runInMain insts))
+(defn vmexec (insts) (.runInMain (.new ash.vm.VM) insts))
 
 (defn parse (code) (ash.parser.Parser/split code))
 
@@ -113,6 +113,6 @@
 
 (defn lazy-iterator (iter)
       (lazy-seq
-	(when (. iter 'hasNext)
-	  (cons (. iter 'next) (lazy-iterator iter)))))
+	(when (.hasNext iter)
+	  (cons (.next iter) (lazy-iterator iter)))))
 

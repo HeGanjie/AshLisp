@@ -2,7 +2,6 @@ package ash.vm;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,14 +97,15 @@ public final class JavaMethod implements Serializable {
 
 	private Object callCustomMethod(Object[] args) {
 		switch (methodFullName) {
-		case ".":
-			return callInstanceMethod(args);
-		case ".$":
-			return readStaticField(args);
 		case ".new":
 			return reflectCreateObject(args);
 		default:
-			throw new UnsupportedOperationException("Unsupport Java Call:" + methodFullName);
+			if (methodFullName.startsWith(".$")) {
+				return readField(methodFullName.substring(2), args);
+			} else if (methodFullName.charAt(0) == '.') {
+				return callInstanceMethod(methodFullName.substring(1), args);
+			}
+			throw new UnsupportedOperationException("Unsupport Custom Method Call:" + methodFullName);
 		}
 	}
 
@@ -121,23 +121,25 @@ public final class JavaMethod implements Serializable {
 		}
 	}
 
-	private static Object callInstanceMethod(Object[] args) {
+	private static Object callInstanceMethod(String methodName, Object[] args) {
 		try {
-			Object[] subArray = subArray(args, 2);
+			Object[] argsArray = subArray(args, 1);
 			Method[] methods = args[0].getClass().getMethods();
-			Method matchMethod = matchMethod(filterMethod(methods, args[1].toString()), getParameterTypes(subArray));
+			Method matchMethod = matchMethod(filterMethod(methods, methodName), getParameterTypes(argsArray));
 			matchMethod.setAccessible(true);
-			return matchMethod.invoke(args[0], subArray);
+			return matchMethod.invoke(args[0], argsArray);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private static Object readStaticField(Object[] args) {
+	private static Object readField(String fieldName, Object[] args) {
 		try {
-			Class<?> clazz = loadClassBySymbol((Symbol) args[0]);
-			Field field = clazz.getField(args[1].toString());
-			return field.get(null);
+			if (args[0] instanceof Symbol) {
+				return loadClassBySymbol((Symbol) args[0]).getField(fieldName).get(null);
+			} else {
+				return args[0].getClass().getField(fieldName).get(args[0]);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

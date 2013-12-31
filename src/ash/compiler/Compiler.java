@@ -27,11 +27,8 @@ public final class Compiler {
 	
 	public static Node astsToInsts(PersistentList parseResult) {
 		if (parseResult.isEndingNode()) return BasicType.NIL;
-		Object instNode = compile(parseResult.head(), BasicType.NIL, 0);
-		if (!(instNode instanceof Node)) {
-			instNode = new Node(instNode); // ensure no raw instructions in the returned list
-		}
-		return new Node(instNode, astsToInsts(parseResult.rest()));
+		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
+		return new Node(instlist, astsToInsts(parseResult.rest()));
 	}
 	
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
@@ -77,9 +74,9 @@ public final class Compiler {
 						callMethod.create(argsCount));
 			}
 		} else if (exp instanceof Symbol) {
-			return compileSymbol((Symbol) exp, lambdaArgs); // (... a add .puts ...)
+			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add .puts ...)
 		} else
-			return InstructionSetEnum.ldc.create(exp); // (... 1 2 3.4 \a "b" ...)
+			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" ...)
 	}
 
 	protected static Serializable compileSymbol(final Symbol symbol, Node lambdaArgs) {

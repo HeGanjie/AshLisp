@@ -52,7 +52,7 @@ public class AshLispUsage {
 		trace(eval("(def x 10)")); // ()
 		
 		// java native invoke
-		trace(eval("(. x 'toString)")); // "10"
+		trace(eval("(.toString x)")); // "10"
 		trace(eval("(Math/abs -10)")); // 10
 		trace(eval("(.new Double \"-100\")")); // -100.0
 		trace(eval("(instance? Number 1)")); // t
@@ -81,7 +81,7 @@ public class AshLispUsage {
 ### Loop
 ```Java
     	// tail recursion for loop
-		trace(eval("((lambda (ls) (cond (ls (do (.puts (car ls)) (tail (cdr ls)))))) (range 0 10))"));
+		trace(eval("((lambda (ls) (cond (ls (do (puts (car ls)) (tail (cdr ls)))))) (range 0 10))"));
         //println 0 1 2 ... 9 (last .puts return nil)
 ```
 

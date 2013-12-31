@@ -1,7 +1,7 @@
-(def *out* (.$ System 'out))
-(def macrosMap (.$ ash.lang.MacroExpander 'MARCOS_MAP))
+(def *out* (.$out System))
+(def macrosMap (.$MARCOS_MAP ash.lang.MacroExpander))
 
-(def new-macro (lambda (symbol pAndt) (. macrosMap 'put symbol pAndt)))
+(def new-macro (lambda (symbol pAndt) (.put macrosMap symbol pAndt)))
 
 (def defmacro (lambda (pattern template)
 		(new-macro (car pattern)

@@ -160,8 +160,8 @@ public final class VMTest extends TestCase {
 		assertEquals(BasicType.T, exec("(instance? Number 1.0)"));
 		assertEquals(BasicType.NIL, exec("(instance? Number \\1)"));
 		
-		assertEquals(12, exec("(. \"Hello World!\" 'length)"));
-		assertEquals(1, exec("(. \"Hello World!\" 'indexOf \\e)"));
+		assertEquals(12, exec("(.length \"Hello World!\")"));
+		assertEquals(1, exec("(.indexOf \"Hello World!\" \\e)"));
 	}
 	
 	protected static Object exec(String code) {
