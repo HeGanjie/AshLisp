@@ -41,12 +41,12 @@ public final class VMTest extends TestCase {
 	public void testCar() throws Exception {
 		assertEquals(Symbol.create("a"), exec("(car '(a b c))"));
 		assertEquals(Symbol.create("+"), exec("(car '(+ b c))"));
-		assertEquals(new Node("a"), exec("(car '((a) b c))"));
+		assertEquals(new Node(Symbol.create("a")), exec("(car '((a) b c))"));
 	}
 	
 	public void testCdr() throws Exception {
-		assertEquals(new Node("b", new Node("c")), exec("(cdr '(a b c))"));
-		assertEquals(new Node(new Node("b"), new Node("c")), exec("(cdr '(a (b) c))"));
+		assertEquals("(b c)", exec("(cdr '(a b c))").toString());
+		assertEquals("((b) c)", exec("(cdr '(a (b) c))").toString());
 		assertEquals(BasicType.NIL, exec("(cdr '(a))"));
 	}
 	

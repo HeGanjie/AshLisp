@@ -111,10 +111,7 @@ public final class Compiler {
 		assert(!MULTI_ARGS_SIGNAL.equals(op));
 		int dotIndex = ListUtils.indexOf(lambdaArgs, MULTI_ARGS_SIGNAL, 0);
 		int opPos = ListUtils.indexOf(lambdaArgs, op, 0);
-		if (dotIndex < 0)
-			return opPos;
-		else
-			return Math.min(dotIndex, opPos);
+		return dotIndex == -1 ? opPos : Math.min(dotIndex, opPos);
 	}
 
 	public static Serializable expand(Serializable instrNodes) {

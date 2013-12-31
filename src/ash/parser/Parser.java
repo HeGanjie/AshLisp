@@ -1,12 +1,12 @@
 package ash.parser;
 
-import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ash.lang.BasicType;
 import ash.lang.Node;
 import ash.lang.PersistentList;
+import ash.lang.Symbol;
 
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
@@ -19,8 +19,8 @@ public final class Parser {
 
 	private Parser() {}
 	
-	private static Serializable createAst(String readIn) {
-		return readIn.charAt(0) == '(' ? split(unwrap(readIn)) : readIn;
+	private static Object createAst(String readIn) {
+		return readIn.charAt(0) == '(' ? split(unwrap(readIn)) : BasicType.realType(readIn);
 	}
 
 	private static String unwrap(String exp) {
@@ -36,7 +36,7 @@ public final class Parser {
 		if (trim.charAt(0) == QUOTE_CHAR) {
 			String first = getFirst(trim.substring(1));
 			String rest = getRest(trim, first.length() + 1);
-			return new Node(new Node("quote", split(first)), split(rest));
+			return new Node(new Node(Symbol.create("quote"), split(first)), split(rest));
 		} else {
 			String first = getFirst(trim);
 			String rest = getRest(trim, first.length());

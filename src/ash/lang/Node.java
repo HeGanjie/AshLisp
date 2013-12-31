@@ -11,7 +11,7 @@ public final class Node extends PersistentList {
 	public Node(Node node) { this(node, BasicType.NIL); }
 
 	public Node(Object l, PersistentList n) {
-		left = l instanceof String ? BasicType.realType((String) l) : l;
+		left = l;
 		next = n;
 	}
 
