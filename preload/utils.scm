@@ -21,10 +21,6 @@
 	      '()
 	      seq))
 
-(defn map (func seq)
-      (when seq
-	(cons (func (car seq)) (map func (cdr seq)))))
-
 (defn filter (pred seq)
       (fold-right (lambda (item init)
 		    (if (pred item)
@@ -32,6 +28,36 @@
 		      init))
 		  '()
 		  seq))
+
+(defn map (func seq)
+      (when seq
+	(cons (func (car seq)) (map func (cdr seq)))))
+
+(defn zip (f . seqs)
+      (when-not (any nil? seqs)
+		(cons (apply f (map car seqs))
+		      (apply (partial zip f) (map cdr seqs)))))
+
+(defn nil? (x) (not x))
+
+(defn any (f seq)
+      (when seq
+	(if (f (car seq))
+	  't
+	  (any f (cdr seq)))))
+
+(defn every (f seq)
+      (if-not seq
+	      't
+	      (if (f (car seq))
+		(every f (cdr seq))
+		'())))
+
+(defn complement (f)
+      (lambda (. args) (not (apply f args))))
+
+(defn partial (f . args)
+      (lambda (. args0) (apply f (append args args0))))
 
 (defn list (. x) x)
 

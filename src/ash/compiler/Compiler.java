@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import bruce.common.functional.Func1;
+
 import ash.lang.BasicType;
 import ash.lang.PersistentList;
 import ash.lang.ListUtils;
@@ -25,7 +27,7 @@ public final class Compiler {
 	
 	private Compiler() {}
 	
-	public static Node astsToInsts(PersistentList parseResult) {
+	public static PersistentList astsToInsts(PersistentList parseResult) {
 		if (parseResult.isEndingNode()) return BasicType.NIL;
 		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
 		return new Node(instlist, astsToInsts(parseResult.rest()));
@@ -53,7 +55,7 @@ public final class Compiler {
 									expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 											InstructionSetEnum.cons_args.create(dotIndex),
 											compile(node.rest().rest().head(),
-													ListUtils.append((Node) node.rest().head(), lambdaArgs),
+													ListUtils.append(removeDot((PersistentList) node.rest().head()), lambdaArgs),
 													notCombineArgs ? 0 : 1),
 													InstructionSetEnum.ret.create()))));
 				default:
@@ -77,6 +79,13 @@ public final class Compiler {
 			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add .puts ...)
 		} else
 			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" ...)
+	}
+
+	private static PersistentList removeDot(PersistentList seq) {
+		return ListUtils.filter(seq, new Func1<Boolean, Object>() {
+			@Override
+			public Boolean call(Object symbol) { return !MULTI_ARGS_SIGNAL.equals(symbol); }
+		});
 	}
 
 	protected static Serializable compileSymbol(final Symbol symbol, Node lambdaArgs) {
@@ -108,10 +117,7 @@ public final class Compiler {
 	}
 
 	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {
-		assert(!MULTI_ARGS_SIGNAL.equals(op));
-		int dotIndex = ListUtils.indexOf(lambdaArgs, MULTI_ARGS_SIGNAL, 0);
-		int opPos = ListUtils.indexOf(lambdaArgs, op, 0);
-		return dotIndex == -1 ? opPos : Math.min(dotIndex, opPos);
+		return ListUtils.indexOf(lambdaArgs, op, 0);
 	}
 
 	public static Serializable expand(Serializable instrNodes) {

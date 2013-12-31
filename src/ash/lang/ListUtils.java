@@ -2,6 +2,8 @@ package ash.lang;
 
 import java.util.Iterator;
 
+import bruce.common.functional.Func1;
+
 
 public final class ListUtils {
 	public static PersistentList pair(PersistentList keys, PersistentList vals) {
@@ -15,6 +17,13 @@ public final class ListUtils {
 	public static int count(PersistentList seq) {
 		if (seq.isEndingNode()) return 0;
 		return 1 + count(seq.rest());
+	}
+	
+	public static PersistentList filter(PersistentList seq, Func1<Boolean, Object> predicate) {
+		if (seq.isEndingNode()) return BasicType.NIL;
+		return predicate.call(seq.head())
+				? new Node(seq.head(), filter(seq.rest(), predicate))
+				: filter(seq.rest(), predicate); 
 	}
 	
 	public static Node take(int count, PersistentList seq) {
