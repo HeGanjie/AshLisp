@@ -24,6 +24,7 @@ public final class VMFrame implements Serializable {
 	private final Deque<Object> workingStack = new ArrayDeque<>();
 	private final List<Instruction> executingInsts;
 	private int runIndex;
+	boolean frameChanged = false;
 	VMFrame prevFrame;
 	VMFrame nextFrame;
 
@@ -35,10 +36,13 @@ public final class VMFrame implements Serializable {
 	private void pushWorkingStack(Object ser) { workingStack.push(ser); }
 
 	public Object popWorkingStack() { return workingStack.pop(); }
+	
+	public Object popReturnValue() { return workingStack.isEmpty() ? BasicType.NIL : workingStack.pop(); }
 
 	public void prepareNextFrame(Closure closure, int paramsCount) {
 		nextFrame = new VMFrame(closure.ins, closure.env);
 		nextFrame.callArgs = createCallingArgs(paramsCount);
+		frameChanged = true;
 	}
 
 	private Object[] createCallingArgs(int paramsCount) {
@@ -53,7 +57,7 @@ public final class VMFrame implements Serializable {
 	}
 
 	public void execUntilStackChange() {
-		while (nextFrame == null && prevFrame != null) {
+		while (!frameChanged) {
 			Instruction i = executingInsts.get(runIndex++);
 			if (debugging) {
 				if (i.args != null)
@@ -140,14 +144,18 @@ public final class VMFrame implements Serializable {
 					if (ordinal < 14) {
 						if (ordinal == 12) { // ret
 							prevFrame.pushWorkingStack(popWorkingStack());
+							prevFrame.frameChanged = false;
 							prevFrame = null;
 						} else { // halt
 							if (workingStack.isEmpty())
 								pushWorkingStack(BasicType.NIL);
-							if (prevFrame != null)
+							if (prevFrame != null) {
 								prevFrame.pushWorkingStack(popWorkingStack());
-							prevFrame = null;
+								prevFrame.frameChanged = false;
+								prevFrame = null;
+							}
 						}
+						frameChanged = true;
 					} else {
 						if (ordinal == 14) { //atom
 							pushWorkingStack(ListUtils.atom(popWorkingStack()));

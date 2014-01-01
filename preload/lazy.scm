@@ -7,6 +7,4 @@
 	(cons x (repeat x))))
 
 (defn stream-make (. args)
-      (lazy-seq
-	(when args
-	  (cons (car args) (apply stream-make (cdr args))))))
+      (map identity args))

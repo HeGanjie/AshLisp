@@ -30,13 +30,15 @@
 		  seq))
 
 (defn map (func seq)
-      (when seq
-	(cons (func (car seq)) (map func (cdr seq)))))
+      (lazy-seq
+	(when seq
+	  (cons (func (car seq)) (map func (cdr seq))))))
 
 (defn zip (f . seqs)
       (let (step (lambda (cs self)
-		   (when (and cs (every identity cs))
-		     (cons (map car cs) (self (map cdr cs) self)))))
+		   (lazy-seq
+		     (when (and cs (every identity cs))
+		       (cons (map car cs) (self (map cdr cs) self))))))
 	(map (lambda (args) (apply f args)) (step seqs step))))
 
 (defn nil? (x) (not x))
@@ -86,9 +88,10 @@
 	    ('t (tail key (cdr pair-seq)))))
 
 (defn append (l r)
-      (if l
-	(cons (car l) (append (cdr l) r))
-	r))
+      (lazy-seq
+	(if l
+	  (cons (car l) (append (cdr l) r))
+	  r)))
 
 (defn count (seq) (reduce inc 0 seq))
 
@@ -129,17 +132,21 @@
 (defn identity (x) x)
 
 (defn take (n seq)
-      (when seq 
-	(when-not (zero? n)
-		  (cons (car seq) (take (dec n) (cdr seq))))))
+      (lazy-seq
+	(when seq 
+	  (when-not (zero? n)
+		    (cons (car seq) (take (dec n) (cdr seq)))))))
 
 (defn drop (n seq)
-      (when seq
-	(if (zero? n) seq
-	  (drop (dec n) (cdr seq)))))
+      (lazy-seq
+	(when seq
+	  (if (zero? n) seq
+	    (drop (dec n) (cdr seq))))))
 
 (defn lazy-iterator (iter)
       (lazy-seq
 	(when (.hasNext iter)
 	  (cons (.next iter) (lazy-iterator iter)))))
 
+(defn class (x)
+      (ash.lang.Symbol/create (.getName (.getClass x))))

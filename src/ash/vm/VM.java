@@ -2,10 +2,9 @@ package ash.vm;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +13,6 @@ import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import ash.parser.Parser;
-import bruce.common.functional.Func2;
-import bruce.common.functional.LambdaUtils;
 import bruce.common.utils.FileUtil;
 
 public final class VM implements Serializable {
@@ -42,18 +39,15 @@ public final class VM implements Serializable {
 	}
 
 	public Object runInMain(PersistentList compiledCodes) {
-		List<Instruction> allInstInMain = LambdaUtils.reduce(compiledCodes, new ArrayList<Instruction>(),
-				new Func2<List<Instruction>, List<Instruction>, PersistentList>() {
-			@Override
-			public List<Instruction> call(List<Instruction> insts, PersistentList instList) {
-				insts.addAll(((Node) instList.head()).toList(Instruction.class));
-				return insts;
-			}
-		});
-		allInstInMain.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
-		pushFrame(new VMFrame(Arrays.asList(InstructionSetEnum.halt.create()), null)); // base frame
-		pushFrame(new VMFrame(allInstInMain, null)); // main frame
-		return run();
+		Iterator<PersistentList> iterator = compiledCodes.iterator();
+		Object lastResult = null;
+		while (iterator.hasNext()) {
+			List<Instruction> insts = ((Node) iterator.next().head()).toList(Instruction.class);
+			insts.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
+			pushFrame(new VMFrame(insts, null)); // main frame
+			lastResult = run();
+		}
+		return lastResult;
 	}
 	
 	private Object run() {
@@ -66,7 +60,7 @@ public final class VM implements Serializable {
 				popFrame();
 		}
 		
-		Object mainRtn = headFrame.popWorkingStack();
+		Object mainRtn = headFrame.popReturnValue();
 		headFrame = null;
 		return mainRtn;
 	}
