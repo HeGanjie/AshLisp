@@ -50,12 +50,15 @@ public final class Compiler {
 				case "lambda":
 					int dotIndex = ListUtils.indexOf((Node) node.rest().head(), MULTI_ARGS_SIGNAL, 0);
 					boolean notCombineArgs = dotIndex == -1;
+					PersistentList argsList = notCombineArgs
+							? (PersistentList) node.rest().head()
+							: removeDot((PersistentList) node.rest().head());
 					return listInstruction(
 							InstructionSetEnum.closure.create(
 									expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 											InstructionSetEnum.cons_args.create(dotIndex),
 											compile(node.rest().rest().head(),
-													ListUtils.append(removeDot((PersistentList) node.rest().head()), lambdaArgs),
+													ListUtils.append(argsList, lambdaArgs),
 													notCombineArgs ? 0 : 1),
 													InstructionSetEnum.ret.create()))));
 				default:

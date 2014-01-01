@@ -34,9 +34,10 @@
 	(cons (func (car seq)) (map func (cdr seq)))))
 
 (defn zip (f . seqs)
-      (when-not (any nil? seqs)
-		(cons (apply f (map car seqs))
-		      (apply (partial zip f) (map cdr seqs)))))
+      (let (step (lambda (cs self)
+		   (when (and cs (every identity cs))
+		     (cons (map car cs) (self (map cdr cs) self)))))
+	(map (lambda (args) (apply f args)) (step seqs step))))
 
 (defn nil? (x) (not x))
 

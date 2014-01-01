@@ -17,13 +17,13 @@ public final class VMFrame implements Serializable {
 	public static final boolean debugging = false;
 	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
 	
-	public static final Map<Symbol, Object> tempVar = VM.tempVar;
+	private static final Map<Symbol, Object> tempVar = VM.tempVar;
 	private Scope myScope;
-	public Object[] callArgs;
+	private Object[] callArgs;
 	
-	public final Deque<Object> workingStack = new ArrayDeque<>();
-	public final List<Instruction> executingInsts;
-	public int runIndex;
+	private final Deque<Object> workingStack = new ArrayDeque<>();
+	private final List<Instruction> executingInsts;
+	private int runIndex;
 	VMFrame prevFrame;
 	VMFrame nextFrame;
 

@@ -162,6 +162,8 @@ public final class VMTest extends TestCase {
 		
 		assertEquals(12, exec("(.length \"Hello World!\")"));
 		assertEquals(1, exec("(.indexOf \"Hello World!\" \\e)"));
+		
+		assertEquals("(12 15 18)", exec("(zip + '(1 2 3) '(4 5 6) '(7 8 9))").toString());
 	}
 	
 	protected static Object exec(String code) {
