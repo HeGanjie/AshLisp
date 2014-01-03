@@ -34,12 +34,13 @@
 	(when seq
 	  (cons (func (car seq)) (map func (cdr seq))))))
 
+(defn zip-step (cs)
+      (lazy-seq
+	(when (and cs (every identity cs))
+	  (cons (map car cs) (zip-step (map cdr cs))))))
+
 (defn zip (f . seqs)
-      (let (step (lambda (cs self)
-		   (lazy-seq
-		     (when (and cs (every identity cs))
-		       (cons (map car cs) (self (map cdr cs) self))))))
-	(map (lambda (args) (apply f args)) (step seqs step))))
+	(map (lambda (args) (apply f args)) (zip-step seqs)))
 
 (defn nil? (x) (not x))
 
@@ -150,3 +151,8 @@
 
 (defn class (x)
       (ash.lang.Symbol/create (.getName (.getClass x))))
+
+(defn partition (n coll)
+      (lazy-seq
+	(when coll
+	  (cons (take n coll) (partition n (drop n coll))))))
