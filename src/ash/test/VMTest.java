@@ -48,6 +48,8 @@ public final class VMTest extends TestCase {
 		assertEquals("(b c)", exec("(cdr '(a b c))").toString());
 		assertEquals("((b) c)", exec("(cdr '(a (b) c))").toString());
 		assertEquals(BasicType.NIL, exec("(cdr '(a))"));
+		
+		assertEquals(2, exec("(cadr '(1 2 3))"));
 	}
 	
 	public void testCons() throws Exception {

@@ -156,3 +156,6 @@
       (lazy-seq
 	(when coll
 	  (cons (take n coll) (partition n (drop n coll))))))
+
+(defn cadr (s) (car (cdr s)))
+
