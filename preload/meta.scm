@@ -3,9 +3,9 @@
 
 (def new-macro (lambda (symbol pAndt) (.put macrosMap symbol pAndt)))
 
-(def defmacro* (lambda (pattern template)
-		(new-macro (car pattern)
-			    (cons pattern (cons template '())))))
+(def defmacro* (lambda (. patternAndTemplatePairs)
+		(new-macro (car (car patternAndTemplatePairs))
+			   patternAndTemplatePairs)))
 			    
 (defmacro* '(comment *) ''())
 

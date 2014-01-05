@@ -4,7 +4,7 @@
 
 (defn puts (. x) (.println *out* (apply str x)))
 
-(defn seq (x) (apply list x))
+(defn seq (x) (map identity x))
 
 (defn instance? (clazz val)
   (ash.vm.JavaMethod/instanceOf

@@ -6,16 +6,21 @@ import java.util.regex.Pattern;
 import ash.lang.BasicType;
 import ash.lang.Node;
 import ash.lang.PersistentList;
+import ash.lang.PersistentMap;
 import ash.lang.Symbol;
 
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
 	private static final char ESCAPE_CHAR = '\\';
 	private static final char STRING_WRAPPING_CHAR = '\"';
-	private static final char QUOTE_CHAR = '\'';
 	public static final char VECTOR_START = '[', VECTOR_END = ']';
 	public static final char HASH_SET_START = '<', HASH_SET_END = '>';
 	public static final char HASH_MAP_START = '{', HASH_MAP_END = '}';
+	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
+			'\'', Symbol.create("quote"),
+			'`', Symbol.create("syntax-quote")/*,
+			'%', Symbol.create("unquote"),
+			'*', Symbol.create("unquote-splicing")*/);
 
 	private Parser() {}
 	
@@ -33,10 +38,11 @@ public final class Parser {
 		String trim = str.trim();
 		if (trim.length() == 0) return BasicType.NIL;
 		
-		if (trim.charAt(0) == QUOTE_CHAR) {
+		if (QUOTE_CHAR_MAP.containsKey(trim.charAt(0))) {
 			String first = getFirst(trim.substring(1));
 			String rest = getRest(trim, first.length() + 1);
-			return new Node(new Node(Symbol.create("quote"), split(first)), split(rest));
+			Node head = new Node(QUOTE_CHAR_MAP.get(trim.charAt(0)), split(first));
+			return new Node(head, split(rest));
 		} else {
 			String first = getFirst(trim);
 			String rest = getRest(trim, first.length());

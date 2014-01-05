@@ -45,17 +45,12 @@
 (defn nil? (x) (not x))
 
 (defn any (f seq)
-      (when seq
-	(if (f (car seq))
-	  't
-	  (any f (cdr seq)))))
+      (fold-right (lambda (item init) (or (f item) init))
+		  '() seq))
 
 (defn every (f seq)
-      (if-not seq
-	      't
-	      (if (f (car seq))
-		(every f (cdr seq))
-		'())))
+      (fold-right (lambda (item init) (and (f item) init))
+		  't seq))
 
 (defn complement (f)
       (lambda (. args) (not (apply f args))))
@@ -93,6 +88,9 @@
 	(if l
 	  (cons (car l) (append (cdr l) r))
 	  r)))
+
+(defn concat (. cs)
+      (fold-right append '() cs))
 
 (defn count (seq) (reduce inc 0 seq))
 
