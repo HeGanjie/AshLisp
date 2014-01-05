@@ -135,8 +135,10 @@ public final class VMFrame implements Serializable {
 								prepareNextFrame((Closure) func, (Integer) args[0]);
 							} else if (func instanceof Instruction) { // instruction
 								exec(((Instruction) func).ins, args);
-							} else { // java method
+							} else if (func instanceof JavaMethod) { // java method
 								pushWorkingStack(((JavaMethod) func).call(createCallingArgs((Integer) args[0])));
+							} else {
+								throw new RuntimeException("Undifined method:" + func);
 							}
 						}
 					}

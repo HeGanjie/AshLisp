@@ -177,7 +177,7 @@ public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E>
 	@Override
 	public String toString() {
 		return CommonUtils.buildString(Parser.VECTOR_START,
-				CommonUtils.displayArray(toArray(), " "),
+				PersistentList.cast(this).innerToString(),
 				Parser.VECTOR_END);
 	}
 }

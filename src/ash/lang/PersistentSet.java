@@ -128,7 +128,7 @@ public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
 	@Override
 	public String toString() {
 		return CommonUtils.buildString(Parser.HASH_SET_START,
-				CommonUtils.displayArray(set.toArray(), " "),
+				PersistentList.cast(this).innerToString(),
 				Parser.HASH_SET_END);
 	}
 }
