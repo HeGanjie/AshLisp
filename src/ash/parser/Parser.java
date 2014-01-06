@@ -18,9 +18,9 @@ public final class Parser {
 	public static final char HASH_MAP_START = '{', HASH_MAP_END = '}';
 	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
 			'\'', Symbol.create("quote"),
-			'`', Symbol.create("syntax-quote")/*,
-			'%', Symbol.create("unquote"),
-			'*', Symbol.create("unquote-splicing")*/);
+			'`', Symbol.create("syntax-quote"),
+			',', Symbol.create("unquote"),
+			':', Symbol.create("unquote-splicing"));
 
 	private Parser() {}
 	

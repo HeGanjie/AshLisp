@@ -18,12 +18,14 @@ import ash.vm.InstructionSetEnum;
 import ash.vm.JavaMethod;
 
 public final class Compiler {
+	private static final Symbol UNQUOTE_SYMBOL = Symbol.create("unquote");
+	private static final Symbol UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing");
 	private static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda",
 			"atom", "car", "cdr", "not",
 			"neq", "eq", "cons", "add", "sub", "mul", "div", "mod",
-			"gt", "ge", "lt", "le", "and", "or"));
+			"gt", "ge", "lt", "le", "and", "or", "syntax-quote"));
 	
 	private Compiler() {}
 	
@@ -33,6 +35,34 @@ public final class Compiler {
 		return new Node(instlist, astsToInsts(parseResult.rest()));
 	}
 	
+	private static Object applySyntaxQuote(Node val) {
+		if (val == BasicType.NIL) return BasicType.NIL;
+		final Object valHead = ((Node) val).head();
+		Object listElem;
+		if (valHead instanceof Node) {
+			if (UNQUOTE_SYMBOL.equals(valHead)) { // %(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3)))
+				listElem = ((Node) valHead).rest().head();
+			} else if (UNQUOTE_SPLICING_SYMBOL.equals(valHead)) { // *(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3)))
+				return ((Node) valHead).rest().head();
+			} else {
+				listElem = new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) valHead));
+			}
+		} else if (valHead instanceof Symbol) {
+			String name = ((Symbol) valHead).name;
+			if (name.charAt(0) == '*') { // *a -> (concat a ...)
+				return Symbol.create(name.substring(1));
+			} else if (name.charAt(0) == '%') { // %a -> (concat (list a) ...)
+				listElem = Symbol.create(name.substring(1));
+			}
+			listElem = (Symbol) valHead; // add -> (concat (list add) ...)
+		} else {
+			listElem = valHead; // 1 2.3 \a "asdf"
+		}
+		Node listed = new Node(Symbol.create("list"), new Node(listElem));
+		PersistentList rest = (PersistentList) applySyntaxQuote((Node) val.rest());
+		return new Node(listed, rest);
+	}
+
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
@@ -45,6 +75,12 @@ public final class Compiler {
 							InstructionSetEnum.asn.create(node.rest().head()));
 				case "quote":
 					return listInstruction(InstructionSetEnum.quote.create(node.rest().head()));
+				case "syntax-quote":
+					Object quoted = node.rest().head();
+					if (!(quoted instanceof Node))
+						return compile(quoted, lambdaArgs, startIndex);
+					return compile(new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) quoted)),
+							lambdaArgs, startIndex);
 				case "cond":
 					return compileCond(node.rest(), lambdaArgs, startIndex);
 				case "lambda":
