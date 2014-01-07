@@ -35,32 +35,37 @@ public final class Compiler {
 		return new Node(instlist, astsToInsts(parseResult.rest()));
 	}
 	
-	private static Object applySyntaxQuote(Node val) {
-		if (val == BasicType.NIL) return BasicType.NIL;
-		final Object valHead = ((Node) val).head();
-		Object listElem;
-		if (valHead instanceof Node) {
-			if (UNQUOTE_SYMBOL.equals(valHead)) { // %(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3)))
-				listElem = ((Node) valHead).rest().head();
-			} else if (UNQUOTE_SPLICING_SYMBOL.equals(valHead)) { // *(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3)))
-				return ((Node) valHead).rest().head();
+	private static Object applySyntaxQuote(Node visiting) {
+		if (visiting == BasicType.NIL) return BasicType.NIL;
+		final Object head = ((Node) visiting).head();
+		Object preListElem;
+		PersistentList rest = (PersistentList) applySyntaxQuote((Node) visiting.rest());
+		if (head instanceof Node) {
+			Object headOfElem = ((Node) head).head();
+			if (UNQUOTE_SYMBOL.equals(headOfElem)) { // %(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3))) -> (list (cdr '(1 2 3)))
+				preListElem = ((Node) head).rest().head();
+			} else if (UNQUOTE_SPLICING_SYMBOL.equals(headOfElem)) { // *(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3))) -> (cdr '(1 2 3))
+				return new Node(((Node) head).rest().head(), rest);
 			} else {
-				listElem = new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) valHead));
+				preListElem = new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) head));
 			}
-		} else if (valHead instanceof Symbol) {
-			String name = ((Symbol) valHead).name;
+		} else if (head instanceof Symbol) {
+			String name = ((Symbol) head).name;
 			if (name.charAt(0) == '*') { // *a -> (concat a ...)
-				return Symbol.create(name.substring(1));
+				return new Node(Symbol.create(name.substring(1)), rest);
 			} else if (name.charAt(0) == '%') { // %a -> (concat (list a) ...)
-				listElem = Symbol.create(name.substring(1));
-			}
-			listElem = (Symbol) valHead; // add -> (concat (list add) ...)
+				preListElem = Symbol.create(name.substring(1));
+			} else
+				preListElem = new Node(Symbol.create("quote"), new Node((Symbol) head)); // val -> (concat (list 'val) ...)
 		} else {
-			listElem = valHead; // 1 2.3 \a "asdf"
+			preListElem = head; // 1 2.3 \a "asdf"
 		}
-		Node listed = new Node(Symbol.create("list"), new Node(listElem));
-		PersistentList rest = (PersistentList) applySyntaxQuote((Node) val.rest());
-		return new Node(listed, rest);
+		Node left = new Node(Symbol.create("list"), new Node(preListElem));
+		return new Node(left, rest);
+	}
+
+	private static Object visitSyntaxQuote(Object quoted) {
+		return quoted instanceof Node ? new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
 	}
 
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
@@ -76,11 +81,7 @@ public final class Compiler {
 				case "quote":
 					return listInstruction(InstructionSetEnum.quote.create(node.rest().head()));
 				case "syntax-quote":
-					Object quoted = node.rest().head();
-					if (!(quoted instanceof Node))
-						return compile(quoted, lambdaArgs, startIndex);
-					return compile(new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) quoted)),
-							lambdaArgs, startIndex);
+					return compile(visitSyntaxQuote(node.rest().head()), lambdaArgs, startIndex);
 				case "cond":
 					return compileCond(node.rest(), lambdaArgs, startIndex);
 				case "lambda":
@@ -104,7 +105,7 @@ public final class Compiler {
 				}
 			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op, node)) { // (let ...)
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
-			} else { // (func ...) | (.str ...) | ((lambda ...) ...) | (closure@1a2b3c ...) <- only adapt for this situation (apply + '(...))
+			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure@1a2b3c ...)
 				int argsCount = ListUtils.count(node.rest());
 				InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
 						? InstructionSetEnum.java_call
