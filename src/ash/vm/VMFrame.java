@@ -8,6 +8,7 @@ import java.util.Map;
 
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
+import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import bruce.common.utils.CommonUtils;
@@ -52,8 +53,8 @@ public final class VMFrame implements Serializable {
 		return args;
 	}
 
-	private Closure makeSubClosure(List<Instruction> rtn) {
-		return new Closure(rtn, new Scope(myScope, callArgs));
+	private Closure makeSubClosure(List<Instruction> rtn, Node argsList) {
+		return new Closure(rtn, new Scope(myScope, callArgs), argsList);
 	}
 
 	public void execUntilStackChange() {
@@ -109,7 +110,7 @@ public final class VMFrame implements Serializable {
 						}
 					} else {
 						if (ordinal == 6) { // closure
-							pushWorkingStack(makeSubClosure((List<Instruction>) args[0]));
+							pushWorkingStack(makeSubClosure((List<Instruction>) args[0], (Node) args[1]));
 						} else { // jmp
 							runIndex = (Integer) args[0];
 						}
@@ -138,7 +139,7 @@ public final class VMFrame implements Serializable {
 							} else if (func instanceof JavaMethod) { // java method
 								pushWorkingStack(((JavaMethod) func).call(createCallingArgs((Integer) args[0])));
 							} else {
-								throw new RuntimeException("Undifined method:" + func);
+								throw new RuntimeException("Undefined method:" + func);
 							}
 						}
 					}

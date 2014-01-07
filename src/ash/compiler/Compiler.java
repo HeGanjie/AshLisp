@@ -17,7 +17,7 @@ import ash.vm.JavaMethod;
 import bruce.common.functional.Func1;
 
 public final class Compiler {
-	private static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
+	public static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda",
 			"atom", "car", "cdr", "not",
@@ -35,7 +35,7 @@ public final class Compiler {
 		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
 		return new Node(instlist, batchCompile(parseResult.rest()));
 	}
-	
+
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
@@ -65,14 +65,15 @@ public final class Compiler {
 											compile(node.rest().rest().head(),
 													ListUtils.append(argsList, lambdaArgs),
 													notCombineArgs ? 0 : 1),
-													InstructionSetEnum.ret.create()))));
+													InstructionSetEnum.ret.create())),
+									node.rest().head()));
 				default:
 					return listInstruction(
 							compileArgs(node.rest(), lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf(op.toString()).create());
 				}
-			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op)) { // (let ...)
-				return compile(MacroExpander.expandMacro((Symbol) op, node), lambdaArgs, startIndex);
+			} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
+				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure@1a2b3c ...)
 				int argsCount = ListUtils.count(node.rest());
 				InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)

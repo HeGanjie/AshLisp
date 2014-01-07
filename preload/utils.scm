@@ -104,7 +104,7 @@
 
 (defn eval (ast) (vmexec (compile ast)))
 
-(defn compile (ast) (ash.compiler.Compiler/astsToInsts (cons ast '())))
+(defn compile (ast) (ash.compiler.Compiler/compileSingle (cons ast '())))
 
 (defn vmexec (insts) (.runInMain (.new ash.vm.VM) insts))
 

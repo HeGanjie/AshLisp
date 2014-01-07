@@ -13,13 +13,31 @@ public class MacroExpander {
 								QUOTE_SYMBOL = Symbol.create("quote"),
 								CONCAT_SYMBOL = Symbol.create("concat"),
 								UNQUOTE_SYMBOL = Symbol.create("unquote"),
-								UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing");
+								UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing"),
+								MORE_ELEM = Compiler.MULTI_ARGS_SIGNAL;
 	public static final Map<Symbol, Closure> MARCOS_MAP = new HashMap<>();
 
 	private MacroExpander() {}
 	
-	public static boolean hasMacro(Symbol macroName) {
-		return MARCOS_MAP.containsKey(macroName);
+	public static boolean hasMacro(Node ast) {
+		Closure closure = MARCOS_MAP.get(ast.head());
+		if (closure == null) return false;
+		return match(closure.argsList, ast.rest());
+	}
+	
+	private static boolean match(PersistentList pattern, PersistentList ast) {
+		if (pattern == BasicType.NIL) return ast == BasicType.NIL; // pattern ending
+		
+		if (pattern.head() instanceof Node) { // inner Node
+			return ast.head() instanceof Node
+					&& match((Node) pattern.head(), (Node) ast.head())
+					&& match(pattern.rest(), ast.rest());
+		} else if (pattern.head() instanceof Symbol) {
+			return MORE_ELEM.equals(pattern.head()) // . more
+					|| ast != BasicType.NIL && match(pattern.rest(), ast.rest()); // x
+		} else {
+			throw new IllegalArgumentException("Pattern Illegal!");
+		}
 	}
 	
 	private static Object applySyntaxQuote(Node visiting) {
@@ -54,10 +72,10 @@ public class MacroExpander {
 		return quoted instanceof Node ? new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
 	}
 
-	public static Object expandMacro(Symbol macroName, Node node) {
-		Closure lambda = MacroExpander.MARCOS_MAP.get(macroName);
+	public static Object expand(Node ast) {
+		Closure lambda = MacroExpander.MARCOS_MAP.get(ast.head());
 		// (fn args)
-		Node exp = new Node(lambda, ListUtils.quoteAll(node.rest()));
+		Node exp = new Node(lambda, ListUtils.quoteAll(ast.rest()));
 		return new VM().runInMain(Compiler.compileSingle(exp));
 	}
 }
