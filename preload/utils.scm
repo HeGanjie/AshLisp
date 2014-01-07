@@ -5,12 +5,6 @@
 	      (cdr seq))
 	init))
 
-(defn fold-right (func init seq)
-      (if seq
-	(func (car seq)
-	      (fold-right func init (cdr seq)))
-	init))
-
 (defn mapr (func seq)
       (fold-right (lambda (item init) (cons (func item) init))
 		  '()
@@ -40,7 +34,7 @@
 	  (cons (map car cs) (zip-step (map cdr cs))))))
 
 (defn zip (f . seqs)
-	(map (lambda (args) (apply f args)) (zip-step seqs)))
+      (map (lambda (args) (apply f args)) (zip-step seqs)))
 
 (defn nil? (x) (not x))
 
@@ -57,8 +51,6 @@
 
 (defn partial (f . args)
       (lambda (. args0) (apply f (append args args0))))
-
-(defn list (. x) x)
 
 (defn nth (n seq)
       (cond
@@ -83,15 +75,6 @@
 	     (ntree '(0 1) pair-seq))
 	    ('t (tail key (cdr pair-seq)))))
 
-(defn append (l r)
-      (lazy-seq
-	(if l
-	  (cons (car l) (append (cdr l) r))
-	  r)))
-
-(defn concat (. cs)
-      (fold-right append '() cs))
-
 (defn count (seq) (reduce inc 0 seq))
 
 (defn indexof (item seq skip)
@@ -114,7 +97,10 @@
 	(when (< low high)
 	  (cons low (range (inc low) high)))))
 
-(defn apply (func args) (eval (cons func args)))
+(defn quote-all (seq)
+     (map (lambda (x) (list 'quote x)) seq))
+
+(defn apply (func args) (eval (cons func (quote-all args))))
 
 (defn eval (ast) (vmexec (compile ast)))
 

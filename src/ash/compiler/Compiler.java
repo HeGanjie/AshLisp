@@ -5,21 +5,18 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import bruce.common.functional.Func1;
-
 import ash.lang.BasicType;
-import ash.lang.PersistentList;
 import ash.lang.ListUtils;
 import ash.lang.MacroExpander;
 import ash.lang.Node;
+import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import ash.vm.Instruction;
 import ash.vm.InstructionSetEnum;
 import ash.vm.JavaMethod;
+import bruce.common.functional.Func1;
 
 public final class Compiler {
-	private static final Symbol UNQUOTE_SYMBOL = Symbol.create("unquote");
-	private static final Symbol UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing");
 	private static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda",
@@ -29,45 +26,16 @@ public final class Compiler {
 	
 	private Compiler() {}
 	
-	public static PersistentList astsToInsts(PersistentList parseResult) {
-		if (parseResult.isEndingNode()) return BasicType.NIL;
-		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
-		return new Node(instlist, astsToInsts(parseResult.rest()));
+	public static PersistentList compileSingle(Object expAst) {
+		return (PersistentList) compile(expAst, BasicType.NIL, 0);
 	}
 	
-	private static Object applySyntaxQuote(Node visiting) {
-		if (visiting == BasicType.NIL) return BasicType.NIL;
-		final Object head = ((Node) visiting).head();
-		Object preListElem;
-		PersistentList rest = (PersistentList) applySyntaxQuote((Node) visiting.rest());
-		if (head instanceof Node) {
-			Object headOfElem = ((Node) head).head();
-			if (UNQUOTE_SYMBOL.equals(headOfElem)) { // %(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3))) -> (list (cdr '(1 2 3)))
-				preListElem = ((Node) head).rest().head();
-			} else if (UNQUOTE_SPLICING_SYMBOL.equals(headOfElem)) { // *(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3))) -> (cdr '(1 2 3))
-				return new Node(((Node) head).rest().head(), rest);
-			} else {
-				preListElem = new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) head));
-			}
-		} else if (head instanceof Symbol) {
-			String name = ((Symbol) head).name;
-			if (name.charAt(0) == '*') { // *a -> (concat a ...)
-				return new Node(Symbol.create(name.substring(1)), rest);
-			} else if (name.charAt(0) == '%') { // %a -> (concat (list a) ...)
-				preListElem = Symbol.create(name.substring(1));
-			} else
-				preListElem = new Node(Symbol.create("quote"), new Node((Symbol) head)); // val -> (concat (list 'val) ...)
-		} else {
-			preListElem = head; // 1 2.3 \a "asdf"
-		}
-		Node left = new Node(Symbol.create("list"), new Node(preListElem));
-		return new Node(left, rest);
+	public static PersistentList batchCompile(PersistentList parseResult) {
+		if (parseResult.isEndingNode()) return BasicType.NIL;
+		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
+		return new Node(instlist, batchCompile(parseResult.rest()));
 	}
-
-	private static Object visitSyntaxQuote(Object quoted) {
-		return quoted instanceof Node ? new Node(Symbol.create("concat"), (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
-	}
-
+	
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
 			Node node = (Node) exp; // (operation ...)
@@ -81,7 +49,7 @@ public final class Compiler {
 				case "quote":
 					return listInstruction(InstructionSetEnum.quote.create(node.rest().head()));
 				case "syntax-quote":
-					return compile(visitSyntaxQuote(node.rest().head()), lambdaArgs, startIndex);
+					return compile(MacroExpander.visitSyntaxQuote(node.rest().head()), lambdaArgs, startIndex);
 				case "cond":
 					return compileCond(node.rest(), lambdaArgs, startIndex);
 				case "lambda":
@@ -103,8 +71,8 @@ public final class Compiler {
 							compileArgs(node.rest(), lambdaArgs, startIndex),
 							InstructionSetEnum.valueOf(op.toString()).create());
 				}
-			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op, node)) { // (let ...)
-				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
+			} else if (op instanceof Symbol && MacroExpander.hasMacro((Symbol) op)) { // (let ...)
+				return compile(MacroExpander.expandMacro((Symbol) op, node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure@1a2b3c ...)
 				int argsCount = ListUtils.count(node.rest());
 				InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
@@ -148,7 +116,7 @@ public final class Compiler {
 	}
 
 	private static boolean isJavaCallSymbol(final String op) {
-		return op.charAt(0) == '.' || op.indexOf('/') != -1;
+		return op.charAt(0) == '.' || 0 < op.indexOf('/');
 	}
 	
 	private static boolean isJavaClassPathSymbol(final String op) {

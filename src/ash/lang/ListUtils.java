@@ -92,4 +92,10 @@ public final class ListUtils {
 	public static final boolean transformBoolean(Object val) {
 		return !(val instanceof PersistentList && ((PersistentList) val).isEndingNode());
 	}
+	
+	public static PersistentList quoteAll(PersistentList seq) {
+		if (seq.isEndingNode()) return BasicType.NIL;
+		Node quoted = new Node(Symbol.create("quote"), new Node(seq.head()));
+		return new Node(quoted, quoteAll(seq.rest()));
+	}
 }

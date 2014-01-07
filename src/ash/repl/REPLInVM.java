@@ -22,7 +22,7 @@ public final class REPLInVM {
 				readIn = br.readLine();
 				if (readIn == null) break;
 				long start = System.currentTimeMillis();
-				Object val = vm.runInMain(Compiler.astsToInsts(Parser.split(readIn)));
+				Object val = vm.batchRunInMain(Compiler.batchCompile(Parser.split(readIn)));
 				System.out.println(BasicType.asString(val));
 				reportElapse(System.currentTimeMillis() - start);
 			} catch (Exception e) {

@@ -153,7 +153,7 @@ public final class VMTest extends TestCase {
 		assertEquals("(\\s \\d \\f)", exec("(cdr \"asdf\")").toString());
 	}
 	
-	public void testJavaMethod() throws Exception {
+	public void testBuildinMethod() throws Exception {
 		assertEquals(BasicType.T, exec("(num? -10)"));
 		assertEquals(10, exec("(Math/abs -10)"));
 		assertEquals(1.5, exec("(Math/abs -1.5)"));
@@ -171,6 +171,6 @@ public final class VMTest extends TestCase {
 	}
 	
 	protected static Object exec(String code) {
-		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
+		return vm.batchRunInMain(Compiler.batchCompile(Parser.split(code)));
 	}
 }

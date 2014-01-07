@@ -3,119 +3,61 @@ package ash.lang;
 import java.util.HashMap;
 import java.util.Map;
 
+import ash.compiler.Compiler;
+import ash.vm.Closure;
+import ash.vm.VM;
+
 
 public class MacroExpander {
-	private static final Symbol MORE_ELEM = Symbol.create("*");
-	private static final String PLACE_HERE_ELEM = "%";
-	private static final String STACK_POINT_ELEM = "@";
-	public static final Map<Symbol, Node> MARCOS_MAP = new HashMap<>();
+	private static final Symbol LIST_SYMBOL = Symbol.create("list"),
+								QUOTE_SYMBOL = Symbol.create("quote"),
+								CONCAT_SYMBOL = Symbol.create("concat"),
+								UNQUOTE_SYMBOL = Symbol.create("unquote"),
+								UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing");
+	public static final Map<Symbol, Closure> MARCOS_MAP = new HashMap<>();
 
 	private MacroExpander() {}
 	
-	public static boolean hasMacro(Symbol symbol, Node ast) {
-		Node pAndt = MARCOS_MAP.get(symbol);
-		if (pAndt != null) {
-			Node pattern = (Node) pAndt.head();
-			return match(pattern, ast);
-		}
-		return false;
-	}
-
-	public static Node expand(Node ast) {
-		Symbol macroName = (Symbol) ast.head();
-		Node pAndt = MARCOS_MAP.get(macroName);
-		Node pattern = (Node) pAndt.head();
-		Node template = (Node) pAndt.rest().head();
-		
-		PersistentMap<Symbol, Object> mapping = findMapping(pattern.rest(), ast.rest());
-		Node moreElem = (Node) mapping.get(MORE_ELEM);
-		if (moreElem == null)
-			return createAstByTemplate(mapping, template, null, null);
-		return createAstRecur(mapping.dissoc(MORE_ELEM), template, moreElem, null, countReplacementRequire(template));
+	public static boolean hasMacro(Symbol macroName) {
+		return MARCOS_MAP.containsKey(macroName);
 	}
 	
-	private static boolean match(PersistentList pattern, PersistentList ast) {
-		if (pattern == BasicType.NIL) return ast == BasicType.NIL; // pattern ending
-		
-		if (pattern.head() instanceof Node) { // inner Node
-			return ast.head() instanceof Node
-					&& match((Node) pattern.head(), (Node) ast.head())
-					&& match(pattern.rest(), ast.rest());
-		} else if (pattern.head() instanceof Symbol) { // * x
-			return MORE_ELEM.equals(pattern.head())
-					|| ast != BasicType.NIL && match(pattern.rest(), ast.rest());
-		} else {
-			throw new IllegalArgumentException("Pattern Illegal!");
-		}
-	}
-
-	private static Node createAstByTemplate(PersistentMap<Symbol, Object> mapping, PersistentList template, PersistentList moreElem, Node stack) {
-		if (template == BasicType.NIL) return BasicType.NIL;
-		
-		Object leftReplacement = null;
-		if (template.head() instanceof Node)
-			leftReplacement = createAstByTemplate(mapping, (Node) template.head(), moreElem, stack);
-		else {
-			if (template.head() instanceof Symbol) {
-				Symbol symbol = (Symbol) template.head();
-				if (symbol.name.startsWith(PLACE_HERE_ELEM)) // %
-					leftReplacement = getRequiringReplacement(symbol, moreElem);
-				else if (symbol.name.startsWith(STACK_POINT_ELEM)) // @x
-					leftReplacement = stack == null ? mapping.get(Symbol.create(symbol.name.substring(1))) : stack;
-				else
-					leftReplacement = mapping.get(symbol);
+	private static Object applySyntaxQuote(Node visiting) {
+		if (visiting == BasicType.NIL) return BasicType.NIL;
+		final Object head = ((Node) visiting).head();
+		Object preListElem;
+		PersistentList rest = (PersistentList) applySyntaxQuote((Node) visiting.rest());
+		if (head instanceof Node) {
+			Object headOfElem = ((Node) head).head();
+			if (UNQUOTE_SYMBOL.equals(headOfElem)) { // ~(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3))) -> (list (cdr '(1 2 3)))
+				preListElem = ((Node) head).rest().head();
+			} else if (UNQUOTE_SPLICING_SYMBOL.equals(headOfElem)) { // @(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3))) -> (cdr '(1 2 3))
+				return new Node(((Node) head).rest().head(), rest);
+			} else {
+				preListElem = new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) head));
 			}
-			if (leftReplacement == null)
-				leftReplacement = template.head();
-		}
-		return new Node(leftReplacement, createAstByTemplate(mapping, template.rest(), moreElem, stack));
-	}
-	
-	private static Object getRequiringReplacement(Symbol symbol, PersistentList moreElem) {
-		if (PLACE_HERE_ELEM.equals(symbol.name)) {
-			return moreElem.head();
+		} else if (head instanceof Symbol) {
+			String name = ((Symbol) head).name;
+			if (name.charAt(0) == '@') { // @a -> (concat a ...)
+				return new Node(Symbol.create(name.substring(1)), rest);
+			} else if (name.charAt(0) == '~') { // ~a -> (concat (list a) ...)
+				preListElem = Symbol.create(name.substring(1));
+			} else
+				preListElem = new Node(QUOTE_SYMBOL, new Node(head)); // val -> (concat (list 'val) ...)
 		} else {
-			int drop = Integer.parseInt(symbol.name.substring(1)) - 1;
-			Object replacement = ListUtils.drop(drop, moreElem).head();
-			if (replacement == null)
-				throw new IllegalArgumentException("Ast Illegal!");
-			return replacement;
+			preListElem = head; // 1 2.3 \a "asdf"
 		}
+		return new Node(new Node(LIST_SYMBOL, new Node(preListElem)), rest);
 	}
 
-	private static Node createAstRecur(PersistentMap<Symbol, Object> mapping,
-			Node template, PersistentList moreElem, Node stack, int replacementCount) {
-		if (moreElem == BasicType.NIL) return stack;
-		
-		Node res = createAstByTemplate(mapping, template, moreElem, stack);
-		if (replacementCount == 0) return res;
-		return createAstRecur(mapping, template, ListUtils.drop(replacementCount, moreElem), res, replacementCount);
+	public static Object visitSyntaxQuote(Object quoted) {
+		return quoted instanceof Node ? new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
 	}
 
-	private static PersistentMap<Symbol, Object> findMapping(PersistentList pattern, PersistentList ast) {
-		if (pattern == BasicType.NIL) return new PersistentMap<>();
-		
-		PersistentMap<Symbol, Object> leftMap;
-		if (pattern.head() instanceof Node)
-			leftMap = findMapping((Node) pattern.head(), (Node) ast.head());
-		else {
-			Symbol symbol = (Symbol) pattern.head();
-			leftMap = new PersistentMap<>(symbol, MORE_ELEM.equals(symbol) ? ast : ast.head());
-		}
-		
-		return leftMap.merge(findMapping(pattern.rest(), ast.rest()));
-	}
-
-	private static int countReplacementRequire(PersistentList template) {
-		if (template == BasicType.NIL) return 0;
-		int leftTreeCount = 0;
-		if (template.head() instanceof Node)
-			leftTreeCount = countReplacementRequire((Node) template.head());
-		else {
-			Object val = template.head();
-			if (val instanceof Symbol && val.toString().startsWith(PLACE_HERE_ELEM))
-				leftTreeCount = 1;
-		}
-		return leftTreeCount + countReplacementRequire(template.rest());
+	public static Object expandMacro(Symbol macroName, Node node) {
+		Closure lambda = MacroExpander.MARCOS_MAP.get(macroName);
+		// (fn args)
+		Node exp = new Node(lambda, ListUtils.quoteAll(node.rest()));
+		return new VM().runInMain(Compiler.compileSingle(exp));
 	}
 }

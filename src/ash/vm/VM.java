@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import ash.compiler.Compiler;
-import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import ash.parser.Parser;
@@ -35,19 +34,23 @@ public final class VM implements Serializable {
 	}
 
 	protected void load(String resName) {
-		runInMain(Compiler.astsToInsts(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
+		batchRunInMain(Compiler.batchCompile(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
-	public Object runInMain(PersistentList compiledCodes) {
+	public Object batchRunInMain(PersistentList compiledCodes) {
 		Iterator<PersistentList> iterator = compiledCodes.iterator();
 		Object lastResult = null;
 		while (iterator.hasNext()) {
-			List<Instruction> insts = ((Node) iterator.next().head()).toList(Instruction.class);
-			insts.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
-			pushFrame(new VMFrame(insts, null)); // main frame
-			lastResult = run();
+			lastResult = runInMain((PersistentList) iterator.next().head());
 		}
 		return lastResult;
+	}
+
+	public Object runInMain(PersistentList instSeq) {
+		List<Instruction> insts = instSeq.toList(Instruction.class);
+		insts.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
+		pushFrame(new VMFrame(insts, null)); // main frame
+		return run();
 	}
 	
 	private Object run() {

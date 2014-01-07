@@ -35,7 +35,7 @@ public final class LazyNode extends PersistentList {
 	}
 
 	private static PersistentList callFunc(Node ast) {
-		return (PersistentList) new VM().runInMain(Compiler.astsToInsts(new Node(ast)));
+		return (PersistentList) new VM().runInMain(Compiler.compileSingle(ast));
 	}
 
 	@Override

@@ -6,3 +6,7 @@
 
 (defn hash-map (. ls)
       (.new ash.lang.PersistentMap (.toList ls)))
+
+(defmacro if (test true else)
+  `(cond (~test ~true)
+	 ('t ~else)))
