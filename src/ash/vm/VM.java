@@ -22,15 +22,7 @@ public final class VM implements Serializable {
 	public VMFrame headFrame;
 	
 	static {
-		VM vm = new VM();
-		vm.load("meta.scm");
-		vm.load("AinA.scm");
-		vm.load("macro.scm");
-		vm.load("maths.scm");
-		vm.load("lazy.scm");
-		vm.load("utils.scm");
-		vm.load("jni.scm");
-		vm.load("user.scm");
+		new VM().load("loader.scm");
 	}
 
 	protected void load(String resName) {

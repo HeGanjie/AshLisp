@@ -32,8 +32,7 @@ public final class Compiler {
 	
 	public static PersistentList batchCompile(PersistentList parseResult) {
 		if (parseResult.isEndingNode()) return BasicType.NIL;
-		Object instlist = compile(parseResult.head(), BasicType.NIL, 0);
-		return new Node(instlist, batchCompile(parseResult.rest()));
+		return new Node(compileSingle(parseResult.head()), batchCompile(parseResult.rest()));
 	}
 
 	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {

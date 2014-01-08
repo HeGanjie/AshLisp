@@ -1,8 +1,6 @@
-(def _out_ (.$out System))
+(def _macrosMap_ (.$MARCOS_MAP ash.lang.MacroExpander))
 
-(def macrosMap (.$MARCOS_MAP ash.lang.MacroExpander))
-
-(def new-macro (lambda (symbol fn) (.put macrosMap symbol fn)))
+(def new-macro (lambda (symbol fn) (.put _macrosMap_ symbol fn)))
 
 (new-macro 'defmacro (lambda (name args body)
 		       `(new-macro ~(list 'quote name) (lambda ~args ~body))))
@@ -14,8 +12,6 @@
 
 (new-macro 'defn (lambda (fname args body)
 		   `(def ~fname (lambda ~args ~body))))
-
-(def list (lambda (. x) x))
 
 (def fold-right (lambda (func init seq)
 		  (cond (seq (func (car seq)

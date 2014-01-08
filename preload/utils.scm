@@ -85,30 +85,10 @@
 (defn contains (item seq)
       (neq -1 (indexof item seq 0)))
 
-(defn last (seq)
-      (if (cdr seq)
-	(car seq)
-	(tail (cdr seq))))
-
-(defn do (. things) (last things))
-
 (defn range (low high)
       (lazy-seq
 	(when (< low high)
 	  (cons low (range (inc low) high)))))
-
-(defn quote-all (seq)
-     (map (lambda (x) (list 'quote x)) seq))
-
-(defn apply (func args) (eval (cons func (quote-all args))))
-
-(defn eval (ast) (vmexec (compile ast)))
-
-(defn compile (ast) (ash.compiler.Compiler/compileSingle ast))
-
-(defn vmexec (insts) (.runInMain (.new ash.vm.VM) insts))
-
-(defn parse (code) (ash.parser.Parser/split code))
 
 (defn regex (s) (java.util.regex.Pattern/compile s))
 
