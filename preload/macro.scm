@@ -1,3 +1,7 @@
+(defmacro if (test true else)
+  `(cond (~test ~true)
+	 ('t ~else)))
+
 (defmacro if-not (test true else)
   `(cond ((not ~test) ~true)
 	 ('t ~else)))

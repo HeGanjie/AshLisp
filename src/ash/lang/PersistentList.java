@@ -7,22 +7,22 @@ import java.util.List;
 
 import bruce.common.utils.CommonUtils;
 
-public abstract class PersistentList implements Serializable, Iterable<PersistentList> {
+public abstract class PersistentList implements Serializable, Iterable<Object> {
 	private static final long serialVersionUID = -4993574552940681092L;
 	public abstract Object head();
 	public abstract PersistentList rest();
 	
 	@Override
-	public Iterator<PersistentList> iterator() {
-		return new Iterator<PersistentList>() {
-			PersistentList head = PersistentList.this;
+	public Iterator<Object> iterator() {
+		return new Iterator<Object>() {
+			PersistentList curr = PersistentList.this;
 			@Override
-			public boolean hasNext() { return !head.isEndingNode(); }
+			public boolean hasNext() { return !curr.isEndingNode(); }
 			@Override
-			public PersistentList next() {
-				PersistentList curr = head;
-				head = head.rest();
-				return curr;
+			public Object next() {
+				Object val = curr.head();
+				curr = curr.rest();
+				return val;
 			}
 			@Override
 			public void remove() { throw new UnsupportedOperationException(); }
@@ -32,8 +32,8 @@ public abstract class PersistentList implements Serializable, Iterable<Persisten
 	@SuppressWarnings("unchecked")
 	public <T> List<T> toList(Class<T> c) {
 		List<T> arrayList = new ArrayList<>();
-		for (PersistentList n : this) {
-			arrayList.add((T) n.head());
+		for (Object n : this) {
+			arrayList.add((T) n);
 		}
 		return arrayList;
 	}

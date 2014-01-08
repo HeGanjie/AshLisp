@@ -30,10 +30,10 @@ public final class VM implements Serializable {
 	}
 
 	public Object batchRunInMain(PersistentList compiledCodes) {
-		Iterator<PersistentList> iterator = compiledCodes.iterator();
+		Iterator<Object> iterator = compiledCodes.iterator();
 		Object lastResult = null;
 		while (iterator.hasNext()) {
-			lastResult = runInMain((PersistentList) iterator.next().head());
+			lastResult = runInMain((PersistentList) iterator.next());
 		}
 		return lastResult;
 	}

@@ -121,5 +121,37 @@
 	(when coll
 	  (cons (take n coll) (partition n (drop n coll))))))
 
+(def last (lambda (seq)
+	    (cond ((cdr seq) (tail (cdr seq)))
+		  ('t (car seq)))))
+
+(def do (lambda (. things) (last things)))
+
 (defn cadr (s) (car (cdr s)))
+
+(defn iterate (f x)
+      (lazy-seq
+	(cons x (iterate f (f x)))))
+
+(defn repeat (x)
+      (lazy-seq
+	(cons x (repeat x))))
+
+(defn stream-make (. args)
+      (map identity args))
+
+(def str (lambda (. x)
+	   (bruce.common.utils.CommonUtils/displayArray (.toArray (.toList x)) "")))
+
+(def puts (lambda (. x)
+	    (.println _out_ (apply str x))))
+
+(defn num? (x) (instance? Number x))
+
+(defn seq (x) (map identity x))
+
+(defn instance? (clazz val)
+      (ash.vm.JavaMethod/instanceOf
+	(.getClass val)
+	(ash.vm.JavaMethod/loadClassBySymbol clazz)))
 
