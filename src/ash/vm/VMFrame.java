@@ -53,8 +53,8 @@ public final class VMFrame implements Serializable {
 		return args;
 	}
 
-	private Closure makeSubClosure(List<Instruction> rtn, Node argsList) {
-		return new Closure(rtn, new Scope(myScope, callArgs), argsList);
+	private Closure makeSubClosure(List<Instruction> rtn, Node fnDefine) {
+		return new Closure(rtn, new Scope(myScope, callArgs), fnDefine);
 	}
 
 	public void execUntilStackChange() {

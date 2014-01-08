@@ -17,7 +17,7 @@ public class AshLispUsage {
 	private static VM vm = new VM();
 	
 	protected static Serializable eval(String code) {
-		return vm.runInMain(Compiler.astsToInsts(Parser.split(code)));
+		return vm.batchRunInMain(Compiler.batchCompile(Parser.split(code)));
 	}
 	
 	private static void trace(Serializable arg) {
@@ -82,7 +82,7 @@ public class AshLispUsage {
 ```Java
     	// tail recursion for loop
 		trace(eval("((lambda (ls) (cond (ls (do (puts (car ls)) (tail (cdr ls)))))) (range 0 10))"));
-        //println 0 1 2 ... 9 (last .puts return nil)
+        //println 0 1 2 ... 9 (last "puts" return nil)
 ```
 
 ### Macro

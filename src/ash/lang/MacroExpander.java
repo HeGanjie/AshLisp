@@ -22,7 +22,7 @@ public class MacroExpander {
 	public static boolean hasMacro(Node ast) {
 		Closure closure = MARCOS_MAP.get(ast.head());
 		if (closure == null) return false;
-		return match(closure.argsList, ast.rest());
+		return match(closure.getArgsList(), ast.rest());
 	}
 	
 	private static boolean match(PersistentList pattern, PersistentList ast) {

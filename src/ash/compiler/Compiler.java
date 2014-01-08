@@ -66,7 +66,7 @@ public final class Compiler {
 													ListUtils.append(argsList, lambdaArgs),
 													notCombineArgs ? 0 : 1),
 													InstructionSetEnum.ret.create())),
-									node.rest().head()));
+									node));
 				default:
 					return listInstruction(
 							compileArgs(node.rest(), lambdaArgs, startIndex),
