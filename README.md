@@ -74,7 +74,7 @@ public class AshLispUsage {
 		
 		// closure
 		eval("(def func ((lambda (x) (lambda (y) (+ x y))) 10))");
-		trace(eval("func")); // ash.vm.Closure@17f74864
+		trace(eval("func")); // (lambda (y) (+ x y))
 		trace(eval("(func -5)")); // 5
 ```
 
@@ -82,7 +82,7 @@ public class AshLispUsage {
 ```Java
     	// tail recursion for loop
 		trace(eval("((lambda (ls) (cond (ls (do (puts (car ls)) (tail (cdr ls)))))) (range 0 10))"));
-        //println 0 1 2 ... 9 (last "puts" return nil)
+        //println 0 1 2 ... 9 ()
 ```
 
 ### Macro

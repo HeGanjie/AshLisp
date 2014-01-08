@@ -10,7 +10,6 @@ import ash.vm.VM;
 
 public class MacroExpander {
 	private static final Symbol LIST_SYMBOL = Symbol.create("list"),
-								QUOTE_SYMBOL = Symbol.create("quote"),
 								CONCAT_SYMBOL = Symbol.create("concat"),
 								UNQUOTE_SYMBOL = Symbol.create("unquote"),
 								UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing"),
@@ -61,11 +60,11 @@ public class MacroExpander {
 			} else if (name.charAt(0) == '~') { // ~a -> (concat (list a) ...)
 				preListElem = Symbol.create(name.substring(1));
 			} else
-				preListElem = new Node(QUOTE_SYMBOL, new Node(head)); // val -> (concat (list 'val) ...)
+				preListElem = ListUtils.quoted(head); // val -> (concat (list 'val) ...)
 		} else {
 			preListElem = head; // 1 2.3 \a "asdf"
 		}
-		return new Node(new Node(LIST_SYMBOL, new Node(preListElem)), rest);
+		return new Node(new Node(LIST_SYMBOL, new Node(preListElem)), rest); // ((list elem) ...)
 	}
 
 	public static Object visitSyntaxQuote(Object quoted) {
@@ -74,7 +73,7 @@ public class MacroExpander {
 
 	public static Object expand(Node ast) {
 		Closure lambda = MacroExpander.MARCOS_MAP.get(ast.head());
-		// (fn args)
+		// (apply-syntax-fn 'a 'b 'c ...)
 		Node exp = new Node(lambda, ListUtils.quoteAll(ast.rest()));
 		return new VM().runInMain(Compiler.compileSingle(exp));
 	}
