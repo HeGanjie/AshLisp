@@ -34,7 +34,7 @@ public final class Closure implements Serializable {
 	}
 
 	public PersistentList getArgsList() {
-		return (PersistentList) fnDefine.rest().head();
+		return (PersistentList) fnDefine.second();
 	}
 	
 }

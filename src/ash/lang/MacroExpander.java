@@ -47,9 +47,9 @@ public class MacroExpander {
 		if (head instanceof Node) {
 			Object headOfElem = ((Node) head).head();
 			if (UNQUOTE_SYMBOL.equals(headOfElem)) { // ~(cdr '(1 2 3)) -> (unquote (cdr '(1 2 3))) -> (list (cdr '(1 2 3)))
-				preListElem = ((Node) head).rest().head();
+				preListElem = ((Node) head).second();
 			} else if (UNQUOTE_SPLICING_SYMBOL.equals(headOfElem)) { // @(cdr '(1 2 3)) -> (unquote-splicing (cdr '(1 2 3))) -> (cdr '(1 2 3))
-				return new Node(((Node) head).rest().head(), rest);
+				return new Node(((Node) head).second(), rest);
 			} else {
 				preListElem = new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) head));
 			}

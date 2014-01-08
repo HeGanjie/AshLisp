@@ -43,50 +43,61 @@ public final class Compiler {
 				switch (op.toString()) {
 				case "def":
 					return listInstruction(
-							compile(node.rest().rest().head(), lambdaArgs, startIndex),
-							InstructionSetEnum.asn.create(node.rest().head()));
+							compile(node.third(), lambdaArgs, startIndex),
+							InstructionSetEnum.asn.create(node.second()));
 				case "quote":
-					return listInstruction(InstructionSetEnum.quote.create(node.rest().head()));
+					return listInstruction(InstructionSetEnum.quote.create(node.second()));
 				case "syntax-quote":
-					return compile(MacroExpander.visitSyntaxQuote(node.rest().head()), lambdaArgs, startIndex);
+					return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaArgs, startIndex);
 				case "cond":
 					return compileCond(node.rest(), lambdaArgs, startIndex);
 				case "lambda":
-					int dotIndex = ListUtils.indexOf((Node) node.rest().head(), MULTI_ARGS_SIGNAL, 0);
-					boolean notCombineArgs = dotIndex == -1;
-					PersistentList argsList = notCombineArgs
-							? (PersistentList) node.rest().head()
-							: removeDot((PersistentList) node.rest().head());
-					return listInstruction(
-							InstructionSetEnum.closure.create(
-									expand(listInstructionRecur(notCombineArgs ? 1 : 0,
-											InstructionSetEnum.cons_args.create(dotIndex),
-											compile(node.rest().rest().head(),
-													ListUtils.append(argsList, lambdaArgs),
-													notCombineArgs ? 0 : 1),
-													InstructionSetEnum.ret.create())),
-									node));
+					return compileLambda(node, lambdaArgs);
 				default:
-					return listInstruction(
-							compileArgs(node.rest(), lambdaArgs, startIndex),
-							InstructionSetEnum.valueOf(op.toString()).create());
+					return compileInstCall((Symbol) op, node.rest(), lambdaArgs, startIndex);
 				}
 			} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
 				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
 			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure@1a2b3c ...)
-				int argsCount = ListUtils.count(node.rest());
-				InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
-						? InstructionSetEnum.java_call
-						: InstructionSetEnum.call;
-				return listInstruction(
-						compileArgs(node.rest(), lambdaArgs, startIndex),
-						compile(op, lambdaArgs, startIndex),
-						callMethod.create(argsCount));
+				return compileCall(op, node.rest(), lambdaArgs, startIndex);
 			}
 		} else if (exp instanceof Symbol) {
 			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add .puts ...)
 		} else
 			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" ...)
+	}
+
+	private static Serializable compileLambda(Node node, Node lambdaArgs) {
+		Node paramList = (Node) node.second();
+		int dotIndex = ListUtils.indexOf(paramList, MULTI_ARGS_SIGNAL, 0);
+		boolean notCombineArgs = dotIndex == -1;
+		Node argsList = notCombineArgs ? paramList : (Node) removeDot(paramList);
+		return listInstruction(
+				InstructionSetEnum.closure.create(
+						expand(listInstructionRecur(notCombineArgs ? 1 : 0,
+								InstructionSetEnum.cons_args.create(dotIndex),
+								compile(node.third(),
+										ListUtils.append(argsList, lambdaArgs),
+										notCombineArgs ? 0 : 1),
+										InstructionSetEnum.ret.create())),
+						node));
+	}
+
+	private static Serializable compileCall(Object op, PersistentList argList, Node lambdaArgs, int startIndex) {
+		int argsCount = ListUtils.count(argList);
+		InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
+				? InstructionSetEnum.java_call
+				: InstructionSetEnum.call;
+		return listInstruction(
+				compileArgs(argList, lambdaArgs, startIndex),
+				compile(op, lambdaArgs, startIndex),
+				callMethod.create(argsCount));
+	}
+
+	private static Node compileInstCall(Symbol inst, PersistentList argList, Node lambdaArgs, int startIndex) {
+		return listInstruction(
+				compileArgs(argList, lambdaArgs, startIndex),
+				InstructionSetEnum.valueOf(inst.name).create());
 	}
 
 	private static PersistentList removeDot(PersistentList seq) {
@@ -146,7 +157,7 @@ public final class Compiler {
 		Serializable condition = compile(headPair.head(), lambdaArgs, startIndex);
 		int condInstCount = countInstruction(condition) + 1;
 		
-		Serializable exp = compile(headPair.rest().head(), lambdaArgs, startIndex + condInstCount);
+		Serializable exp = compile(headPair.second(), lambdaArgs, startIndex + condInstCount);
 		int nextCaseStartIndex = startIndex + condInstCount + countInstruction(exp) + 1;
 		
 		Serializable nextCase = compileCond(pairList.rest(), lambdaArgs, nextCaseStartIndex);

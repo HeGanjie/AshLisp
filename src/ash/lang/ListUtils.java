@@ -10,7 +10,7 @@ public final class ListUtils {
 	
 	public static PersistentList pair(PersistentList keys, PersistentList vals) {
 		if (Symbol.create(".").equals(keys.head())) // (. x) -> (1 2 3 ...) 
-			return new Node(new Node(keys.rest().head(), new Node(vals)));
+			return new Node(new Node(keys.second(), new Node(vals)));
 		else if (!keys.isEndingNode() && !vals.isEndingNode())
 			return new Node(new Node(keys.head(), new Node(vals.head())), pair(keys.rest(), vals.rest()));
 		return BasicType.NIL;
@@ -58,7 +58,7 @@ public final class ListUtils {
 		if (headNode == null)
 			return BasicType.NIL;
 		else if (varName.equals(headNode.head()))
-			return headNode.rest().head();
+			return headNode.second();
 		else
 			return assoc(varName, environment.rest());
 	}

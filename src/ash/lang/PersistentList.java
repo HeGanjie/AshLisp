@@ -13,7 +13,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	public abstract PersistentList rest();
 	
 	@Override
-	public Iterator<Object> iterator() {
+	public final Iterator<Object> iterator() {
 		return new Iterator<Object>() {
 			PersistentList curr = PersistentList.this;
 			@Override
@@ -30,7 +30,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> List<T> toList(Class<T> c) {
+	public final <T> List<T> toList(Class<T> c) {
 		List<T> arrayList = new ArrayList<>();
 		for (Object n : this) {
 			arrayList.add((T) n);
@@ -38,11 +38,11 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 		return arrayList;
 	}
 	
-	public List<Object> toList() {
+	public final List<Object> toList() {
 		return toList(Object.class);
 	}
 		
-	String innerToString() {
+	final String innerToString() {
 		StringBuilder sb = new StringBuilder();
 		Object left = head();
 		PersistentList next = rest();
@@ -59,7 +59,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 		return sb.toString();
 	}
 	
-	public boolean isEndingNode() {
+	public final boolean isEndingNode() {
 		return rest() == null;
 	}
 	
@@ -69,7 +69,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	}
 	
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		Object left = head();
 		PersistentList next = rest();
@@ -78,7 +78,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
@@ -100,7 +100,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 		return true;
 	}
 	
-	public static PersistentList cast(Object val) {
+	public final static PersistentList cast(Object val) {
 		if (val instanceof String)
 			return CharNode.create((String) val);
 		else if (val instanceof PersistentList) {
@@ -110,4 +110,8 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 		}
 		throw new IllegalArgumentException(val.getClass() + " Should Be Iterable at least.");
 	}
+	
+	public final Object second() { return rest().head(); }
+	
+	public final Object third() { return rest().rest().head(); }
 }
