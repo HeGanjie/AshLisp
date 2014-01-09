@@ -59,7 +59,7 @@ public final class Compiler {
 						compile(node.third(), lambdaArgs, startIndex),
 						InstructionSetEnum.asn.create(node.second()));
 			case "quote":
-				return listInstruction(InstructionSetEnum.quote.create(node.second()));
+				return listInstruction(InstructionSetEnum.ldc.create(node.second()));
 			case "cond":
 				return compileCond(node.rest(), lambdaArgs, startIndex);
 			case "lambda":
@@ -155,11 +155,13 @@ public final class Compiler {
 	
 	private static PersistentList compileArgs(PersistentList args, PersistentList lambdaArgs, int startIndex) {
 		if (args.isEndingNode()) return BasicType.NIL;
-		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
+		return listInstruction(
+				compile(args.head(), lambdaArgs, startIndex),
+				compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
 	private static Serializable compileCond(PersistentList pairList, PersistentList lambdaArgs, int startIndex) {
-		if (pairList.isEndingNode()) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
+		if (pairList.isEndingNode()) return listInstruction(InstructionSetEnum.ldc.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();
 		

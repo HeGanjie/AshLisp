@@ -84,16 +84,20 @@ public final class VMFrame implements Serializable {
 				if (ordinal < 4) { // 0...4
 					if (ordinal < 2) {
 						if (ordinal == 0) { // ldp
-							int varIndex = (Integer) args[0]; // params
-							if (varIndex < callArgs.length)
-								pushWorkingStack(callArgs[varIndex]);
-							else
-								pushWorkingStack(myScope.queryArg(varIndex - callArgs.length));
+							int varIndex = (Integer) args[0];
+							Object arg = varIndex < callArgs.length
+									? callArgs[varIndex]
+									: myScope.queryArg(varIndex - callArgs.length);
+							pushWorkingStack(arg);
 						} else { // ldv
 							pushWorkingStack(tempVar.get(args[0])); // symbol
 						}
-					} else { // ldc, quote
-						pushWorkingStack(args[0]);
+					} else {
+						if (ordinal == 2) { // ldc (quote)
+							pushWorkingStack(args[0]);
+						} else { // ldt
+							pushWorkingStack(loadInTree(args));
+						}
 					}
 				} else { // 4...8
 					if (ordinal < 6) {
@@ -260,6 +264,18 @@ public final class VMFrame implements Serializable {
 				}
 			}
 		}
+	}
+
+	private Object loadInTree(Object[] indexs) {
+		int varIndex = (Integer) indexs[0];
+		Object arg = varIndex < callArgs.length
+				? callArgs[varIndex]
+				: myScope.queryArg(varIndex - callArgs.length);
+		int depth = 1;
+		while (indexs.length != depth) {
+			arg = ListUtils.nth((PersistentList) arg, (int) indexs[depth++]);
+		}
+		return arg;
 	}
 	
 	protected static final String makeIndent(VMFrame headFrame) {

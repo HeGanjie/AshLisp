@@ -38,6 +38,10 @@ public final class ListUtils {
 		return count == 0 ? seq : drop(count - 1, seq.rest());
 	}
 	
+	public static Object nth(PersistentList seq, int index) {
+		return drop(index, seq).head();
+	}
+	
 	public static PersistentList toSeq(Iterator<PersistentList> tailNodeSeq) {
 		if (!tailNodeSeq.hasNext()) return BasicType.NIL;
 		return new Node(tailNodeSeq.next().head(), toSeq(tailNodeSeq));
