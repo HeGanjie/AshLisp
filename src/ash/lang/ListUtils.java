@@ -48,8 +48,9 @@ public final class ListUtils {
 		return new Node(tailNodeSeq[skipElems], toSeq(skipElems + 1, tailNodeSeq));
 	}
 		
-	public static Node append(PersistentList left, Node right) {
+	public static PersistentList append(PersistentList left, PersistentList right) {
 		if (left.isEndingNode()) return right;
+		if (right.isEndingNode()) return left;
 		return new Node(left.head(), append(left.rest(), right));
 	}
 	

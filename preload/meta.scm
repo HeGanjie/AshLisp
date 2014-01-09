@@ -15,7 +15,8 @@
 	      (fold-right append '() cs)))
 
 (def append (lambda (l r)
-	      (cond (l (cons (car l) (append (cdr l) r)))
+	      (cond (l (cond (r (cons (car l) (append (cdr l) r)))
+			     ('t l)))
 		    ('t r))))
 
 (defmacro defn (fname args body)

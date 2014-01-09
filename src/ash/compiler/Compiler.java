@@ -22,7 +22,7 @@ public final class Compiler {
 			"def", "quote", "cond", "lambda",
 			"atom", "car", "cdr", "not",
 			"neq", "eq", "cons", "add", "sub", "mul", "div", "mod",
-			"gt", "ge", "lt", "le", "and", "or", "syntax-quote"));
+			"gt", "ge", "lt", "le", "and", "or"));
 	
 	private Compiler() {}
 	
@@ -35,39 +35,48 @@ public final class Compiler {
 		return new Node(compileSingle(parseResult.head()), batchCompile(parseResult.rest()));
 	}
 
-	private static Serializable compile(final Object exp, Node lambdaArgs, int startIndex) {
+	private static Serializable compile(final Object exp, PersistentList lambdaArgs, int startIndex) {
 		if (exp instanceof Node) {
-			Node node = (Node) exp; // (operation ...)
-			final Object op = node.head();
-			if (NORMAL_INSTRUCTION_SET.contains(op.toString())) {
-				switch (op.toString()) {
-				case "def":
-					return listInstruction(
-							compile(node.third(), lambdaArgs, startIndex),
-							InstructionSetEnum.asn.create(node.second()));
-				case "quote":
-					return listInstruction(InstructionSetEnum.quote.create(node.second()));
-				case "syntax-quote":
-					return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaArgs, startIndex);
-				case "cond":
-					return compileCond(node.rest(), lambdaArgs, startIndex);
-				case "lambda":
-					return compileLambda(node, lambdaArgs);
-				default:
-					return compileInstCall((Symbol) op, node.rest(), lambdaArgs, startIndex);
-				}
-			} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
-				return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
-			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure@1a2b3c ...)
-				return compileCall(op, node.rest(), lambdaArgs, startIndex);
-			}
-		} else if (exp instanceof Symbol) {
+			return compileNode((Node) exp, lambdaArgs, startIndex);
+		} else {
+			return compileObject(exp, lambdaArgs);
+		}
+	}
+
+	private static Serializable compileObject(final Object exp, PersistentList lambdaArgs) {
+		if (exp instanceof Symbol)
 			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add .puts ...)
-		} else
+		else
 			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" ...)
 	}
 
-	private static Serializable compileLambda(Node node, Node lambdaArgs) {
+	private static Serializable compileNode(Node node, PersistentList lambdaArgs, int startIndex) {
+		final Object op = node.head(); // (operation ...)
+		if (op instanceof Symbol && NORMAL_INSTRUCTION_SET.contains(((Symbol) op).name)) {
+			switch (op.toString()) {
+			case "def":
+				return listInstruction(
+						compile(node.third(), lambdaArgs, startIndex),
+						InstructionSetEnum.asn.create(node.second()));
+			case "quote":
+				return listInstruction(InstructionSetEnum.quote.create(node.second()));
+			case "cond":
+				return compileCond(node.rest(), lambdaArgs, startIndex);
+			case "lambda":
+				return compileLambda(node, lambdaArgs);
+			default:
+				return compileInstCall((Symbol) op, node.rest(), lambdaArgs, startIndex);
+			}
+		} else if (MacroExpander.SYNTAX_QUOTE.equals(op)) {// `(...)
+			return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaArgs, startIndex);
+		} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
+			return compile(MacroExpander.expand(node), lambdaArgs, startIndex);
+		} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure ...)
+			return compileCall(op, node.rest(), lambdaArgs, startIndex);
+		}
+	}
+
+	private static Serializable compileLambda(Node node, PersistentList lambdaArgs) {
 		Node paramList = (Node) node.second();
 		int dotIndex = ListUtils.indexOf(paramList, MULTI_ARGS_SIGNAL, 0);
 		boolean notCombineArgs = dotIndex == -1;
@@ -83,7 +92,7 @@ public final class Compiler {
 						node));
 	}
 
-	private static Serializable compileCall(Object op, PersistentList argList, Node lambdaArgs, int startIndex) {
+	private static Serializable compileCall(Object op, PersistentList argList, PersistentList lambdaArgs, int startIndex) {
 		int argsCount = ListUtils.count(argList);
 		InstructionSetEnum callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
 				? InstructionSetEnum.java_call
@@ -94,7 +103,7 @@ public final class Compiler {
 				callMethod.create(argsCount));
 	}
 
-	private static Node compileInstCall(Symbol inst, PersistentList argList, Node lambdaArgs, int startIndex) {
+	private static PersistentList compileInstCall(Symbol inst, PersistentList argList, PersistentList lambdaArgs, int startIndex) {
 		return listInstruction(
 				compileArgs(argList, lambdaArgs, startIndex),
 				InstructionSetEnum.valueOf(inst.name).create());
@@ -107,7 +116,7 @@ public final class Compiler {
 		});
 	}
 
-	protected static Serializable compileSymbol(final Symbol symbol, Node lambdaArgs) {
+	protected static Serializable compileSymbol(final Symbol symbol, PersistentList lambdaArgs) {
 		String methodName = symbol.name;
 		if (isJavaCallSymbol(methodName))
 			return InstructionSetEnum.ldc.create(JavaMethod.create(symbol)); // java method
@@ -135,7 +144,7 @@ public final class Compiler {
 				op.charAt(0) != '.' && op.indexOf('.') != -1;
 	}
 
-	protected static int findArgIndex(Node lambdaArgs, final Symbol op) {
+	protected static int findArgIndex(PersistentList lambdaArgs, final Symbol op) {
 		return ListUtils.indexOf(lambdaArgs, op, 0);
 	}
 
@@ -144,12 +153,12 @@ public final class Compiler {
 		return (Serializable) ((Node) instrNodes).toList(Instruction.class);
 	}
 	
-	private static Node compileArgs(PersistentList args, Node lambdaArgs, int startIndex) {
+	private static PersistentList compileArgs(PersistentList args, PersistentList lambdaArgs, int startIndex) {
 		if (args.isEndingNode()) return BasicType.NIL;
 		return listInstruction(compile(args.head(), lambdaArgs, startIndex), compileArgs(args.rest(), lambdaArgs, startIndex));
 	}
 
-	private static Serializable compileCond(PersistentList pairList, Node lambdaArgs, int startIndex) {
+	private static Serializable compileCond(PersistentList pairList, PersistentList lambdaArgs, int startIndex) {
 		if (pairList.isEndingNode()) return listInstruction(InstructionSetEnum.quote.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();
@@ -175,13 +184,13 @@ public final class Compiler {
 		return ListUtils.count((Node) ins);
 	}
 	
-	public static Node listInstruction(Serializable... ins) { return listInstructionRecur(0, ins); }
+	public static PersistentList listInstruction(Serializable... ins) { return listInstructionRecur(0, ins); }
 
-	public static Node listInstructionRecur(int skipParams, Serializable... ins) {
+	public static PersistentList listInstructionRecur(int skipParams, Serializable... ins) {
 		if (ins.length == skipParams) return BasicType.NIL;
 		Serializable s = ins[skipParams];
 		if (s instanceof Node)
-			return ListUtils.append((Node) s, listInstructionRecur(skipParams + 1, ins));
+			return ListUtils.append((PersistentList) s, listInstructionRecur(skipParams + 1, ins));
 		else
 			return new Node(s, listInstructionRecur(skipParams + 1, ins));
 	}
