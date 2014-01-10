@@ -96,7 +96,7 @@ public final class VMFrame implements Serializable {
 						if (ordinal == 2) { // ldc (quote)
 							pushWorkingStack(args[0]);
 						} else { // ldt
-							pushWorkingStack(loadInTree(args));
+							pushWorkingStack(loadInTree((PersistentList) args[0]));
 						}
 					}
 				} else { // 4...8
@@ -266,16 +266,20 @@ public final class VMFrame implements Serializable {
 		}
 	}
 
-	private Object loadInTree(Object[] indexs) {
-		int varIndex = (Integer) indexs[0];
-		Object arg = varIndex < callArgs.length
-				? callArgs[varIndex]
-				: myScope.queryArg(varIndex - callArgs.length);
-		int depth = 1;
-		while (indexs.length != depth) {
-			arg = ListUtils.nth((PersistentList) arg, (int) indexs[depth++]);
+	private Object loadInTree(PersistentList stackedIndexs) {
+		if (stackedIndexs.rest().isEndingNode()) {
+			int varIndex = (Integer) stackedIndexs.head();
+			return varIndex < callArgs.length
+					? callArgs[varIndex]
+					: myScope.queryArg(varIndex - callArgs.length);
+		} else {
+			PersistentList seq = (PersistentList) loadInTree(stackedIndexs.rest());
+			int pos = (int) stackedIndexs.head();
+			if (pos < 0)
+				return ListUtils.drop(-pos, seq);
+			else
+				return ListUtils.nth(seq, pos);
 		}
-		return arg;
 	}
 	
 	protected static final String makeIndent(VMFrame headFrame) {

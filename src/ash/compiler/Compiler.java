@@ -120,19 +120,34 @@ public final class Compiler {
 		String methodName = symbol.name;
 		if (isJavaCallSymbol(methodName))
 			return InstructionSetEnum.ldc.create(JavaMethod.create(symbol)); // java method
-		else if (isJavaClassPathSymbol(methodName)) {
+		else if (isJavaClassPathSymbol(methodName))
 			return InstructionSetEnum.ldc.create(symbol); // java class path
-		}
 
-		int symbolIndexOfArgs = findArgIndex(lambdaArgs, symbol);
-		if (symbolIndexOfArgs == -1) {
+		PersistentList argIndexs = findArgIndexs(lambdaArgs, symbol, 0, BasicType.NIL);
+		if (argIndexs.isEndingNode()) {
 			if (InstructionSetEnum.contains(methodName))
 				return InstructionSetEnum.ldc.create(InstructionSetEnum.valueOf(methodName).create()); // instruction
 			else
 				return InstructionSetEnum.ldv.create(symbol); // symbol
-		} else {
-			return InstructionSetEnum.ldp.create(symbolIndexOfArgs); // symbol index of params
-		}
+		} else if (argIndexs.rest().isEndingNode())
+			return InstructionSetEnum.ldp.create(argIndexs.head()); // symbol index of params
+		else
+			return InstructionSetEnum.ldt.create(argIndexs); // destructuring
+	}
+
+	private static PersistentList findArgIndexs(PersistentList lambdaArgs, Symbol symbol, int skiped, Node stack) {
+		if (lambdaArgs.isEndingNode()) return BasicType.NIL;
+		Object val = lambdaArgs.head();
+		if (val instanceof Node) {
+			PersistentList rst = findArgIndexs((PersistentList) val, symbol, 0, new Node(skiped, stack));
+			if (!rst.isEndingNode()) return rst;
+		} else if (MULTI_ARGS_SIGNAL.equals(val)) {
+			if (symbol.equals(lambdaArgs.second())) {
+				return new Node(-skiped, stack);
+			}
+		} else if (symbol.equals(val))
+			return new Node(skiped, stack);
+		return findArgIndexs(lambdaArgs.rest(), symbol, skiped + 1, stack);
 	}
 
 	private static boolean isJavaCallSymbol(final String op) {
@@ -142,10 +157,6 @@ public final class Compiler {
 	private static boolean isJavaClassPathSymbol(final String op) {
 		return Character.isUpperCase(op.charAt(0)) ||
 				op.charAt(0) != '.' && op.indexOf('.') != -1;
-	}
-
-	protected static int findArgIndex(PersistentList lambdaArgs, final Symbol op) {
-		return ListUtils.indexOf(lambdaArgs, op, 0);
 	}
 
 	public static Serializable expand(Serializable instrNodes) {
