@@ -12,6 +12,11 @@
 (defmacro when-not (test true)
   `(cond ((not ~test) ~true)))
 
+(defmacro let ((p v . rest) body)
+  (if rest
+    `((lambda (~p) (let ~rest ~body)) ~v)
+    `((lambda (~p) ~body) ~v)))
+
 (defmacro + (x y . s)
 	 (if s
 	   `(+ (add ~x ~y) @s)

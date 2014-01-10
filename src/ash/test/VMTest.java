@@ -84,9 +84,9 @@ public final class VMTest extends TestCase {
 		assertEquals(2178309, exec("(fibs 32)"));
 	}
 	
-	/*public void testFibTail() throws Exception {
+	public void testFibTail() throws Exception {
 		assertEquals(2178309, exec("(fib-tail 32)"));
-	}*/
+	}
 
 	public void testTailAndCombineArgs() throws Exception {
 		exec("(def reverse0 (lambda (x y) (cond (x (tail (cdr x) (cons (car x) y))) ('t y))))");
@@ -126,17 +126,15 @@ public final class VMTest extends TestCase {
 		assertEquals(3628800, exec("(fac-c 10 identity)"));
 	}
 	
-	/*public void testMacro() throws Exception {
+	public void testMacro() throws Exception {
 		assertEquals("(let (a 1) a)", exec("'(let (a 1) a)").toString());
 		assertEquals("((lambda (a) a) 1)", exec("(expand-macro '(let (a 1) a))").toString());
 		assertEquals(100, exec("(let (a 100) a)"));
 		
 		// advanced
-		assertEquals("(add (add 1 2) 3)", exec("(expand-macro '(+ 1 2 3))").toString());
-		assertEquals("((lambda (b) ((lambda (a) (+ a b)) 1)) 2)",
-				exec("(expand-macro '(let (a 1 b 2) (+ a b)))").toString());
-		assertEquals(3, exec("(let (a 1 b 2) (+ a b))"));
-	}*/
+		assertEquals("(+ (add 1 2) 3)", exec("(expand-macro '(+ 1 2 3))").toString());
+		assertEquals(3, exec("(let (a 1 b (inc a)) (+ a b))"));
+	}
 	
 	public void testLazySeq() throws Exception {
 		assertEquals("(0 1 2 3 4 5 6 7 8 9)", exec("(take 10 (iterate inc 0))").toString());
