@@ -1,6 +1,7 @@
 package ash.vm;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import ash.lang.ListUtils;
@@ -37,4 +38,15 @@ public final class Closure implements Serializable {
 		return (PersistentList) fnDefine.second();
 	}
 	
+	public Object applyTo(Iterable<Object> args) {
+		List<Instruction> ls = new ArrayList<>();
+		for (Object arg : args) {
+			ls.add(InstructionSetEnum.ldc.create(arg));
+		}
+		int argsCount = ls.size();
+		ls.add(InstructionSetEnum.ldc.create(this));
+		ls.add(InstructionSetEnum.call.create(argsCount));
+		ls.add(InstructionSetEnum.halt.create());
+		return new VM().runFrame(new VMFrame(ls, null));
+	}
 }

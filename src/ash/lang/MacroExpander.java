@@ -5,7 +5,6 @@ import java.util.Map;
 
 import ash.compiler.Compiler;
 import ash.vm.Closure;
-import ash.vm.VM;
 
 
 public class MacroExpander {
@@ -74,8 +73,6 @@ public class MacroExpander {
 
 	public static Object expand(Node ast) {
 		Closure lambda = MacroExpander.MARCOS_MAP.get(ast.head());
-		// (apply-syntax-fn 'a 'b 'c ...)
-		Node exp = new Node(lambda, ListUtils.quoteAll(ast.rest()));
-		return new VM().runInMain(Compiler.compileSingle(exp));
+		return lambda.applyTo(ast.rest());
 	}
 }

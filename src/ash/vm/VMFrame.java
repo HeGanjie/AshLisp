@@ -20,7 +20,7 @@ public final class VMFrame implements Serializable {
 	
 	private static final Map<Symbol, Object> tempVar = VM.tempVar;
 	private Scope myScope;
-	private Object[] callArgs;
+	Object[] callArgs;
 	
 	private final Deque<Object> workingStack = new ArrayDeque<>();
 	private final List<Instruction> executingInsts;

@@ -25,7 +25,7 @@
 (defmacro lazy-seq (body)
   `(.new ash.lang.LazyNode (lambda () ~body)))
 
-(defmacro comment (. ignore) '())
+(defmacro comment (. ignore) `'())
 
 (defn vector (. ls)
       (.new ash.lang.PersistentVector (.toList ls)))

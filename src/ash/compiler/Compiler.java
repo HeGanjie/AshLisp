@@ -45,9 +45,9 @@ public final class Compiler {
 
 	private static Serializable compileObject(final Object exp, PersistentList lambdaArgs) {
 		if (exp instanceof Symbol)
-			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add .puts ...)
+			return listInstruction(compileSymbol((Symbol) exp, lambdaArgs)); // (... a add puts ...)
 		else
-			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" ...)
+			return listInstruction(InstructionSetEnum.ldc.create(exp)); // (... 1 2 3.4 \a "b" closure ...)
 	}
 
 	private static Serializable compileNode(Node node, PersistentList lambdaArgs, int startIndex) {

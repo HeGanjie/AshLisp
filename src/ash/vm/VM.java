@@ -41,7 +41,11 @@ public final class VM implements Serializable {
 	public Object runInMain(PersistentList instSeq) {
 		List<Instruction> insts = instSeq.toList(Instruction.class);
 		insts.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
-		pushFrame(new VMFrame(insts, null)); // main frame
+		return runFrame(new VMFrame(insts, null));
+	}
+	
+	public Object runFrame(VMFrame mainFrame) {
+		pushFrame(mainFrame);
 		return run();
 	}
 	

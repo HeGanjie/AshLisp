@@ -1,13 +1,9 @@
-(def _vm_ (.new ash.vm.VM))
-
-(def compile (lambda (ast)
-	       (ash.compiler.Compiler/compileSingle ast)))
+(def compile ash.compiler.Compiler/compileSingle)
 
 (def vmexec (lambda (insts)
-	      (.runInMain _vm_ insts)))
+	      (.runInMain (.new ash.vm.VM) insts)))
 
-(def parse (lambda (code)
-	     (ash.parser.Parser/split code)))
+(def parse ash.parser.Parser/split)
 
 (def lazy-load (lambda (astIter)
 		 (.new ash.lang.LazyNode
@@ -17,10 +13,7 @@
 
 (def list (lambda (. x) x))
 
-(def apply (lambda (func args)
-	     (eval
-	       (cons func
-		     (ash.lang.ListUtils/quoteAll args)))))
+(def apply .applyTo)
 
 (def eval (lambda (ast)
 	    (vmexec (compile ast))))

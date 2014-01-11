@@ -3,15 +3,15 @@
 (defn - (. x) (reduce sub (car x) (cdr x)))
 (defn * (. x) (reduce mul (car x) (cdr x)))
 (defn / (. x) (reduce div (car x) (cdr x)))
-(defn % (x y) (mod x y))
+(def % mod)
 
 (defn && (. x) (reduce and (car x) (cdr x)))
 (defn || (. x) (reduce or (car x) (cdr x)))
 
-(defn < (x y) (lt x y))
-(defn <= (x y) (le x y))
-(defn > (x y) (gt x y))
-(defn >= (x y) (ge x y))
+(def < lt)
+(def <= le)
+(def > gt)
+(def >= ge)
 
 (defn even? (x) (eq 0 (mod x 2)))
 (defn odd? (x) (eq 1 (mod x 2)))
