@@ -36,7 +36,7 @@
 (defn zip (f . seqs)
       (map (lambda (args) (apply f args)) (zip-step seqs)))
 
-(defn nil? (x) (not x))
+(def nil? not)
 
 (defn any (f seq)
       (fold-right (lambda (item init) (or (f item) init))
@@ -90,9 +90,7 @@
 	(when (< low high)
 	  (cons low (range (inc low) high)))))
 
-(defn regex (s) (java.util.regex.Pattern/compile s))
-
-(defn expand-macro (ast) (ash.lang.MacroExpander/expand ast))
+(def expand-macro ash.lang.MacroExpander/expand)
 
 (defn identity (x) x)
 
@@ -126,8 +124,6 @@
 		  ('t (car seq)))))
 
 (def do (lambda (. things) (last things)))
-
-(defn cadr (s) (car (cdr s)))
 
 (defn iterate (f x)
       (lazy-seq

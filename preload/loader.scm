@@ -30,4 +30,5 @@
 (load "macro.scm")
 (load "maths.scm")
 (load "utils.scm")
+(load "regex.scm")
 (load "user.scm")
