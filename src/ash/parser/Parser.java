@@ -20,7 +20,8 @@ public final class Parser {
 			'\'', Symbol.create("quote"),
 			'`', Symbol.create("syntax-quote"),
 			'~', Symbol.create("unquote"),
-			'@', Symbol.create("unquote-splicing"));
+			'@', Symbol.create("unquote-splicing"),
+			'#', Symbol.create("regex"));
 
 	private Parser() {}
 	

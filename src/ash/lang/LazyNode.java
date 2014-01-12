@@ -19,7 +19,7 @@ public final class LazyNode extends PersistentList {
 
 	private PersistentList valid() {
 		if (seq == null) {
-			seq = callFunc(new Node(func)); // (f)
+			seq = (PersistentList) func.applyTo(BasicType.NIL);
 		}
 		return seq;
 	}
