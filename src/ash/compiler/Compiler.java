@@ -197,11 +197,11 @@ public final class Compiler {
 		return ListUtils.count((Node) ins);
 	}
 	
-	public static PersistentList listInstruction(Serializable... ins) { return listInstructionRecur(0, ins); }
+	private static PersistentList listInstruction(Object... ins) { return listInstructionRecur(0, ins); }
 
-	public static PersistentList listInstructionRecur(int skipParams, Serializable... ins) {
+	private static PersistentList listInstructionRecur(int skipParams, Object... ins) {
 		if (ins.length == skipParams) return BasicType.NIL;
-		Serializable s = ins[skipParams];
+		Object s = ins[skipParams];
 		if (s instanceof Node)
 			return ListUtils.append((PersistentList) s, listInstructionRecur(skipParams + 1, ins));
 		else

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ash.lang.ListUtils;
 import bruce.common.functional.Func1;
 import bruce.common.functional.LambdaUtils;
 
@@ -68,7 +69,13 @@ public enum InstructionSetEnum {
 		
 	public final Instruction create() { return INST_CACHES.get(ordinal()); }
 	
-	public final Instruction create(Object... args) { return new Instruction(this, args); }
+	public final Instruction create(Object arg) {
+		return new Instruction(this, arg);
+	}
+	
+	public final Instruction create(Object arg0, Object arg1) {
+		return new Instruction(this, ListUtils.toSeq(0, arg0, arg1));
+	}
 
 	public static boolean contains(String op) {
 		return INST_NAME_CACHE.contains(op);

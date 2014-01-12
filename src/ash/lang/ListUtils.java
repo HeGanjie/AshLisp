@@ -6,8 +6,6 @@ import bruce.common.functional.Func1;
 
 
 public final class ListUtils {
-	private static final Symbol QUOTE_SYMBOL = Symbol.create("quote");
-	
 	public static PersistentList pair(PersistentList keys, PersistentList vals) {
 		if (Symbol.create(".").equals(keys.head())) // (. x) -> (1 2 3 ...) 
 			return new Node(new Node(keys.second(), new Node(vals)));
@@ -98,14 +96,5 @@ public final class ListUtils {
 	
 	public static final boolean transformBoolean(Object val) {
 		return !(val instanceof PersistentList && ((PersistentList) val).isEndingNode());
-	}
-
-	public static Node quoted(final Object val) {
-		return new Node(QUOTE_SYMBOL, new Node(val));
-	}
-	
-	public static PersistentList quoteAll(PersistentList seq) {
-		if (seq.isEndingNode()) return BasicType.NIL;
-		return new Node(quoted(seq.head()), quoteAll(seq.rest()));
 	}
 }

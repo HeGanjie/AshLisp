@@ -63,7 +63,7 @@ public final class VMFrame implements Serializable {
 			if (debugging) {
 				if (i.args != null)
 					System.out.print(CommonUtils.buildString(makeIndent(this),
-							INST_ARR[i.ins], ' ', CommonUtils.displayArray(i.args, " ")));
+							INST_ARR[i.ins], ' ', i.args));
 				else
 					System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
 			}
@@ -78,35 +78,35 @@ public final class VMFrame implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void exec(int ordinal, Object[] args) {
+	private void exec(int ordinal, Object arg) {
 		if (ordinal < 16) {
 			if (ordinal < 8) {
 				if (ordinal < 4) { // 0...4
 					if (ordinal < 2) {
 						if (ordinal == 0) { // ldp
-							int varIndex = (Integer) args[0];
-							Object arg = varIndex < callArgs.length
+							int varIndex = (Integer) arg;
+							Object val = varIndex < callArgs.length
 									? callArgs[varIndex]
 									: myScope.queryArg(varIndex - callArgs.length);
-							pushWorkingStack(arg);
+							pushWorkingStack(val);
 						} else { // ldv
-							pushWorkingStack(tempVar.get(args[0])); // symbol
+							pushWorkingStack(tempVar.get(arg)); // symbol
 						}
 					} else {
 						if (ordinal == 2) { // ldc (quote)
-							pushWorkingStack(args[0]);
+							pushWorkingStack(arg);
 						} else { // ldt
-							pushWorkingStack(loadInTree((PersistentList) args[0]));
+							pushWorkingStack(loadInTree((PersistentList) arg));
 						}
 					}
 				} else { // 4...8
 					if (ordinal < 6) {
 						if (ordinal == 4) { //asn
-							if (tempVar.containsKey(args[0]))
-								System.out.println("Warnning: Redefining " + args[0]);
-							tempVar.put((Symbol) args[0], popWorkingStack());
+							if (tempVar.containsKey(arg))
+								System.out.println("Warnning: Redefining " + arg);
+							tempVar.put((Symbol) arg, popWorkingStack());
 						} else { // cons_args
-							int dotIndex = (Integer) args[0];
+							int dotIndex = (Integer) arg;
 							Object[] newArgs = new Object[dotIndex + 1];
 							System.arraycopy(callArgs, 0, newArgs, 0, dotIndex);
 							newArgs[dotIndex] = ListUtils.toSeq(dotIndex, callArgs);
@@ -114,9 +114,10 @@ public final class VMFrame implements Serializable {
 						}
 					} else {
 						if (ordinal == 6) { // closure
-							pushWorkingStack(makeSubClosure((List<Instruction>) args[0], (Node) args[1]));
+							PersistentList args = (PersistentList) arg;
+							pushWorkingStack(makeSubClosure((List<Instruction>) args.head(), (Node) ((PersistentList) arg).second()));
 						} else { // jmp
-							runIndex = (Integer) args[0];
+							runIndex = (Integer) arg;
 						}
 					}
 				}
@@ -125,23 +126,23 @@ public final class VMFrame implements Serializable {
 					if (ordinal < 10) {
 						if (ordinal == 8) { // jz
 							if (!ListUtils.transformBoolean(popWorkingStack()))
-								runIndex = (Integer) args[0];
+								runIndex = (Integer) arg;
 						} else { // tail
-							callArgs = createCallingArgs((Integer) args[0]);
+							callArgs = createCallingArgs((Integer) arg);
 							workingStack.clear();
 							runIndex = 0;
 						}
 					} else {
 						if (ordinal == 10) { // java_call
-							pushWorkingStack(((JavaMethod) popWorkingStack()).call(createCallingArgs((Integer) args[0])));
+							pushWorkingStack(((JavaMethod) popWorkingStack()).call(createCallingArgs((Integer) arg)));
 						} else { // call
 							Object func = popWorkingStack();
 							if (func instanceof Closure) { // symbol
-								prepareNextFrame((Closure) func, (Integer) args[0]);
+								prepareNextFrame((Closure) func, (Integer) arg);
 							} else if (func instanceof Instruction) { // instruction
-								exec(((Instruction) func).ins, args);
+								exec(((Instruction) func).ins, arg);
 							} else if (func instanceof JavaMethod) { // java method
-								pushWorkingStack(((JavaMethod) func).call(createCallingArgs((Integer) args[0])));
+								pushWorkingStack(((JavaMethod) func).call(createCallingArgs((Integer) arg)));
 							} else {
 								throw new RuntimeException("Undefined method:" + func);
 							}

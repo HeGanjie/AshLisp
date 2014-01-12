@@ -13,7 +13,9 @@ public class MacroExpander {
 								CONCAT_SYMBOL = Symbol.create("concat"),
 								UNQUOTE_SYMBOL = Symbol.create("unquote"),
 								UNQUOTE_SPLICING_SYMBOL = Symbol.create("unquote-splicing"),
-								MORE_ELEM = Compiler.MULTI_ARGS_SIGNAL;
+								MORE_ELEM = Compiler.MULTI_ARGS_SIGNAL,
+								QUOTE_SYMBOL = Symbol.create("quote");
+	
 	public static final Map<Symbol, Closure> MARCOS_MAP = new HashMap<>();
 
 	private MacroExpander() {}
@@ -60,13 +62,17 @@ public class MacroExpander {
 			} else if (name.charAt(0) == '~') { // ~a -> (concat (list a) ...)
 				preListElem = Symbol.create(name.substring(1));
 			} else
-				preListElem = ListUtils.quoted(head); // val -> (concat (list 'val) ...)
+				preListElem = quoted(head); // val -> (concat (list 'val) ...)
 		} else {
 			preListElem = head; // 1 2.3 \a "asdf"
 		}
 		return new Node(new Node(LIST_SYMBOL, new Node(preListElem)), rest); // ((list elem) ...)
 	}
 
+	private static Node quoted(final Object val) {
+		return new Node(QUOTE_SYMBOL, new Node(val));
+	}
+	
 	public static Object visitSyntaxQuote(Object quoted) {
 		return quoted instanceof Node ? new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
 	}
