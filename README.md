@@ -23,17 +23,17 @@ public class AshLispUsage {
 	private static void trace(Serializable arg) {
 		System.out.println(arg);
 	}
-    
-    public static void main(String[] args) {
-        ...
-    }
+	
+	public static void main(String[] args) {
+		...
+	}
 }
 ```
 
 ### Calculation
 ```Java
-        trace(eval("(+ 1 2 3 4)")); // 10
-    	trace(eval("(* 2.5 3)")); // 7.5
+		trace(eval("(+ 1 2 3 4)")); // 10
+		trace(eval("(* 2.5 3)")); // 7.5
 ```
 
 ### Logical operation 
@@ -72,6 +72,9 @@ public class AshLispUsage {
 		// function
 		trace(eval("((lambda (x) (* x 2))  10)")); // 20
 		
+		// make list from args
+		trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
+		
 		// closure
 		eval("(def func ((lambda (x) (lambda (y) (+ x y))) 10))");
 		trace(eval("func")); // (lambda (y) (+ x y))
@@ -88,30 +91,31 @@ public class AshLispUsage {
 
 ### LazySeq
 ```Java
-		// lazy.scm show you how to define lazySeq
+		// utils.scm show you how to define lazySeq
+		trace(eval("(class (iterate inc 0))")); // ash.lang.LazyNode
 		trace(eval("(take 10 (iterate inc 0))")); // (0 1 2 3 4 5 6 7 8 9)
-		trace(eval("(take 10 (repeat 0))")); // (0 0 0 0 0 0 0 0 0 0)
 ```
 
-### Misc
+### Destructuring
 ```Java
 		// destructuring
 		trace(eval("((lambda ((a . b)) a) '(1 2 3))")); // 1
 		trace(eval("((lambda ((a . b)) b) '(1 2 3))")); // (2 3)
+```
+
+### Misc
+```Java
+		// build string 
+		trace(eval("(str \"No.\" 1)")); // No.1
 		
 		// some built-in functions (for more details, watch preload/*.scm)
 		trace(eval("(filter even? (range 0 10))")); // (0 2 4 6 8)
-        
-        // build string 
-    	trace(eval("(str \"No.\" 1)")); // No.1
-        // make list from args
-    	trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
-    	
+		
 		// loop: using tail recursion
-		trace(eval("((lambda (ls) (when ls (do (puts (car ls)) (tail (cdr ls))))) (range 0 10))"));
-        //println 0 1 2 ... 9 ()
-        
-		// eval
+		trace(eval("((lambda (ls) (when ls (puts (car ls)) (tail (cdr ls)))) (range 0 10))"));
+		//println 0 1 2 ... 9 ()
+		
+		// eval & apply
 		trace(eval("(eval (cons + '(1 2)))")); // 3
 		trace(eval("(apply * '(3 4))")); // 12
 ```

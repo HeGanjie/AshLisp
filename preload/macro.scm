@@ -6,11 +6,11 @@
   `(cond ((not ~test) ~true)
 	 ('t ~else)))
 
-(defmacro when (test true)
-  `(cond (~test ~true)))
+(defmacro when (test . true)
+  `(cond (~test (do @true))))
 
-(defmacro when-not (test true)
-  `(cond ((not ~test) ~true)))
+(defmacro when-not (test . true)
+  `(cond ((not ~test) (do @true))))
 
 (defmacro let ((p v . rest) body)
   (if rest
