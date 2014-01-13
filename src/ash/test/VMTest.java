@@ -126,7 +126,8 @@ public final class VMTest extends TestCase {
 	
 	public void testMacro() throws Exception {
 		assertEquals("(let (a 1) a)", exec("'(let (a 1) a)").toString());
-		assertEquals("((lambda (a) a) 1)", exec("(expand-macro '(let (a 1) a))").toString());
+		//assertEquals("((lambda (a) (do a)) 1)", exec("(expand-macro '(let (a 1) a))").toString());
+		assertEquals("(add 1 1)", exec("(expand-macro '(inc 1))").toString());
 		assertEquals(100, exec("(let (a 100) a)"));
 		
 		// advanced

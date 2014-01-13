@@ -81,9 +81,4 @@ public final class VM implements Serializable {
 		frameStack.push(vmFrame);
 		headFrame = vmFrame;
 	}
-
-	public void init() {
-		frameStack.clear();
-		headFrame = null;
-	}
 }

@@ -123,8 +123,6 @@
 	    (cond ((cdr seq) (tail (cdr seq)))
 		  ('t (car seq)))))
 
-(def do (lambda (. things) (last things)))
-
 (defn iterate (f x)
       (lazy-seq
 	(cons x (iterate f (f x)))))
@@ -145,9 +143,4 @@
 (defn num? (x) (instance? Number x))
 
 (defn seq (x) (map identity x))
-
-(defn instance? (clazz val)
-      (ash.vm.JavaMethod/instanceOf
-	(.getClass val)
-	(ash.vm.JavaMethod/loadClassBySymbol clazz)))
 

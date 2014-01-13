@@ -40,10 +40,9 @@ public final class Parser {
 		if (trim.length() == 0) return BasicType.NIL;
 		
 		if (QUOTE_CHAR_MAP.containsKey(trim.charAt(0))) {
-			String first = getFirst(trim.substring(1));
-			String rest = getRest(trim, first.length() + 1);
-			Node head = new Node(QUOTE_CHAR_MAP.get(trim.charAt(0)), split(first));
-			return new Node(head, split(rest));
+			PersistentList innerSplit = split(trim.substring(1));
+			Node head = new Node(QUOTE_CHAR_MAP.get(trim.charAt(0)), new Node(innerSplit.head()));
+			return new Node(head, innerSplit.rest());
 		} else {
 			String first = getFirst(trim);
 			String rest = getRest(trim, first.length());

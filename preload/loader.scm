@@ -20,11 +20,17 @@
 
 (def doall (lambda (lazy) (apply list lazy)))
 
+(def read-resource-file bruce.common.utils.FileUtil/readTextFileForDefaultEncoding)
+
+(def load-src (lambda (src)
+		(doall
+		  (lazy-load
+		    (.iterator
+		      (parse src))))))
+
 (def load (lambda (srcName)
-	    (doall
-	      (lazy-load
-		(.iterator (parse
-			     (bruce.common.utils.FileUtil/readTextFileForDefaultEncoding srcName)))))))
+	    (load-src
+	      (read-resource-file srcName))))
 
 (load "meta.scm")
 (load "macro.scm")

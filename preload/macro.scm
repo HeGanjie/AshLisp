@@ -6,46 +6,51 @@
   `(cond ((not ~test) ~true)
 	 ('t ~else)))
 
+(defmacro do (. things)
+  (if (cdr things)
+    `((lambda (. rst) (last rst)) @things)
+    `~(car things)))
+
 (defmacro when (test . true)
   `(cond (~test (do @true))))
 
 (defmacro when-not (test . true)
   `(cond ((not ~test) (do @true))))
 
-(defmacro let ((p v . rest) body)
+(defmacro let ((p v . rest) . body)
   (if rest
-    `((lambda (~p) (let ~rest ~body)) ~v)
-    `((lambda (~p) ~body) ~v)))
+    `((lambda (~p) (let ~rest (do @body))) ~v)
+    `((lambda (~p) (do @body)) ~v)))
 
 (defmacro + (x y . s)
-	 (if s
-	   `(+ (add ~x ~y) @s)
-	   `(add ~x ~y)))
+  (if s
+    `(+ (add ~x ~y) @s)
+    `(add ~x ~y)))
 
 (defmacro - (x y . s)
-	 (if s
-	   `(- (sub ~x ~y) @s)
-	   `(sub ~x ~y)))
+  (if s
+    `(- (sub ~x ~y) @s)
+    `(sub ~x ~y)))
 
 (defmacro * (x y . s)
-	 (if s
-	   `(* (mul ~x ~y) @s)
-	   `(mul ~x ~y)))
+  (if s
+    `(* (mul ~x ~y) @s)
+    `(mul ~x ~y)))
 
 (defmacro / (x y . s)
-	 (if s
-	   `(/ (div ~x ~y) @s)
-	   `(div ~x ~y)))
+  (if s
+    `(/ (div ~x ~y) @s)
+    `(div ~x ~y)))
 
 (defmacro && (x y . s)
-	 (if s
-	   `(&& (and ~x ~y) @s)
-	   `(and ~x ~y)))
+  (if s
+    `(&& (and ~x ~y) @s)
+    `(and ~x ~y)))
 
 (defmacro || (x y . s)
-	 (if s
-	   `(|| (or ~x ~y) @s)
-	   `(or ~x ~y)))
+  (if s
+    `(|| (or ~x ~y) @s)
+    `(or ~x ~y)))
 
 (defmacro = (x y) `(eq ~x ~y))
 (defmacro % (x y) `(mod ~x ~y))

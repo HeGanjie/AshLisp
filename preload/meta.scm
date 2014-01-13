@@ -35,3 +35,30 @@
 
 (defn hash-map (. ls)
       (.new ash.lang.PersistentMap (.toList ls)))
+
+(defn instance? (clazz val)
+      (ash.vm.JavaMethod/instanceOf
+	(.getClass val)
+	(ash.vm.JavaMethod/loadClassBySymbol clazz)))
+
+(defn seq? (obj) (instance? ash.lang.PersistentList obj))
+
+(defn cadr (s) (car (cdr s)))
+
+(defn caddr (s) (car (cdr (cdr s))))
+
+(defn first (coll)
+      (if seq?
+	(car coll)
+	(.get coll 0)))
+
+(defn second (coll)
+      (if seq?
+	(cadr coll)
+	(.get coll 1)))
+
+(defn third (coll)
+      (if seq?
+	(caddr coll)
+	(.get coll 2)))
+

@@ -74,7 +74,14 @@ public class MacroExpander {
 	}
 	
 	public static Object visitSyntaxQuote(Object quoted) {
-		return quoted instanceof Node ? new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) quoted)) : quoted;
+		if (quoted instanceof Node) {
+			Node quotedNode = (Node) quoted;
+			if (UNQUOTE_SYMBOL.equals(quotedNode.head())) // `~(...)
+				return quotedNode.second();
+			else
+				return new Node(CONCAT_SYMBOL, (PersistentList) applySyntaxQuote((Node) quoted));
+		}
+		return quoted;
 	}
 
 	public static Object expand(Node ast) {
