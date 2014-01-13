@@ -48,10 +48,8 @@ public class AshLispUsage {
 
 ### Define and Java native invoke
 ```Java
-		// define
 		trace(eval("(def x 10)")); // ()
 		
-		// java native invoke
 		trace(eval("(.toString x)")); // "10"
 		trace(eval("(Math/abs -10)")); // 10
 		trace(eval("(.new Double \"-100\")")); // -100.0
@@ -69,8 +67,11 @@ public class AshLispUsage {
 
 ### Function and Closure
 ```Java
-		// function
-		trace(eval("((lambda (x) (* x 2))  10)")); // 20
+		// define a function, equivalent to (def square (lambda (x) (* x x)))
+		eval("(defn square (x) (* x x))");
+		
+		// call a function
+		trace(eval("(square 10)")); // 100
 		
 		// make list from args
 		trace(eval("((lambda (head . tail) tail) 10 20 30)")); // (20 30)
@@ -98,7 +99,6 @@ public class AshLispUsage {
 
 ### Destructuring
 ```Java
-		// destructuring
 		trace(eval("((lambda ((a . b)) a) '(1 2 3))")); // 1
 		trace(eval("((lambda ((a . b)) b) '(1 2 3))")); // (2 3)
 ```
@@ -116,7 +116,7 @@ public class AshLispUsage {
 		//println 0 1 2 ... 9 ()
 		
 		// eval & apply
-		trace(eval("(eval (cons + '(1 2)))")); // 3
+		trace(eval("(eval '(+ 1 2))")); // 3
 		trace(eval("(apply * '(3 4))")); // 12
 ```
 
