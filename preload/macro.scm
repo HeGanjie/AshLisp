@@ -22,6 +22,22 @@
     `((lambda (~p) (let ~rest (do @body))) ~v)
     `((lambda (~p) (do @body)) ~v)))
 
+(defmacro -> (val . ops)
+  (if ops
+    (if (seq? (car ops))
+      (let ((head . rest) (car ops))
+	`(-> (~head ~val @rest) @(cdr ops)))
+      `(-> (~(car ops) ~val) @(cdr ops)))
+    val))
+
+(defmacro ->> (val . ops)
+  (if ops
+    (if (seq? (car ops))
+      (let ((head . rest) (car ops))
+	`(->> (~head @rest ~val) @(cdr ops)))
+      `(->> (~(car ops) ~val) @(cdr ops)))
+    val))
+
 (defmacro + (x y . s)
   (if s
     `(+ (add ~x ~y) @s)

@@ -1,0 +1,14 @@
+(def repl_br (->> (.$in System)
+		  (.new java.io.InputStreamReader)
+		  (.new java.io.BufferedReader)))
+
+(def isStringNullOrWhiteSpace bruce.common.utils.CommonUtils/isStringNullOrWriteSpace)
+
+(defn repl_loop (readIn)
+      (when-not (isStringNullOrWhiteSpace readIn)
+		(-> readIn load-src last ash.lang.BasicType/asString puts)
+		(.print _out_ "> ")
+		(tail (.readLine repl_br))))
+
+(repl_loop "'(REPL is running, press ENTER to exit.)")
+

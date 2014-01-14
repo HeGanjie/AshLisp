@@ -144,3 +144,8 @@
 
 (defn seq (x) (map identity x))
 
+(defn trampoline (f . args)
+      (if (instance? ash.vm.Closure f)
+	(tail (apply f args))
+	f))
+
