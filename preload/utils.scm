@@ -149,3 +149,12 @@
 	(tail (apply f args))
 	f))
 
+(defn reductions (f init seq)
+      (lazy-seq
+	(if seq
+	  (cons init
+		(reductions f
+			    (f init (car seq))
+			    (cdr seq)))
+	  (cons init '()))))
+

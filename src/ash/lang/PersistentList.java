@@ -103,12 +103,11 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	public final static PersistentList cast(Object val) {
 		if (val instanceof String)
 			return CharNode.create((String) val);
-		else if (val instanceof PersistentList) {
+		else if (val instanceof PersistentList)
 			return (PersistentList) val;
-		} else if (val instanceof Iterable<?>) {
+		else if (val instanceof Iterable<?>)
 			return LazyNode.create(((Iterable<?>) val).iterator());
-		}
-		throw new IllegalArgumentException(val.getClass() + " Should Be Iterable at least.");
+		throw new IllegalArgumentException(String.format("%s : %s Should Be Iterable at least.", val, val.getClass().getName()));
 	}
 	
 	public final Object second() { return rest().head(); }
