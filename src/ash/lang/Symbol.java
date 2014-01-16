@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Symbol implements Serializable {
+public final class Symbol implements Serializable {
 	private static final long serialVersionUID = 6668290329248269533L;
 	public final String name;
 
@@ -24,9 +24,7 @@ public class Symbol implements Serializable {
 	}
 
 	@Override
-	public String toString() {
-		return name;
-	}
+	public String toString() { return name; }
 
 	@Override
 	public int hashCode() {
