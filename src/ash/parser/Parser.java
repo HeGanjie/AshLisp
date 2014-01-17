@@ -7,15 +7,15 @@ import ash.lang.BasicType;
 import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.PersistentMap;
+import ash.lang.PersistentSet;
 import ash.lang.Symbol;
 
 public final class Parser {
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
+	private static final PersistentSet<Character> COLLECTION_HEAD_CHAR_SET = new PersistentSet<>( '(', '[', '{');
+	private static final PersistentSet<Character> COLLECTION_TAIL_CHAR_SET = new PersistentSet<>( ')', ']', '}');
 	private static final char ESCAPE_CHAR = '\\';
 	private static final char STRING_WRAPPING_CHAR = '\"';
-	public static final char VECTOR_START = '[', VECTOR_END = ']';
-	public static final char HASH_SET_START = '<', HASH_SET_END = '>';
-	public static final char HASH_MAP_START = '{', HASH_MAP_END = '}';
 	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
 			'\'', Symbol.create("quote"),
 			'`', Symbol.create("syntax-quote"),
@@ -25,14 +25,25 @@ public final class Parser {
 
 	private Parser() {}
 	
-	private static Object createAst(String readIn) {
-		return readIn.charAt(0) == '(' ? split(unwrap(readIn)) : BasicType.realType(readIn);
+	private static String unwrap(String exp) {
+		return exp.substring(1, exp.length() - 1);
 	}
 
-	private static String unwrap(String exp) {
-		if (exp.charAt(0) == '(' && exp.charAt(exp.length() - 1) == ')')
-			return exp.substring(1, exp.length() - 1);
-		throw new UnsupportedOperationException("Can not Unwrap:" + exp);
+	private static Object createAst(String readIn) {
+		char firstChar = readIn.charAt(0);
+		if (COLLECTION_HEAD_CHAR_SET.contains(firstChar)) {
+			PersistentList splitInner = split(unwrap(readIn));
+			if (firstChar == '(') return splitInner;
+			else if (firstChar == '[')
+				return new Node(Symbol.create("vector"), splitInner);
+			else if (firstChar == '{')
+				return new Node(Symbol.create("hash-map"), splitInner);
+			throw new IllegalArgumentException();
+		} else if (firstChar == '$') {
+			PersistentList splitInner = split(unwrap(readIn.substring(1)));
+			return new Node(Symbol.create("hash-set"), splitInner);
+		}
+		return BasicType.realType(readIn);
 	}
 
 	public static PersistentList split(String str) {
@@ -56,7 +67,9 @@ public final class Parser {
 
 	private static String getFirst(String str) {
 		char headCh = str.charAt(0);
-		return headCh == '(' || headCh == STRING_WRAPPING_CHAR
+		if (headCh == '$')
+			return str.substring(0, getFirstElemLen(str.substring(1), 0, 0, '\0') + 1);
+		return COLLECTION_HEAD_CHAR_SET.contains(headCh) || headCh == STRING_WRAPPING_CHAR
 				? str.substring(0, getFirstElemLen(str, 0, 0, '\0'))
 				: getHeadPlainText(str);
 	}
@@ -67,14 +80,18 @@ public final class Parser {
 		return m.group(1);
 	}
 
+	private static int getBalanceDelta(final char c) {
+		if (COLLECTION_HEAD_CHAR_SET.contains(c)) return 1;
+		else if (COLLECTION_TAIL_CHAR_SET.contains(c)) return -1;
+		return 0;
+	}
+
 	private static int getFirstElemLen(String src, int balance, int elemLen, char spanChar) {
 		if (elemLen != 0 && balance == 0 && spanChar == '\0') return elemLen;
 		
 		final char c = src.charAt(elemLen);
 		return getFirstElemLen(src,
-				spanChar == STRING_WRAPPING_CHAR
-					? balance
-					: balance + (c == '(' ? 1 : (c == ')' ? -1 : 0)),
+				spanChar == STRING_WRAPPING_CHAR ? balance : balance + getBalanceDelta(c),
 				elemLen + (c == ESCAPE_CHAR ? 2 : 1),
 				STRING_WRAPPING_CHAR == c ? (spanChar == c ? '\0' : c) : spanChar);
 	}

@@ -103,6 +103,14 @@ public class AshLispUsage {
 		trace(eval("((lambda ((a . b)) b) '(1 2 3))")); // (2 3)
 ```
 
+### Persistent Data Structure
+```Java
+		trace(eval("(class '(:a :b :c))")); // ash.lang.Node
+		trace(eval("(class [1 2 3])")); // ash.lang.PersistentVector
+		trace(eval("(class ${:a :b :c})")); // ash.lang.PersistentSet
+		trace(eval("(class {:a 1 :b 2})")); // ash.lang.PersistentMap
+```
+
 ### Misc
 ```Java
 		// build string 
@@ -124,6 +132,5 @@ public class AshLispUsage {
 `ash.repl.REPLInVM` Run As Java Application
 
 ## Specification
-* List is the data structure only supported. (Doesn't support dotted pair)
 * Nil for false, others for true. Nil expressing into '().
 * Preload file using '.scm' as suffix just for the convenience of editing and color coding.

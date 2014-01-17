@@ -15,12 +15,15 @@ public final class BasicType {
 			return Integer.parseInt(val);
 		else if (DECIMAL_PATTERN.matcher(val).matches())
 			return Double.parseDouble(val);
-		else if (val.charAt(0) == '\\')
-			return parseChar(val);
-		else if (val.charAt(0) == '\"' && val.charAt(val.length() - 1) == '\"')
-			return val.substring(1, val.length() - 1);
-		else if (val.charAt(0) == ':')
-			return KeyWord.create(val);
+		else {
+			char firstChar = val.charAt(0);
+			if (firstChar == '\\')
+				return parseChar(val);
+			else if (firstChar == '\"' && val.charAt(val.length() - 1) == '\"')
+				return val.substring(1, val.length() - 1);
+			else if (firstChar == ':')
+				return KeyWord.create(val);
+		}
 		return Symbol.create(val);
 	}
 

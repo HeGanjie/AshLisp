@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import ash.parser.Parser;
 import bruce.common.utils.CommonUtils;
 
 //TODO : make more efficient
@@ -127,8 +126,8 @@ public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString(Parser.HASH_SET_START,
+		return CommonUtils.buildString("${",
 				PersistentList.cast(this).innerToString(),
-				Parser.HASH_SET_END);
+				"}");
 	}
 }

@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ash.parser.Parser;
 import bruce.common.utils.CommonUtils;
 
 // TODO : make more efficient
 public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> {
 	private static final long serialVersionUID = -434275790068739365L;
+	private static final char HASH_MAP_START = '{', HASH_MAP_END = '}';
 	private final Map<K, V> map;
 	
 	public PersistentMap() {
@@ -106,9 +106,9 @@ public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> 
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString(Parser.HASH_MAP_START,
+		return CommonUtils.buildString(HASH_MAP_START,
 				PersistentList.cast(this).innerToString(),
-				Parser.HASH_MAP_END);
+				HASH_MAP_END);
 	}
 
 	@Override
