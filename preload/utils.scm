@@ -137,6 +137,8 @@
 (def str (lambda (. x)
 	   (bruce.common.utils.CommonUtils/displayArray (.toArray (.toList x)) "")))
 
+(def _out_ (.$out System))
+
 (def puts (lambda (. x)
 	    (.println _out_ (apply str x))))
 
@@ -157,4 +159,16 @@
 			    (f init (car seq))
 			    (cdr seq)))
 	  (cons init '()))))
+
+(defn lazy-cat (. cs)
+      (lazy-seq
+	(when cs
+	  (let ((h . rc) cs)
+	    (if h
+	      (cons (car h)
+		    (apply lazy-cat (cons (cdr h) rc)))
+	      (apply lazy-cat rc))))))
+
+(defn mapcat (f coll)
+      (apply lazy-cat (map f coll)))
 

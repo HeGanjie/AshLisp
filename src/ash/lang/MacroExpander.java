@@ -7,7 +7,7 @@ import ash.compiler.Compiler;
 import ash.vm.Closure;
 
 
-public class MacroExpander {
+public final class MacroExpander {
 	public static final Symbol SYNTAX_QUOTE = Symbol.create("syntax-quote");
 	private static final Symbol LIST_SYMBOL = Symbol.create("list"),
 								CONCAT_SYMBOL = Symbol.create("concat"),

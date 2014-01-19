@@ -11,6 +11,9 @@ import ash.lang.PersistentSet;
 import ash.lang.Symbol;
 
 public final class Parser {
+	private static final Symbol VECTOR_SYMBOL = Symbol.create("vector"),
+								HASH_SET_SYMBOL = Symbol.create("hash-set"),
+								HASH_MAP_SYMBOL = Symbol.create("hash-map");
 	private static final Pattern getFirstPlainTextPattern = Pattern.compile("(\\S+)\\s*");
 	private static final PersistentSet<Character> COLLECTION_HEAD_CHAR_SET = new PersistentSet<>( '(', '[', '{');
 	private static final PersistentSet<Character> COLLECTION_TAIL_CHAR_SET = new PersistentSet<>( ')', ']', '}');
@@ -35,13 +38,13 @@ public final class Parser {
 			PersistentList splitInner = split(unwrap(readIn));
 			if (firstChar == '(') return splitInner;
 			else if (firstChar == '[')
-				return new Node(Symbol.create("vector"), splitInner);
+				return new Node(VECTOR_SYMBOL, splitInner);
 			else if (firstChar == '{')
-				return new Node(Symbol.create("hash-map"), splitInner);
+				return new Node(HASH_MAP_SYMBOL, splitInner);
 			throw new IllegalArgumentException();
 		} else if (firstChar == '$') {
 			PersistentList splitInner = split(unwrap(readIn.substring(1)));
-			return new Node(Symbol.create("hash-set"), splitInner);
+			return new Node(HASH_SET_SYMBOL, splitInner);
 		}
 		return BasicType.realType(readIn);
 	}

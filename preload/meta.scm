@@ -1,4 +1,3 @@
-(def _out_ (.$out System))
 (def _macrosMap_ (.$MARCOS_MAP ash.lang.MacroExpander))
 
 (def new-macro (lambda (symbol fn) (.put _macrosMap_ symbol fn)))
@@ -46,19 +45,4 @@
 (defn cadr (s) (car (cdr s)))
 
 (defn caddr (s) (car (cdr (cdr s))))
-
-(defn first (coll)
-      (if seq?
-	(car coll)
-	(.get coll 0)))
-
-(defn second (coll)
-      (if seq?
-	(cadr coll)
-	(.get coll 1)))
-
-(defn third (coll)
-      (if seq?
-	(caddr coll)
-	(.get coll 2)))
 
