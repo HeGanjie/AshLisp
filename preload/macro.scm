@@ -42,10 +42,12 @@
   (if rest
     (cond ((= :when (car rest)) `(for (~p (filter (lambda (~p) ~(cadr rest)) ~coll)
 				       @(cddr rest)) ~body))
+	  ((= :while (car rest)) `(for (~p (take-while (lambda (~p) ~(cadr rest)) ~coll)
+					@(cddr rest)) ~body))
 	  ((= :let (car rest)) (let ((letp letv) (zip-step (partition 2 (cadr rest)))
 				     consp (if (seq? p) (concat p letp) (cons p letp))
 				     consv (if (seq? p) (concat p letv) (cons p letv)))
-				 `(for (~consp (map (lambda (~p) [@consv]) ~coll)
+				 `(for (~consp (map (lambda (~p) (list @consv)) ~coll)
 					@(cddr rest)) ~body)))
 	  ('t `(mapcat (lambda (~p) (for ~rest ~body)) ~coll)))
     `(map (lambda (~p) ~body) ~coll)))

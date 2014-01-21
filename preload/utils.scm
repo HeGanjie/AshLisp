@@ -175,3 +175,8 @@
 (defn keyword? (v)
       (instance? ash.lang.KeyWord v))
 
+(defn take-while (f coll)
+      (when coll
+	(when (f (car coll))
+	  (cons (car coll) (take-while f (cdr coll))))))
+
