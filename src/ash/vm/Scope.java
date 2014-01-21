@@ -17,6 +17,6 @@ public final class Scope implements Serializable {
 		if (argIndex < environment.length)
 			return environment[argIndex];
 		else
-			return prevScope.queryArg(environment.length - argIndex);
+			return prevScope.queryArg(argIndex - environment.length);
 	}
 }
