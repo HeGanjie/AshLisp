@@ -90,7 +90,10 @@ public final class VMFrame implements Serializable {
 									: myScope.queryArg(varIndex - callArgs.length);
 							pushWorkingStack(val);
 						} else { // ldv
-							pushWorkingStack(tempVar.get(arg)); // symbol
+							Object var = tempVar.get(arg);
+							if (var == null)
+								throw new RuntimeException("Undefine var:" + arg);
+							pushWorkingStack(var); // symbol
 						}
 					} else {
 						if (ordinal == 2) { // ldc (quote)
@@ -274,7 +277,7 @@ public final class VMFrame implements Serializable {
 					? callArgs[varIndex]
 					: myScope.queryArg(varIndex - callArgs.length);
 		} else {
-			PersistentList seq = (PersistentList) loadInTree(stackedIndexs.rest());
+			PersistentList seq = PersistentList.cast(loadInTree(stackedIndexs.rest()));
 			int pos = (int) stackedIndexs.head();
 			if (pos < 0)
 				return ListUtils.drop(-pos, seq);

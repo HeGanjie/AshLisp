@@ -46,3 +46,5 @@
 
 (defn caddr (s) (car (cdr (cdr s))))
 
+(defn cddr (s) (cdr (cdr s)))
+

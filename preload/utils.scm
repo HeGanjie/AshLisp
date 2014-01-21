@@ -172,3 +172,6 @@
 (defn mapcat (f coll)
       (apply lazy-cat (map f coll)))
 
+(defn keyword? (v)
+      (instance? ash.lang.KeyWord v))
+
