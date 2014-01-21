@@ -108,6 +108,8 @@ public class AshLispUsage {
 		trace(eval("(for (a (range 0 6) :when (even? a)) a)")); // (0 2 4)
 		trace(eval("(for (a (range 0 6) :let (b (* a 2))) [a b])"));
 		// ([0 0] [1 2] [2 4] [3 6] [4 8] [5 10])
+		trace(eval("(for (x [:a :b :c] y [1 2]) [x y])"));
+		// ([:a 1] [:a 2] [:b 1] [:b 2] [:c 1] [:c 2])
 ```
 
 ### Persistent Data Structure
