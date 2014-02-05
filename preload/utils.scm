@@ -16,12 +16,12 @@
 	      seq))
 
 (defn filter (pred seq)
-      (fold-right (lambda (item init)
-		    (if (pred item)
-		      (cons item init)
-		      init))
-		  '()
-		  seq))
+      (lazy-seq
+	(when seq
+	  (let ((h . r) seq)
+	    (if (pred h)
+	      (cons h (filter pred r))
+	      (filter pred r))))))
 
 (defn map (func seq)
       (lazy-seq
@@ -54,7 +54,7 @@
 
 (defn nth (n seq)
       (cond
-	((not seq) '())
+	((nil? seq) '())
 	((zero? n) (car seq))
 	('t (tail (dec n) (cdr seq)))))
 
@@ -65,12 +65,12 @@
 
 (defn pair (keys vals)
       (cond
-	((or (not keys) (not vals)) '())
+	((or (nil? keys) (nil? vals)) '())
 	((eq (car keys) '.) (list (nth 1 keys) vals))
 	('t (cons (list (car keys) (car vals)) (pair (cdr keys) (cdr vals))))))
 
 (defn assoc (key pair-seq)
-      (cond ((not pair-seq) '())
+      (cond ((nil? pair-seq) '())
 	    ((eq (ntree '(0 0) pair-seq) key)
 	     (ntree '(0 1) pair-seq))
 	    ('t (tail key (cdr pair-seq)))))
@@ -78,7 +78,7 @@
 (defn count (seq) (reduce inc 0 seq))
 
 (defn indexof (item seq skip)
-      (cond ((not seq) -1)
+      (cond ((nil? seq) -1)
 	    ((eq (car seq) item) skip)
 	    ('t (tail item (cdr seq) (inc skip)))))
 
@@ -93,6 +93,9 @@
 (def expand-macro ash.lang.MacroExpander/expand)
 
 (defn identity (x) x)
+
+(defn constantly (x)
+      (lambda (. ignores) x))
 
 (defn take (n seq)
       (lazy-seq
@@ -119,9 +122,10 @@
 	(when coll
 	  (cons (take n coll) (partition n (drop n coll))))))
 
-(def last (lambda (seq)
-	    (cond ((cdr seq) (tail (cdr seq)))
-		  ('t (car seq)))))
+(defn last (seq)
+      (if (cdr seq)
+	(tail (cdr seq))
+	(car seq)))
 
 (defn iterate (f x)
       (lazy-seq
@@ -134,20 +138,25 @@
 (defn stream-make (. args)
       (map identity args))
 
-(def str (lambda (. x)
-	   (bruce.common.utils.CommonUtils/displayArray (.toArray (.toList x)) "")))
+(defn str (. x)
+      (bruce.common.utils.CommonUtils/displayArray
+	(.toArray (.toList x))
+	""))
 
 (def _out_ (.$out System))
 
-(def puts (lambda (. x)
-	    (.println _out_ (apply str x))))
+(defn puts (. x)
+      (.println _out_ (apply str x)))
 
 (defn num? (x) (instance? Number x))
 
 (defn seq (x) (map identity x))
 
+(defn lambda? (e)
+      (instance? ash.vm.Closure e))
+
 (defn trampoline (f . args)
-      (if (instance? ash.vm.Closure f)
+      (if (lambda? f)
 	(tail (apply f args))
 	f))
 
@@ -176,7 +185,8 @@
       (instance? ash.lang.KeyWord v))
 
 (defn take-while (f coll)
-      (when coll
-	(when (f (car coll))
-	  (cons (car coll) (take-while f (cdr coll))))))
+      (lazy-seq
+	(when coll
+	  (when (f (car coll))
+	    (cons (car coll) (take-while f (cdr coll)))))))
 
