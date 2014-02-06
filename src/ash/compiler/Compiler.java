@@ -77,10 +77,10 @@ public final class Compiler {
 	}
 
 	private static Serializable compileLambda(Node node, PersistentList lambdaArgs) {
-		Node paramList = (Node) node.second();
+		PersistentList paramList = (PersistentList) node.second();
 		int dotIndex = ListUtils.indexOf(paramList, MULTI_ARGS_SIGNAL, 0);
 		boolean notCombineArgs = dotIndex == -1;
-		Node argsList = notCombineArgs ? paramList : (Node) removeDot(paramList);
+		PersistentList argsList = notCombineArgs ? paramList : removeDot(paramList);
 		return listInstruction(
 				InstructionSetEnum.closure.create(
 						expand(listInstructionRecur(notCombineArgs ? 1 : 0,

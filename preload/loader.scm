@@ -5,11 +5,11 @@
 
 (def parse ash.parser.Parser/split)
 
-(def lazy-load (lambda (astIter)
+(def lazy-load (lambda (asts)
 		 (.new ash.lang.LazyNode
 		       (lambda ()
-			 (cond ((.hasNext astIter) (cons (vmexec (compile (.next astIter)))
-							 (lazy-load astIter))))))))
+			 (cond (asts (cons (vmexec (compile (car asts)))
+					   (lazy-load (cdr asts)))))))))
 
 (def list (lambda (. x) x))
 
@@ -25,8 +25,7 @@
 (def load-src (lambda (src)
 		(doall
 		  (lazy-load
-		    (.iterator
-		      (parse src))))))
+		    (parse src)))))
 
 (def load (lambda (srcName)
 	    (load-src
