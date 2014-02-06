@@ -86,6 +86,7 @@
     `(or ~x ~y)))
 
 (defmacro = (x y) `(eq ~x ~y))
+(defmacro != (x y) `(neq ~x ~y))
 (defmacro % (x y) `(mod ~x ~y))
 (defmacro < (x y) `(lt ~x ~y))
 (defmacro <= (x y) `(le ~x ~y))
