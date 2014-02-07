@@ -6,17 +6,17 @@ import bruce.common.utils.CommonUtils;
 
 public final class Instruction implements Serializable {
 	private static final long serialVersionUID = 4568764332998004451L;
-	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
+	private static final InstructionSet[] INST_ARR = InstructionSet.values();
 	
 	final int ins;
 	final Object args;
 	
-	public Instruction(InstructionSetEnum instruction) {
+	public Instruction(InstructionSet instruction) {
 		ins = instruction.ordinal();
 		args = null;
 	}
 	
-	public Instruction(InstructionSetEnum instruction, Object instructionArgs) {
+	public Instruction(InstructionSet instruction, Object instructionArgs) {
 		ins = instruction.ordinal();
 		args = instructionArgs;
 	}

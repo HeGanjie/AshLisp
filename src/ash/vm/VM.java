@@ -17,6 +17,7 @@ import bruce.common.utils.FileUtil;
 public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;
 
+	public static final boolean debugging = false;
 	public static final Map<Symbol, Object> tempVar = new HashMap<>();
 	protected final Deque<VMFrame> frameStack = new ArrayDeque<>();
 	public VMFrame headFrame;
@@ -40,7 +41,7 @@ public final class VM implements Serializable {
 
 	public Object runInMain(PersistentList instSeq) {
 		List<Instruction> insts = instSeq.toList(Instruction.class);
-		insts.add(InstructionSetEnum.halt.create()); // not ret because maybe nothing can be return
+		insts.add(InstructionSet.halt.create()); // not ret because maybe nothing can be return
 		return runFrame(new VMFrame(insts, null));
 	}
 	
@@ -52,7 +53,8 @@ public final class VM implements Serializable {
 	private Object run() {
 		while (!frameStack.isEmpty()) {
 			headFrame = frameStack.peek();
-			headFrame.execUntilStackChange();
+			if (debugging) headFrame.execUntilStackChange_DEBUG();
+			else headFrame.execUntilStackChange();
 			if (headFrame.nextFrame != null)
 				pushFrame(headFrame.nextFrame);
 			else

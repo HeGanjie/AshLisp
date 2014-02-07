@@ -10,7 +10,7 @@ import bruce.common.functional.Func1;
 import bruce.common.functional.LambdaUtils;
 
 
-public enum InstructionSetEnum {
+public enum InstructionSet {
 	ldp, // 0
 	ldv,
 	ldc,
@@ -54,15 +54,15 @@ public enum InstructionSetEnum {
 //	dup;
 	
 	private static final Set<String> INST_NAME_CACHE = new HashSet<>(LambdaUtils.select(Arrays.asList(values()),
-			new Func1<String, InstructionSetEnum>() {
+			new Func1<String, InstructionSet>() {
 		@Override
-		public String call(InstructionSetEnum ins) { return ins.name(); }
+		public String call(InstructionSet ins) { return ins.name(); }
 	}));
 	
 	private static final List<Instruction> INST_CACHES = LambdaUtils.select(Arrays.asList(values()),
-			new Func1<Instruction, InstructionSetEnum>() {
+			new Func1<Instruction, InstructionSet>() {
 		@Override
-		public Instruction call(InstructionSetEnum inst) {
+		public Instruction call(InstructionSet inst) {
 			return new Instruction(inst);
 		}
 	});

@@ -1,14 +1,14 @@
 package ash.lang;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public final class Symbol implements Serializable {
 	private static final long serialVersionUID = 6668290329248269533L;
 	public final String name;
 
-	private static final Map<String, Symbol> CACHE = new HashMap<>();
+	private static final Map<String, Symbol> CACHE = new WeakHashMap<>();
 	
 	public static Symbol create(String name) {
 		Symbol symbol = CACHE.get(name);

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import ash.compiler.Compiler;
 import ash.vm.Closure;
 import ash.vm.VM;
-import ash.vm.VMFrame;
 import bruce.common.utils.CommonUtils;
 
 public final class LazyNode extends PersistentList {
@@ -40,7 +39,7 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public String toString() {
-		return VMFrame.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
+		return VM.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
 	}
 
 	public static PersistentList create(Iterator<?> iter) {

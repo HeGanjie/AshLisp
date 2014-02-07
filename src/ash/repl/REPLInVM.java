@@ -7,14 +7,13 @@ import ash.compiler.Compiler;
 import ash.lang.BasicType;
 import ash.parser.Parser;
 import ash.vm.VM;
-import ash.vm.VMFrame;
 import bruce.common.utils.CommonUtils;
 
 public final class REPLInVM {
 
 	public static void main(String[] args) {
 		VM vm = new VM();
-		if (VMFrame.debugging) {
+		if (VM.debugging) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 			while (true) {

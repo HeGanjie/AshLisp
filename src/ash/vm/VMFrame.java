@@ -8,15 +8,13 @@ import java.util.Map;
 
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
-import ash.lang.Node;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
 	private static final long serialVersionUID = 3322385890943332297L;
-	public static final boolean debugging = false;
-	private static final InstructionSetEnum[] INST_ARR = InstructionSetEnum.values();
+	private static final InstructionSet[] INST_ARR = InstructionSet.values();
 	
 	private static final Map<Symbol, Object> tempVar = VM.tempVar;
 	private Scope myScope;
@@ -40,8 +38,8 @@ public final class VMFrame implements Serializable {
 	
 	public Object popReturnValue() { return workingStack.isEmpty() ? BasicType.NIL : workingStack.pop(); }
 
-	public void prepareNextFrame(Closure closure, int paramsCount) {
-		nextFrame = new VMFrame(closure.ins, closure.env);
+	private void prepareNextFrame(Closure closure, int paramsCount) {
+		nextFrame = new VMFrame(closure.getInsts(), closure.env);
 		nextFrame.callArgs = createCallingArgs(paramsCount);
 		frameChanged = true;
 	}
@@ -53,36 +51,33 @@ public final class VMFrame implements Serializable {
 		return args;
 	}
 
-	private Closure makeSubClosure(List<Instruction> rtn, Node fnDefine) {
-		return new Closure(rtn, getScope(), fnDefine);
+	private Closure makeSubClosure(ClosureArgs args) {
+		Scope closureScope = callArgs == null ? null : new Scope(myScope, callArgs);
+		return new Closure(args, closureScope);
 	}
 
-	private Scope getScope() {
-		if (myScope == null && callArgs == null) return null;
-		return new Scope(myScope, callArgs);
-	}
-
-	public void execUntilStackChange() {
+	public void execUntilStackChange_DEBUG() {
 		while (!frameChanged) {
 			Instruction i = executingInsts.get(runIndex++);
-			if (debugging) {
-				if (i.args != null)
-					System.out.print(CommonUtils.buildString(makeIndent(this),
-							INST_ARR[i.ins], ' ', i.args));
-				else
-					System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
-			}
-			
+			if (i.args != null)
+				System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins], ' ', i.args));
+			else
+				System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
+
 			exec(i.ins, i.args);
-			
-			if (debugging) {
-				System.out.print('\t');
-				System.out.println(workingStack);
-			}
+
+			System.out.print('\t');
+			System.out.println(workingStack);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	public void execUntilStackChange() {
+		while (!frameChanged) {
+			Instruction i = executingInsts.get(runIndex++);
+			exec(i.ins, i.args);
+		}
+	}
+	
 	private void exec(int ordinal, Object arg) {
 		if (ordinal < 16) {
 			if (ordinal < 8) {
@@ -122,8 +117,7 @@ public final class VMFrame implements Serializable {
 						}
 					} else {
 						if (ordinal == 6) { // closure
-							PersistentList args = (PersistentList) arg;
-							pushWorkingStack(makeSubClosure((List<Instruction>) args.head(), (Node) ((PersistentList) arg).second()));
+							pushWorkingStack(makeSubClosure((ClosureArgs) arg));
 						} else { // jmp
 							runIndex = (Integer) arg;
 						}
@@ -291,7 +285,7 @@ public final class VMFrame implements Serializable {
 		}
 	}
 	
-	protected static final String makeIndent(VMFrame headFrame) {
+	private static final String makeIndent(VMFrame headFrame) {
 		int indent = calcIndent(headFrame, -1);
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < indent; i++)
@@ -299,7 +293,7 @@ public final class VMFrame implements Serializable {
 		return sb.toString();
 	}
 
-	protected static final int calcIndent(VMFrame headFrame, int base) {
+	private static final int calcIndent(VMFrame headFrame, int base) {
 		if (headFrame.prevFrame == null) return base;
 		return calcIndent(headFrame.prevFrame, base + 1);
 	}

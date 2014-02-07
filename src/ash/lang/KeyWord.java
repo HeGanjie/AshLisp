@@ -1,14 +1,14 @@
 package ash.lang;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public final class KeyWord implements Serializable {
 	private static final long serialVersionUID = -5276674770932351129L;
 	private final String name;
 
-	private static final Map<String, KeyWord> CACHE = new HashMap<>();
+	private static final Map<String, KeyWord> CACHE = new WeakHashMap<>();
 	
 	public static KeyWord create(String name) {
 		KeyWord keyWord = CACHE.get(name);

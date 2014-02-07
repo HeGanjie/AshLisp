@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import ash.lang.BasicType;
 import ash.lang.ListUtils;
@@ -19,7 +19,7 @@ import bruce.common.functional.LambdaUtils;
 public final class JavaMethod implements Serializable {
 	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[]{};
 	private static final long serialVersionUID = -933603269059202413L;
-	private static final Map<String, JavaMethod> CACHE = new HashMap<>();
+	private static final Map<String, JavaMethod> CACHE = new WeakHashMap<>();
 	
 	private String methodFullName;
 	private Class<?> clazz;
