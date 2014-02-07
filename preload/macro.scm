@@ -46,13 +46,13 @@
       `(->> (~(car ops) ~val) @(cdr ops)))
     val))
 
-(defmacro for (pcs body)
+(defmacro for (pcs . body)
   (let (p (car pcs)
 	coll (cadr pcs)
 	rest (cddr pcs))
     (if rest
       (let (update-for (lambda (pu cu)
-			 `(for (~pu ~cu @(cddr rest)) ~body)))
+			 `(for (~pu ~cu @(cddr rest)) @body)))
 	(cond ((= :when (car rest)) (update-for p `(filter (lambda (~p) ~(cadr rest)) ~coll)))
 	      ((= :while (car rest)) (update-for p `(take-while (lambda (~p) ~(cadr rest)) ~coll)))
 	      ((= :let (car rest)) (let (letpv (zip-step (partition 2 (cadr rest)))
@@ -67,8 +67,8 @@
 					 consp (if (seq? p) (concat p zipp) (cons p zipp))
 					 consc (cons coll zipv))
 				     (update-for consp `(zip-step (list @consc)))))
-	      ('t `(mapcat (lambda (~p) (for ~rest ~body)) ~coll))))
-      `(map (lambda (~p) ~body) ~coll))))
+	      ('t `(mapcat (lambda (~p) (for ~rest @body)) ~coll))))
+      `(map (lambda (~p) (do @body)) ~coll))))
 
 (defmacro + (x y . s)
   (if s
