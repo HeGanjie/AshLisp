@@ -24,9 +24,11 @@
   `(cond ((not ~test) (do @true))))
 
 (defmacro let (pvs . body)
-  (if (cddr pvs)
-    `((lambda (~(car pvs)) (let ~(cddr pvs) (do @body))) ~(cadr pvs))
-    `((lambda (~(car pvs)) (do @body)) ~(cadr pvs))))
+  ((lambda (p v rest)
+     (if rest
+       `((lambda (~p) (let ~rest (do @body))) ~v)
+       `((lambda (~p) (do @body)) ~v)))
+   (car pvs) (cadr pvs) (cddr pvs)))
 
 (defmacro -> (val . ops)
   (if ops
@@ -46,8 +48,8 @@
 
 (defmacro for (pcs body)
   (let (p (car pcs)
-	  coll (cadr pcs)
-	  rest (cddr pcs))
+	coll (cadr pcs)
+	rest (cddr pcs))
     (if rest
       (let (update-for (lambda (pu cu)
 			 `(for (~pu ~cu @(cddr rest)) ~body)))
