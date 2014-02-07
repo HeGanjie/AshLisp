@@ -1,8 +1,5 @@
-(defn = (h s . x)
-      (when (eq h s)
-	(if x
-	  (apply = (cons s x))
-	  't)))
+(defn = (. x)
+      (every (lambda (e) (eq (car x) e)) (cdr x)))
 (defn != (. x) (not (apply = x)))
 (defn + (. x) (reduce add (car x) (cdr x)))
 (defn - (. x) (reduce sub (car x) (cdr x)))

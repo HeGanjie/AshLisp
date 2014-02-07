@@ -13,9 +13,9 @@ import bruce.common.utils.CommonUtils;
 public final class REPLInVM {
 
 	public static void main(String[] args) {
+		VM vm = new VM();
 		if (VMFrame.debugging) {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			VM vm = new VM();
 
 			while (true) {
 				try {
@@ -33,6 +33,6 @@ public final class REPLInVM {
 				}
 			}
 		} else
-			new VM().batchRunInMain(Compiler.batchCompile(Parser.split("(load \"repl.scm\")")));
+			vm.batchRunInMain(Compiler.batchCompile(Parser.split("(load \"repl.scm\")")));
 	}
 }

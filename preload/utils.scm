@@ -39,12 +39,16 @@
 (def nil? not)
 
 (defn any (f seq)
-      (fold-right (lambda (item init) (or (f item) init))
-		  '() seq))
+      (when seq
+	(if (f (car seq))
+	  't
+	  (tail f (cdr seq)))))
 
 (defn every (f seq)
-      (fold-right (lambda (item init) (and (f item) init))
-		  't seq))
+      (if seq
+	(when (f (car seq))
+	  (tail f (cdr seq)))
+	't))
 
 (defn complement (f)
       (lambda (. args) (not (apply f args))))

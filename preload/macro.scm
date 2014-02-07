@@ -1,3 +1,9 @@
+(defmacro cadr (s) `(car (cdr ~s)))
+
+(defmacro caddr (s) `(car (cdr (cdr ~s))))
+
+(defmacro cddr (s) `(cdr (cdr ~s)))
+
 (defmacro if (test true else)
   `(cond (~test ~true)
 	 ('t ~else)))
@@ -17,10 +23,10 @@
 (defmacro when-not (test . true)
   `(cond ((not ~test) (do @true))))
 
-(defmacro let ((p v . rest) . body)
-  (if rest
-    `((lambda (~p) (let ~rest (do @body))) ~v)
-    `((lambda (~p) (do @body)) ~v)))
+(defmacro let (pvs . body)
+  (if (cddr pvs)
+    `((lambda (~(car pvs)) (let ~(cddr pvs) (do @body))) ~(cadr pvs))
+    `((lambda (~(car pvs)) (do @body)) ~(cadr pvs))))
 
 (defmacro -> (val . ops)
   (if ops
@@ -38,22 +44,29 @@
       `(->> (~(car ops) ~val) @(cdr ops)))
     val))
 
-(defmacro for ((p coll . rest) body)
-  (if rest
-    (let (update-for (lambda (pu cu)
-		       `(for (~pu ~cu @(cddr rest)) ~body)))
-      (cond ((= :when (car rest)) (update-for p `(filter (lambda (~p) ~(cadr rest)) ~coll)))
-	    ((= :while (car rest)) (update-for p `(take-while (lambda (~p) ~(cadr rest)) ~coll)))
-	    ((= :let (car rest)) (let ((letp letv) (zip-step (partition 2 (cadr rest)))
-						   consp (if (seq? p) (concat p letp) (cons p letp))
-						   consv (if (seq? p) (concat p letv) (cons p letv)))
-				   (update-for consp `(map (lambda (~p) (list @consv)) ~coll))))
-	    ((= :zip (car rest)) (let ((zipp zipv) (zip-step (partition 2 (cadr rest)))
-						   consp (if (seq? p) (concat p zipp) (cons p zipp))
-						   consc (cons coll zipv))
-				   (update-for consp `(zip-step (list @consc)))))
-	    ('t `(mapcat (lambda (~p) (for ~rest ~body)) ~coll))))
-    `(map (lambda (~p) ~body) ~coll)))
+(defmacro for (pcs body)
+  (let (p (car pcs)
+	  coll (cadr pcs)
+	  rest (cddr pcs))
+    (if rest
+      (let (update-for (lambda (pu cu)
+			 `(for (~pu ~cu @(cddr rest)) ~body)))
+	(cond ((= :when (car rest)) (update-for p `(filter (lambda (~p) ~(cadr rest)) ~coll)))
+	      ((= :while (car rest)) (update-for p `(take-while (lambda (~p) ~(cadr rest)) ~coll)))
+	      ((= :let (car rest)) (let (letpv (zip-step (partition 2 (cadr rest)))
+					 letp (car letpv)
+					 letv (cadr letpv)
+					 consp (if (seq? p) (concat p letp) (cons p letp))
+					 consv (if (seq? p) (concat p letv) (cons p letv)))
+				     (update-for consp `(map (lambda (~p) (list @consv)) ~coll))))
+	      ((= :zip (car rest)) (let (zippv (zip-step (partition 2 (cadr rest)))
+					 zipp (car zippv)
+					 zipv (cadr zippv)
+					 consp (if (seq? p) (concat p zipp) (cons p zipp))
+					 consc (cons coll zipv))
+				     (update-for consp `(zip-step (list @consc)))))
+	      ('t `(mapcat (lambda (~p) (for ~rest ~body)) ~coll))))
+      `(map (lambda (~p) ~body) ~coll))))
 
 (defmacro + (x y . s)
   (if s
