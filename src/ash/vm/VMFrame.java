@@ -13,6 +13,7 @@ import ash.lang.Symbol;
 import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
+	private static final Symbol SLEEP_SYMBOL = Symbol.create("_sleep_");
 	private static final long serialVersionUID = 3322385890943332297L;
 	private static final InstructionSet[] INST_ARR = InstructionSet.values();
 	
@@ -68,6 +69,9 @@ public final class VMFrame implements Serializable {
 
 			System.out.print('\t');
 			System.out.println(workingStack);
+			
+			if (tempVar.containsKey(SLEEP_SYMBOL))
+				CommonUtils.delay(((Number) tempVar.get(SLEEP_SYMBOL)).longValue());
 		}
 	}
 	

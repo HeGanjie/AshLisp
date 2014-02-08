@@ -21,7 +21,7 @@ import bruce.common.functional.Func1;
 public final class Compiler {
 	public static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
-			"def", "quote", "cond", "lambda",
+			"def", "quote", "cond", "lambda*",
 			"atom", "car", "cdr", "not",
 			"neq", "eq", "cons", "add", "sub", "mul", "div", "mod",
 			"gt", "ge", "lt", "le", "and", "or"));
@@ -63,7 +63,7 @@ public final class Compiler {
 				return listInstruction(InstructionSet.ldc.create(node.second()));
 			case "cond":
 				return compileCond(node.rest(), lambdaContext, startIndex);
-			case "lambda":
+			case "lambda*":
 				return compileLambdaLazy(node, lambdaContext);
 			default:
 				return compileInstCall((Symbol) op, node.rest(), lambdaContext, startIndex);
