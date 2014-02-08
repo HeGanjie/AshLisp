@@ -112,11 +112,13 @@ public final class Compiler {
 				InstructionSet.valueOf(inst.name).create());
 	}
 
+	private static final Func1<Boolean, Object> removeDotPred = new Func1<Boolean, Object>() {
+		@Override
+		public Boolean call(Object symbol) { return !MULTI_ARGS_SIGNAL.equals(symbol); }
+	};
+	
 	private static PersistentList removeDot(PersistentList seq) {
-		return ListUtils.filter(seq, new Func1<Boolean, Object>() {
-			@Override
-			public Boolean call(Object symbol) { return !MULTI_ARGS_SIGNAL.equals(symbol); }
-		});
+		return ListUtils.filter(seq, removeDotPred);
 	}
 
 	private static Serializable compileSymbol(final Symbol symbol, PersistentList lambdaContext) {
@@ -126,31 +128,15 @@ public final class Compiler {
 		else if (isJavaClassPathSymbol(methodName))
 			return InstructionSet.ldc.create(symbol); // java class path
 
-		PersistentList argIndexs = findArgIndexs(lambdaContext, symbol, 0, BasicType.NIL);
-		if (argIndexs.isEndingNode()) {
-			if (InstructionSet.contains(methodName))
-				return InstructionSet.ldc.create(InstructionSet.valueOf(methodName).create()); // instruction
-			else
+		if (InstructionSet.contains(methodName))
+			return InstructionSet.ldc.create(InstructionSet.valueOf(methodName).create()); // instruction
+		else {
+			int argIndexs = ListUtils.indexOf(lambdaContext, symbol, 0);
+			if (argIndexs == -1) {
 				return InstructionSet.ldv.create(symbol); // symbol
-		} else if (argIndexs.rest().isEndingNode())
-			return InstructionSet.ldp.create(argIndexs.head()); // symbol index of params
-		else
-			return InstructionSet.ldt.create(argIndexs); // destructuring
-	}
-
-	private static PersistentList findArgIndexs(PersistentList lambdaContext, Symbol symbol, int skiped, Node stack) {
-		if (lambdaContext.isEndingNode()) return BasicType.NIL;
-		Object val = lambdaContext.head();
-		if (val instanceof Node) {
-			PersistentList rst = findArgIndexs((PersistentList) val, symbol, 0, new Node(skiped, stack));
-			if (!rst.isEndingNode()) return rst;
-		} else if (MULTI_ARGS_SIGNAL.equals(val)) {
-			if (symbol.equals(lambdaContext.second())) {
-				return new Node(-skiped, stack);
-			}
-		} else if (symbol.equals(val))
-			return new Node(skiped, stack);
-		return findArgIndexs(lambdaContext.rest(), symbol, skiped + 1, stack);
+			} else
+				return InstructionSet.ldp.create(argIndexs); // symbol index of params
+		}
 	}
 
 	private static boolean isJavaCallSymbol(final String op) {
@@ -163,7 +149,6 @@ public final class Compiler {
 	}
 
 	private static List<Instruction> expand(Serializable instrNodes) {
-		//make sure only Instruction List appear in runtime
 		return ((Node) instrNodes).toList(Instruction.class);
 	}
 	

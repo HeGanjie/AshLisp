@@ -99,12 +99,8 @@ public final class VMFrame implements Serializable {
 								throw new RuntimeException("Undefine var:" + arg);
 							pushWorkingStack(var); // symbol
 						}
-					} else {
-						if (ordinal == 2) { // ldc (quote)
-							pushWorkingStack(arg);
-						} else { // ldt
-							pushWorkingStack(loadInTree((PersistentList) arg));
-						}
+					} else { // ldc (quote)
+						pushWorkingStack(arg);
 					}
 				} else { // 4...8
 					if (ordinal < 6) {
@@ -270,22 +266,6 @@ public final class VMFrame implements Serializable {
 					}
 				}
 			}
-		}
-	}
-
-	private Object loadInTree(PersistentList stackedIndexs) {
-		if (stackedIndexs.rest().isEndingNode()) {
-			int varIndex = (Integer) stackedIndexs.head();
-			return varIndex < callArgs.length
-					? callArgs[varIndex]
-					: myScope.queryArg(varIndex - callArgs.length);
-		} else {
-			PersistentList seq = PersistentList.cast(loadInTree(stackedIndexs.rest()));
-			int pos = (int) stackedIndexs.head();
-			if (pos < 0)
-				return ListUtils.drop(-pos, seq);
-			else
-				return ListUtils.nth(seq, pos);
 		}
 	}
 	

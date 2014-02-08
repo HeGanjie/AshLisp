@@ -14,7 +14,7 @@ public enum InstructionSet {
 	ldp, // 0
 	ldv,
 	ldc,
-	ldt,
+	quote,
 	
 	asn, // 4
 	cons_args,
