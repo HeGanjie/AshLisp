@@ -37,7 +37,7 @@ public final class Compiler {
 		return new Node(compileSingle(parseResult.head()), batchCompile(parseResult.rest()));
 	}
 
-	private static Serializable compile(final Object exp, Node lambdaContext, int startIndex) {
+	private static Serializable compile(final Object exp, PersistentList lambdaContext, int startIndex) {
 		if (exp instanceof Node)
 			return compileNode((Node) exp, lambdaContext, startIndex);
 		else
@@ -51,7 +51,7 @@ public final class Compiler {
 			return listInstruction(InstructionSet.ldc.create(exp)); // (... 1 2 3.4 \a "b" closure ...)
 	}
 
-	private static Serializable compileNode(Node node, Node lambdaContext, int startIndex) {
+	private static Serializable compileNode(Node node, PersistentList lambdaContext, int startIndex) {
 		final Object op = node.head(); // (operation ...)
 		if (op instanceof Symbol && NORMAL_INSTRUCTION_SET.contains(((Symbol) op).name)) {
 			switch (op.toString()) {
@@ -77,12 +77,12 @@ public final class Compiler {
 		}
 	}
 
-	private static Serializable compileLambdaLazy(Node lambdaBody, Node lambdaContext) {
+	private static Serializable compileLambdaLazy(Node lambdaBody, PersistentList lambdaContext) {
 		return listInstruction(
 				InstructionSet.closure.create(new ClosureArgs(lambdaBody, lambdaContext)));
 	}
 	
-	public static List<Instruction> compileLambda(Node lambdaBody, Node lambdaContext) {
+	public static List<Instruction> compileLambda(Node lambdaBody, PersistentList lambdaContext) {
 		PersistentList paramList = (PersistentList) lambdaBody.second();
 		int dotIndex = ListUtils.indexOf(paramList, MULTI_ARGS_SIGNAL, 0);
 		boolean notCombineArgs = dotIndex == -1;
@@ -90,12 +90,12 @@ public final class Compiler {
 		return expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 				InstructionSet.cons_args.create(dotIndex),
 				compile(lambdaBody.third(),
-						(Node) ListUtils.append(argsList, lambdaContext),
+						ListUtils.append(argsList, lambdaContext),
 						notCombineArgs ? 0 : 1),
 						InstructionSet.ret.create()));
 	}
 
-	private static Serializable compileCall(Object op, PersistentList argList, Node lambdaContext, int startIndex) {
+	private static Serializable compileCall(Object op, PersistentList argList, PersistentList lambdaContext, int startIndex) {
 		int argsCount = ListUtils.count(argList);
 		InstructionSet callMethod = op instanceof Symbol && isJavaCallSymbol(((Symbol) op).name)
 				? InstructionSet.java_call
@@ -106,7 +106,7 @@ public final class Compiler {
 				callMethod.create(argsCount));
 	}
 
-	private static PersistentList compileInstCall(Symbol inst, PersistentList argList, Node lambdaContext, int startIndex) {
+	private static PersistentList compileInstCall(Symbol inst, PersistentList argList, PersistentList lambdaContext, int startIndex) {
 		return listInstruction(
 				compileArgs(argList, lambdaContext, startIndex),
 				InstructionSet.valueOf(inst.name).create());
@@ -167,14 +167,14 @@ public final class Compiler {
 		return ((Node) instrNodes).toList(Instruction.class);
 	}
 	
-	private static PersistentList compileArgs(PersistentList args, Node lambdaContext, int startIndex) {
+	private static PersistentList compileArgs(PersistentList args, PersistentList lambdaContext, int startIndex) {
 		if (args.isEndingNode()) return BasicType.NIL;
 		return listInstruction(
 				compile(args.head(), lambdaContext, startIndex),
 				compileArgs(args.rest(), lambdaContext, startIndex));
 	}
 
-	private static Serializable compileCond(PersistentList pairList, Node lambdaContext, int startIndex) {
+	private static Serializable compileCond(PersistentList pairList, PersistentList lambdaContext, int startIndex) {
 		if (pairList.isEndingNode()) return listInstruction(InstructionSet.ldc.create(BasicType.NIL));
 		
 		Node headPair = (Node) pairList.head();

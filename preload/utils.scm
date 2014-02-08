@@ -18,10 +18,9 @@
 (defn filter (pred seq)
       (lazy-seq
 	(when seq
-	  (let ((h . r) seq)
-	    (if (pred h)
-	      (cons h (filter pred r))
-	      (filter pred r))))))
+	  (if (pred (car seq))
+	    (cons (car seq) (filter pred (cdr seq)))
+	    (filter pred (cdr seq))))))
 
 (defn map (func seq)
       (lazy-seq
@@ -172,7 +171,8 @@
 (defn lazy-cat (. cs)
       (lazy-seq
 	(when cs
-	  (let ((h . rc) cs)
+	  (let (h (car cs)
+		rc (cdr cs))
 	    (if h
 	      (cons (car h)
 		    (apply lazy-cat (cons (cdr h) rc)))

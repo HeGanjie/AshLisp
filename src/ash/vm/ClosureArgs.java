@@ -12,10 +12,10 @@ public class ClosureArgs implements Serializable {
 	private static final long serialVersionUID = 6028752794396503066L;
 	List<Instruction> ins;
 	final Node fnBody;
-	final Node fnContext;
+	final PersistentList fnContext;
 	int argsLimit = -2;
 	
-	public ClosureArgs(Node lambdaBody, Node lambdaContext) {
+	public ClosureArgs(Node lambdaBody, PersistentList lambdaContext) {
 		fnBody = lambdaBody;
 		fnContext = lambdaContext;
 	}

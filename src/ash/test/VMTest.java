@@ -111,6 +111,7 @@ public final class VMTest extends TestCase {
 	public void testPreload() throws Exception {
 		assertEquals(5, exec("(count '(+ 1 2 3 4))"));
 		assertEquals("(2 4)", exec("(filter even? '(1 2 3 4))").toString());
+		assertEquals("[1 2 (3)]", exec("((lambda ((a . (b . c))) [a b c]) '(1 2 3))").toString());
 	}
 	
 	public void testString() throws Exception {
