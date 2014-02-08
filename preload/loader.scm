@@ -8,15 +8,14 @@
 (def lazy-load (lambda* (asts)
 			(.new ash.lang.LazyNode
 			      (lambda* ()
-				       (cond (asts (cons (vmexec (compile (car asts)))
+				       (cond (asts (cons (eval (car asts))
 							 (lazy-load (cdr asts)))))))))
 
 (def list (lambda* (. x) x))
 
 (def apply .applyTo)
 
-(def eval (lambda* (ast)
-		   (vmexec (compile ast))))
+(def eval (lambda* (ast) (vmexec (compile ast))))
 
 (def doall (lambda* (lazy) (apply list lazy)))
 

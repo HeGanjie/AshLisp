@@ -2,7 +2,6 @@ package ash.lang;
 
 import java.util.Iterator;
 
-import ash.compiler.Compiler;
 import ash.vm.Closure;
 import ash.vm.VM;
 import bruce.common.utils.CommonUtils;
@@ -33,10 +32,6 @@ public final class LazyNode extends PersistentList {
 		return valid().rest();
 	}
 
-	private static PersistentList callFunc(Node ast) {
-		return (PersistentList) new VM().runInMain(Compiler.compileSingle(ast));
-	}
-
 	@Override
 	public String toString() {
 		return VM.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
@@ -44,6 +39,7 @@ public final class LazyNode extends PersistentList {
 
 	public static PersistentList create(Iterator<?> iter) {
 		// (lazy-iterator iter)
-		return callFunc(new Node(Symbol.create("lazy-iterator"), new Node(iter)));
+		Closure lazyIterator = (Closure) VM.tempVar.get(Symbol.create("lazy-iterator"));
+		return (PersistentList) lazyIterator.applyTo(new Node(iter));
 	}
 }

@@ -171,8 +171,7 @@
 (defn lazy-cat (. cs)
       (lazy-seq
 	(when cs
-	  (let (h (car cs)
-		rc (cdr cs))
+	  (let ((h . rc) cs)
 	    (if h
 	      (cons (car h)
 		    (apply lazy-cat (cons (cdr h) rc)))
@@ -192,4 +191,21 @@
 
 (defn map-indexed (f s)
       (zip f (iterate inc 0) s))
+
+(defmacro for ((p coll . rest) . body)
+  (if rest
+    (let (update-for (lambda (pu cu)
+		       `(for (~pu ~cu @(cddr rest)) @body)))
+      (cond ((= :when (car rest)) (update-for p `(filter (lambda (~p) ~(cadr rest)) ~coll)))
+	    ((= :while (car rest)) (update-for p `(take-while (lambda (~p) ~(cadr rest)) ~coll)))
+	    ((= :let (car rest)) (let ((letp letv) (zip-step (partition 2 (cadr rest)))
+				       consp (if (seq? p) (concat p letp) (cons p letp))
+				       consv (if (seq? p) (concat p letv) (cons p letv)))
+				   (update-for consp `(map (lambda (~p) (list @consv)) ~coll))))
+	    ((= :zip (car rest)) (let ((zipp zipv) (zip-step (partition 2 (cadr rest)))
+				       consp (if (seq? p) (concat p zipp) (cons p zipp))
+				       consc (cons coll zipv))
+				   (update-for consp `(zip-step (list @consc)))))
+	    ('t `(mapcat (lambda (~p) (for ~rest @body)) ~coll))))
+    `(map (lambda (~p) @body) ~coll)))
 
