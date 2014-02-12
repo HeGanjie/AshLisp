@@ -142,4 +142,5 @@ public class AshLispUsage {
 
 ## Specification
 * Nil for false, others for true. Nil expressing into '().
-* Preload file using '.scm' as suffix just for the convenience of editing and color coding.
+* Preload file using '.scm' as suffix just for the convenience of editing and code coloring.
+
