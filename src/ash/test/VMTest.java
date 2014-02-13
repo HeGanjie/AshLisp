@@ -112,6 +112,8 @@ public final class VMTest extends TestCase {
 		assertEquals(5, exec("(count '(+ 1 2 3 4))"));
 		assertEquals("(2 4)", exec("(filter even? '(1 2 3 4))").toString());
 		assertEquals("[1 2 (3)]", exec("((lambda ((a . (b . c))) [a b c]) '(1 2 3))").toString());
+		assertEquals("([:a 1] [:a 2] [:b 1] [:b 2] [:c 1] [:c 2])", exec("(for (x [:a :b :c] y [1 2]) [x y])").toString());
+		assertEquals("([0 :a] [1 :b] [2 :c] [3 :d])", exec("(for (a [:a :b :c :d] :zip (index (iterate inc 0))) [index a])").toString());
 	}
 	
 	public void testString() throws Exception {

@@ -87,7 +87,7 @@
 			      (when (neq p '.)
 				  (let (letp (if (atom p) p (sym (apply str `(\_ ~index @i-stack)))))
 				    (if (= check-dot '.)
-				      (gen-drop letp (dec index))
+				      (gen-drop letp index)
 				      (gen-nth letp index)))))
 			    (iterate inc 0) dp (cons '() dp))
 	    next-layer (map-indexed (lambda (index p)
