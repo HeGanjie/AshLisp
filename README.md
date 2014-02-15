@@ -143,6 +143,7 @@ public class AshLispUsage {
 `ash.repl.REPLInVM` Run As Java Application
 
 ## Specification
-* Nil for false, others for true. Nil expressing into '().
-* Preload file using '.scm' as suffix just for the convenience of editing and code coloring.
+* Doesn't support dotted pair
+* Nil for false, others for true. Nil expressing into '()
+* Preload file using '.scm' as suffix just for the convenience of editing and code coloring
 
