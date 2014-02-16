@@ -8,7 +8,6 @@ A hobby Lisp compiler and runtime in Java
 
 ### Prepare
 ```Java
-import java.io.Serializable;
 import ash.compiler.Compiler;
 import ash.parser.Parser;
 import ash.vm.VM;
@@ -16,11 +15,11 @@ import ash.vm.VM;
 public class AshLispUsage {
 	private static VM vm = new VM();
 	
-	protected static Serializable eval(String code) {
+	protected static Object eval(String code) {
 		return vm.batchRunInMain(Compiler.batchCompile(Parser.split(code)));
 	}
 	
-	private static void trace(Serializable arg) {
+	private static void trace(Object arg) {
 		System.out.println(arg);
 	}
 	
