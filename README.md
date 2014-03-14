@@ -119,6 +119,15 @@ public class AshLispUsage {
 		trace(eval("(class [1 2 3])")); // ash.lang.PersistentVector
 		trace(eval("(class ${:a :b :c})")); // ash.lang.PersistentSet
 		trace(eval("(class {:a 1 :b 2})")); // ash.lang.PersistentMap
+		
+		trace(eval("(.conj [0 1 2] 3)")); // [0 1 2 3]
+		trace(eval("(.disj [:a :b :c] :a)")); // [:b :c]
+		
+		trace(eval("(get-methods [])"));
+		/* ${.merge .conj .size .retainAll .get .assoc .getCollection
+			.iterator .containsAll .toArray .disjAll .disjAt .toString
+			.subList .indexOf .contains .isEmpty .disj .listIterator
+			.hashCode .lastIndexOf .equals} */
 ```
 
 ### Misc

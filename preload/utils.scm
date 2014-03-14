@@ -209,3 +209,14 @@
 	    ('t `(mapcat (lambda (~p) (for ~rest @body)) ~coll))))
     `(map (lambda (~p) @body) ~coll)))
 
+(defn get-methods (obj)
+      (let (dms (-> obj .getClass .getDeclaredMethods java.util.Arrays/asList))
+	(apply hash-set (map (lambda (dm) (->> dm .getName (str \.) sym))
+			     (apply hash-set dms)))))
+
+(defn get-all-methods (obj)
+      (let (dms (-> obj .getClass .getMethods java.util.Arrays/asList))
+	(apply hash-set
+	       (map (lambda (dm) (->> dm .getName (str \.) sym))
+		    dms))))
+
