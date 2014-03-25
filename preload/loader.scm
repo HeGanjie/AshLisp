@@ -3,7 +3,7 @@
 (def vmexec (lambda* (insts)
 		     (.runInMain (.new ash.vm.VM) insts)))
 
-(def parse ash.parser.Parser/split)
+(def parse ash.parser.Parser/parse)
 
 (def lazy-load (lambda* (asts)
 			(.new ash.lang.LazyNode

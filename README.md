@@ -16,7 +16,7 @@ public class AshLispUsage {
 	private static VM vm = new VM();
 	
 	protected static Object eval(String code) {
-		return vm.batchRunInMain(Compiler.batchCompile(Parser.split(code)));
+		return vm.batchRunInMain(Compiler.batchCompile(Parser.parse(code)));
 	}
 	
 	private static void trace(Object arg) {

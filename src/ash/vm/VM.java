@@ -27,7 +27,7 @@ public final class VM implements Serializable {
 	}
 
 	protected void load(String resName) {
-		batchRunInMain(Compiler.batchCompile(Parser.split(FileUtil.readTextFileForDefaultEncoding(resName))));
+		batchRunInMain(Compiler.batchCompile(Parser.parse(FileUtil.readTextFileForDefaultEncoding(resName))));
 	}
 
 	public Object batchRunInMain(PersistentList compiledCodes) {

@@ -19,6 +19,15 @@ public final class ListUtils {
 		return 1 + count(seq.rest());
 	}
 	
+	public static PersistentList reverse(PersistentList seq) {
+		return reverse(seq, BasicType.NIL);
+	}
+	
+	private static PersistentList reverse(PersistentList seq, PersistentList rst) {
+		if (seq.isEndingNode()) return rst;
+		return reverse(seq.rest(), new Node(seq.head(), rst));
+	}
+	
 	public static PersistentList filter(PersistentList seq, Func1<Boolean, Object> predicate) {
 		if (seq.isEndingNode()) return BasicType.NIL;
 		return predicate.call(seq.head())

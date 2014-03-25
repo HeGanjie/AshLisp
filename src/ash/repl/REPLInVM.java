@@ -23,7 +23,7 @@ public final class REPLInVM {
 					readIn = br.readLine();
 					if (readIn == null) break;
 					if (!CommonUtils.isStringNullOrWriteSpace(readIn)) {
-						Object val = vm.batchRunInMain(Compiler.batchCompile(Parser.split(readIn)));
+						Object val = vm.batchRunInMain(Compiler.batchCompile(Parser.parse(readIn)));
 						System.out.println(BasicType.asString(val));
 					}
 				} catch (Exception e) {
@@ -32,6 +32,6 @@ public final class REPLInVM {
 				}
 			}
 		} else
-			vm.batchRunInMain(Compiler.batchCompile(Parser.split("(load \"repl.scm\")")));
+			vm.batchRunInMain(Compiler.batchCompile(Parser.parse("(load \"repl.scm\")")));
 	}
 }

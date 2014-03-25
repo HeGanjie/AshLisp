@@ -1,5 +1,6 @@
 package ash.test;
 
+import bruce.common.utils.FileUtil;
 import junit.framework.TestCase;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
@@ -8,8 +9,15 @@ import ash.lang.Symbol;
 import ash.parser.Parser;
 import ash.vm.VM;
 
-public final class VMTest extends TestCase {
+public final class AshTest extends TestCase {
 	private static VM vm = new VM();
+	
+	public void testParserPerfomance() throws Exception {
+		for (int i = 0; i < 100; i++) {
+			String utilsSrc = FileUtil.readTextFileForDefaultEncoding("utils.scm");
+			Parser.parse(utilsSrc);
+		}
+	}
 	
 	public void testEvalRaw() throws Exception {
 		assertEquals(10, exec("10"));
@@ -171,6 +179,6 @@ public final class VMTest extends TestCase {
 	}
 	
 	protected static Object exec(String code) {
-		return vm.batchRunInMain(Compiler.batchCompile(Parser.split(code)));
+		return vm.batchRunInMain(Compiler.batchCompile(Parser.parse(code)));
 	}
 }
