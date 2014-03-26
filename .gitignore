@@ -1,6 +1,8 @@
 bin/
+.idea/
 .settings/
 *.class
+*.iml
 
 # Package Files #
 #*.jar

@@ -13,8 +13,8 @@ public final class AshTest extends TestCase {
 	private static VM vm = new VM();
 	
 	public void testParserPerfomance() throws Exception {
-		for (int i = 0; i < 100; i++) {
-			String utilsSrc = FileUtil.readTextFileForDefaultEncoding("utils.scm");
+		String utilsSrc = FileUtil.readTextFileForDefaultEncoding("utils.scm");
+		for (int i = 0; i < 2000; i++) {
 			Parser.parse(utilsSrc);
 		}
 	}

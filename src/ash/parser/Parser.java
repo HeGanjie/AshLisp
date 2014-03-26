@@ -1,5 +1,6 @@
 package ash.parser;
 
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,60 +20,55 @@ public final class Parser {
 	private Parser() {}
 	
 	public static PersistentList parse(String src) {
-		return toTree(ListUtils.reverse(tokenize(src.trim())), BasicType.NIL);
+		return toTree(ListUtils.reverse(tokenize(src, 0)), BasicType.NIL, null);
 	}
 	
-	private static final Symbol smallLeft = Symbol.create("("),
-								smallRight = Symbol.create(")");
+	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
+			'\'', Symbol.create("quote"),
+			'`', Symbol.create("syntax-quote"),
+			'~', Symbol.create("unquote"),
+			'@', Symbol.create("unquote-splicing"),
+			'#', Symbol.create("regex"));
 	
-	private static final PersistentMap<Symbol, Symbol> QUOTE_MAP = new PersistentMap<>(
-			Symbol.create("'"), Symbol.create("quote"),
-			Symbol.create("`"), Symbol.create("syntax-quote"),
-			Symbol.create("~"), Symbol.create("unquote"),
-			Symbol.create("@"), Symbol.create("unquote-splicing"),
-			Symbol.create("#"), Symbol.create("regex"));
-	
-	private static PersistentList toTree(PersistentList reversedTokens, Node base) {
+	private static PersistentList toTree(PersistentList reversedTokens, Node base, BiFunction<Object, PersistentList, PersistentList> continuation) {
 		if (reversedTokens.isEndingNode()) return base;
 		Object head = reversedTokens.head();
-		if (smallRight.equals(head)) { // )
-			PersistentList treeAndRest = toTree(reversedTokens.rest(), BasicType.NIL);
-			PersistentList tree = (PersistentList) treeAndRest.head();
-			PersistentList theRest = treeAndRest.rest();
-			return toTree(theRest, new Node(tree, base));
-		} else if (smallLeft.equals(head)) { // (
-			return new Node(base, reversedTokens.rest());
-		} else if (head instanceof Symbol && QUOTE_MAP.containsKey((Symbol) head)) {
-			Symbol quoteSym = QUOTE_MAP.get((Symbol) head);
+		if (head.equals(')')) {
+            return toTree(reversedTokens.rest(), BasicType.NIL, (node, restToken) -> toTree(restToken, new Node(node, base), continuation));
+		} else if (head.equals('(')) {
+            return continuation.apply(base, reversedTokens.rest());
+		} else if (head instanceof Character) {
+			Symbol quoteSym = QUOTE_CHAR_MAP.get((Character) head);
 			Node quoted = new Node(quoteSym, new Node(base.head()));
-			return toTree(reversedTokens.rest(), new Node(quoted, base.rest()));
+			return toTree(reversedTokens.rest(), new Node(quoted, base.rest()), continuation);
 		} else {
-			return toTree(reversedTokens.rest(), new Node(BasicType.realType((String) head), base));
+			return toTree(reversedTokens.rest(), new Node(BasicType.realType((String) head), base), continuation);
 		}
 	}
 
-	private static final PersistentSet<Character> TOKEN_CHAR_SET = new PersistentSet<>(
+	private static final PersistentSet<Character> META_CHAR_SET = new PersistentSet<>(
 			'(', ')', '\'', '`', '~', '@', '#');
-	private static final PersistentMap<Character, String> CHAR_TRANSFROM_MAP = new PersistentMap<>(
+	private static final PersistentMap<Character, String> CHAR_TRANSFORM_MAP = new PersistentMap<>(
 			'[', "(vector ",
 			'{', "(hash-map ",
 			']', ")",
 			'}', ")");
 	
-	private static PersistentList tokenize(String src) {
-		if (src.isEmpty()) return BasicType.NIL;
-		char headChar = src.charAt(0);
-		if (Character.isWhitespace(headChar)) {
-			return tokenize(src.substring(1));
-		} else if (TOKEN_CHAR_SET.contains(headChar)) {
-			return new Node(Symbol.create(String.valueOf(headChar)), tokenize(src.substring(1)));
-		} else if (CHAR_TRANSFROM_MAP.containsKey(headChar)) {
-			return tokenize(CHAR_TRANSFROM_MAP.get(headChar) + src.substring(1));
-		} else if (headChar == '$' && 2 < src.length() && '{' == src.charAt(1)) {
-			return tokenize("(hash-set " + src.substring(2));
+	public static PersistentList tokenize(String src, int offset) {
+		if (src.length() == offset) return BasicType.NIL;
+		char c = src.charAt(offset);
+		if (Character.isWhitespace(c)) {
+			return tokenize(src, offset + 1);
+        } else if (META_CHAR_SET.contains(c)) {
+            return new Node(c, tokenize(src, offset + 1));
+        } else if (CHAR_TRANSFORM_MAP.containsKey(c)) {
+            return tokenize(CHAR_TRANSFORM_MAP.get(c) + src.substring(offset + 1), 0);
+		} else if (c == '$' && offset + 1 < src.length() && src.charAt(offset + 1) == '{') {
+			return tokenize("(hash-set " + src.substring(offset + 2), 0);
 		} else {
-			String headText = getHeadElem(src);
-			return new Node(headText, tokenize(src.substring(headText.length())));
+            String s = src.substring(offset);
+            String headText = getHeadElem(s);
+			return new Node(headText, tokenize(s, headText.length()));
 		}
 	}
 	
