@@ -14,7 +14,7 @@ public final class AshTest extends TestCase {
 	
 	public void testParserPerfomance() throws Exception {
 		String utilsSrc = FileUtil.readTextFileForDefaultEncoding("utils.scm");
-		for (int i = 0; i < 2000; i++) {
+		for (int i = 0; i < 500; i++) {
 			Parser.parse(utilsSrc);
 		}
 	}

@@ -1,26 +1,14 @@
 package ash.parser;
 
-import java.util.function.BiFunction;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import ash.lang.*;
 
-import ash.lang.BasicType;
-import ash.lang.ListUtils;
-import ash.lang.Node;
-import ash.lang.PersistentList;
-import ash.lang.PersistentMap;
-import ash.lang.PersistentSet;
-import ash.lang.Symbol;
+import java.util.function.BiFunction;
 
 public final class Parser {
-	private static final Pattern getFirstSymbolPattern = Pattern.compile("([^\\s\\(\\)\\[\\]\\{\\}]+)\\s*");
-	private static final char ESCAPE_CHAR = '\\';
-	private static final char STRING_WRAPPING_CHAR = '\"';
-
-	private Parser() {}
+    private Parser() {}
 	
 	public static PersistentList parse(String src) {
-		return toTree(ListUtils.reverse(tokenize(src, 0)), BasicType.NIL, null);
+		return toTree(ListUtils.reverse(tokenize(src)), BasicType.NIL, null);
 	}
 	
 	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
@@ -48,49 +36,61 @@ public final class Parser {
 
 	private static final PersistentSet<Character> META_CHAR_SET = new PersistentSet<>(
 			'(', ')', '\'', '`', '~', '@', '#');
-	private static final PersistentMap<Character, String> CHAR_TRANSFORM_MAP = new PersistentMap<>(
-			'[', "(vector ",
-			'{', "(hash-map ",
-			']', ")",
-			'}', ")");
-	
-	public static PersistentList tokenize(String src, int offset) {
+	private static final PersistentMap<Character, PersistentList> CHAR_TRANSFORM_MAP = new PersistentMap<>(
+			'[', ListUtils.toSeq(0, '(', "vector"),
+			']', new Node(')'),
+            '{', ListUtils.toSeq(0, '(', "hash-map"),
+			'}', new Node(')'));
+
+    private static PersistentList tokenize(String src) { return tokenize(src, 0); }
+
+    private static final PersistentList HASH_SET_HEAD_TOKEN = ListUtils.toSeq(0, '(', "hash-set");
+    private static PersistentList tokenize(String src, int offset) {
 		if (src.length() == offset) return BasicType.NIL;
-		char c = src.charAt(offset);
-		if (Character.isWhitespace(c)) {
+		char headCh = src.charAt(offset);
+		if (Character.isWhitespace(headCh)) {
 			return tokenize(src, offset + 1);
-        } else if (META_CHAR_SET.contains(c)) {
-            return new Node(c, tokenize(src, offset + 1));
-        } else if (CHAR_TRANSFORM_MAP.containsKey(c)) {
-            return tokenize(CHAR_TRANSFORM_MAP.get(c) + src.substring(offset + 1), 0);
-		} else if (c == '$' && offset + 1 < src.length() && src.charAt(offset + 1) == '{') {
-			return tokenize("(hash-set " + src.substring(offset + 2), 0);
+        } else if (META_CHAR_SET.contains(headCh)) {
+            return new Node(headCh, tokenize(src, offset + 1));
+        } else if (CHAR_TRANSFORM_MAP.containsKey(headCh)) {
+            return ListUtils.append(CHAR_TRANSFORM_MAP.get(headCh), tokenize(src, offset + 1));
+		} else if (headCh == '$' && offset + 1 < src.length() && src.charAt(offset + 1) == '{') {
+            return ListUtils.append(HASH_SET_HEAD_TOKEN, tokenize(src, offset + 2));
 		} else {
-            String s = src.substring(offset);
-            String headText = getHeadElem(s);
-			return new Node(headText, tokenize(s, headText.length()));
+            String headText = getHeadElem(src, offset);
+			return new Node(headText, tokenize(src, offset + headText.length()));
 		}
 	}
-	
-	private static String getHeadElem(String str) {
-		char headCh = str.charAt(0);
+
+    public static void main(String[] args) {
+        System.out.println(tokenize(" \"a b c d\" e"));
+    }
+
+    private static final char STRING_WRAPPING_CHAR = '\"';
+	private static String getHeadElem(String str, int offset) {
+		char headCh = str.charAt(offset);
 		return headCh == STRING_WRAPPING_CHAR
-				? str.substring(0, getStringElemLen(str, 0, '\0'))
-				: getHeadSymbol(str);
+				? str.substring(offset, getStringElemLen(str, offset, offset, '\0'))
+				: getHeadSymbol(str, offset, offset);
 	}
 
-	private static String getHeadSymbol(String str) {
-		Matcher m = getFirstSymbolPattern.matcher(str);
-		m.find();
-		return m.group(1);
-	}
+    private static final PersistentSet<Character> NO_SYMBOL_CHAR_SET = new PersistentSet<>('(', ')', '[', ']', '{', '}');
+	private static String getHeadSymbol(String str, int start, int end) {
+        if (str.length() == end) return str.substring(start);
+        char headCh = str.charAt(end);
+        if (Character.isWhitespace(headCh) || NO_SYMBOL_CHAR_SET.contains(headCh))
+            return str.substring(start, end);
+        else
+            return getHeadSymbol(str, start, end + 1);
+    }
 
-	private static int getStringElemLen(String src, int elemLen, char spanChar) {
-		if (elemLen != 0 && spanChar == '\0') return elemLen;
+    private static final char ESCAPE_CHAR = '\\';
+	private static int getStringElemLen(String src, final int start, int elemLen, char flag) {
+		if (elemLen != start && flag == '\0') return elemLen;
 		
 		final char c = src.charAt(elemLen);
-		return getStringElemLen(src,
-				elemLen + (c == ESCAPE_CHAR ? 2 : 1),
-				STRING_WRAPPING_CHAR == c ? (spanChar == c ? '\0' : c) : spanChar);
+		return getStringElemLen(src, start,
+                elemLen + (c == ESCAPE_CHAR ? 2 : 1),
+                STRING_WRAPPING_CHAR == c ? (flag == c ? '\0' : c) : flag);
 	}
 }
