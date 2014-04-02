@@ -8,8 +8,6 @@ public final class Node extends PersistentList {
 	
 	public Node(Object val) { this(val, BasicType.NIL); }
 
-	public Node(Node node) { this(node, BasicType.NIL); }
-
 	public Node(Object l, PersistentList n) {
 		left = l;
 		next = n;
@@ -20,5 +18,5 @@ public final class Node extends PersistentList {
 
 	@Override
 	public PersistentList rest() { return next; }
-	
+
 }

@@ -6,19 +6,19 @@ import java.util.function.BiFunction;
 
 public final class Parser {
     private Parser() {}
-	
+
 	public static PersistentList parse(String src) {
 		return toTree(ListUtils.reverse(tokenize(src)), BasicType.NIL, null);
 	}
-	
+
 	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
 			'\'', Symbol.create("quote"),
 			'`', Symbol.create("syntax-quote"),
 			'~', Symbol.create("unquote"),
 			'@', Symbol.create("unquote-splicing"),
 			'#', Symbol.create("regex"));
-	
-	private static PersistentList toTree(PersistentList reversedTokens, Node base, BiFunction<Object, PersistentList, PersistentList> continuation) {
+
+    private static PersistentList toTree(PersistentList reversedTokens, Node base, BiFunction<PersistentList, PersistentList, PersistentList> continuation) {
 		if (reversedTokens.isEndingNode()) return base;
 		Object head = reversedTokens.head();
 		if (head.equals(')')) {
@@ -34,8 +34,8 @@ public final class Parser {
 		}
 	}
 
-	private static final PersistentSet<Character> META_CHAR_SET = new PersistentSet<>(
-			'(', ')', '\'', '`', '~', '@', '#');
+    private static final PersistentSet<Character> NO_SYMBOL_CHAR_SET = new PersistentSet<>('(', ')', '[', ']', '{', '}');
+	private static final PersistentSet<Character> META_CHAR_SET = NO_SYMBOL_CHAR_SET.merge(QUOTE_CHAR_MAP.keySet());
 	private static final PersistentMap<Character, PersistentList> CHAR_TRANSFORM_MAP = new PersistentMap<>(
 			'[', ListUtils.toSeq(0, '(', "vector"),
 			']', new Node(')'),
@@ -51,9 +51,10 @@ public final class Parser {
 		if (Character.isWhitespace(headCh)) {
 			return tokenize(src, offset + 1);
         } else if (META_CHAR_SET.contains(headCh)) {
-            return new Node(headCh, tokenize(src, offset + 1));
-        } else if (CHAR_TRANSFORM_MAP.containsKey(headCh)) {
-            return ListUtils.append(CHAR_TRANSFORM_MAP.get(headCh), tokenize(src, offset + 1));
+            if (CHAR_TRANSFORM_MAP.containsKey(headCh))
+                return ListUtils.append(CHAR_TRANSFORM_MAP.get(headCh), tokenize(src, offset + 1));
+            else
+                return new Node(headCh, tokenize(src, offset + 1));
 		} else if (headCh == '$' && offset + 1 < src.length() && src.charAt(offset + 1) == '{') {
             return ListUtils.append(HASH_SET_HEAD_TOKEN, tokenize(src, offset + 2));
 		} else {
@@ -61,10 +62,6 @@ public final class Parser {
 			return new Node(headText, tokenize(src, offset + headText.length()));
 		}
 	}
-
-    public static void main(String[] args) {
-        System.out.println(tokenize(" \"a b c d\" e"));
-    }
 
     private static final char STRING_WRAPPING_CHAR = '\"';
 	private static String getHeadElem(String str, int offset) {
@@ -74,7 +71,6 @@ public final class Parser {
 				: getHeadSymbol(str, offset, offset);
 	}
 
-    private static final PersistentSet<Character> NO_SYMBOL_CHAR_SET = new PersistentSet<>('(', ')', '[', ']', '{', '}');
 	private static String getHeadSymbol(String str, int start, int end) {
         if (str.length() == end) return str.substring(start);
         char headCh = str.charAt(end);
