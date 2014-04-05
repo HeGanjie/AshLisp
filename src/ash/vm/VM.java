@@ -1,18 +1,13 @@
 package ash.vm;
 
-import java.io.Serializable;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import ash.compiler.Compiler;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import ash.parser.Parser;
 import bruce.common.utils.FileUtil;
+
+import java.io.Serializable;
+import java.util.*;
 
 public final class VM implements Serializable {
 	private static final long serialVersionUID = -3115756210819523693L;

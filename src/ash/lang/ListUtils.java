@@ -1,8 +1,7 @@
 package ash.lang;
 
 import java.util.Iterator;
-
-import bruce.common.functional.Func1;
+import java.util.function.Predicate;
 
 
 public final class ListUtils {
@@ -28,9 +27,9 @@ public final class ListUtils {
 		return reverse(seq.rest(), new Node(seq.head(), rst));
 	}
 	
-	public static PersistentList filter(PersistentList seq, Func1<Boolean, Object> predicate) {
+	public static PersistentList filter(PersistentList seq, Predicate<Object> predicate) {
 		if (seq.isEndingNode()) return BasicType.NIL;
-		return predicate.call(seq.head())
+		return predicate.test(seq.head())
 				? new Node(seq.head(), filter(seq.rest(), predicate))
 				: filter(seq.rest(), predicate); 
 	}

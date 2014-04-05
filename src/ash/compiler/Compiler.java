@@ -1,22 +1,17 @@
 package ash.compiler;
 
+import ash.lang.*;
+import ash.vm.ClosureArgs;
+import ash.vm.Instruction;
+import ash.vm.InstructionSet;
+import ash.vm.JavaMethod;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import ash.lang.BasicType;
-import ash.lang.ListUtils;
-import ash.lang.MacroExpander;
-import ash.lang.Node;
-import ash.lang.PersistentList;
-import ash.lang.Symbol;
-import ash.vm.ClosureArgs;
-import ash.vm.Instruction;
-import ash.vm.InstructionSet;
-import ash.vm.JavaMethod;
-import bruce.common.functional.Func1;
+import java.util.function.Predicate;
 
 public final class Compiler {
 	public static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
@@ -112,10 +107,7 @@ public final class Compiler {
 				InstructionSet.valueOf(inst.name).create());
 	}
 
-	private static final Func1<Boolean, Object> removeDotPred = new Func1<Boolean, Object>() {
-		@Override
-		public Boolean call(Object symbol) { return !MULTI_ARGS_SIGNAL.equals(symbol); }
-	};
+	private static final Predicate<Object> removeDotPred = symbol -> !MULTI_ARGS_SIGNAL.equals(symbol);
 	
 	private static PersistentList removeDot(PersistentList seq) {
 		return ListUtils.filter(seq, removeDotPred);
