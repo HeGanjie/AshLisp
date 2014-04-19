@@ -1,7 +1,7 @@
 AshLisp
 =======
 
-A hobby Lisp compiler and runtime in Java
+A hobby Lisp compiler and runtime in Java/Android
 
 
 ## Usage

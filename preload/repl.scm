@@ -2,7 +2,7 @@
 		  (.new java.io.InputStreamReader)
 		  (.new java.io.BufferedReader)))
 
-(def isStringNullOrWhiteSpace bruce.common.utils.CommonUtils/isStringNullOrWriteSpace)
+(def isStringNullOrWhiteSpace ash.util.JavaUtils/isStringNullOrWriteSpace)
 
 (defn repl_loop (readIn)
       (when-not (isStringNullOrWhiteSpace readIn)

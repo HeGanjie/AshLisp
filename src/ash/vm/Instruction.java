@@ -1,8 +1,8 @@
 package ash.vm;
 
-import java.io.Serializable;
+import ash.util.JavaUtils;
 
-import bruce.common.utils.CommonUtils;
+import java.io.Serializable;
 
 public final class Instruction implements Serializable {
 	private static final long serialVersionUID = 4568764332998004451L;
@@ -24,7 +24,7 @@ public final class Instruction implements Serializable {
 	@Override
 	public String toString() {
 		if (args != null)
-			return CommonUtils.buildString(INST_ARR[ins], ' ', args);
+			return JavaUtils.buildString(INST_ARR[ins], ' ', args);
 		else
 			return INST_ARR[ins].name();
 	}

@@ -1,10 +1,10 @@
 package ash.lang;
 
-import java.util.Iterator;
-
+import ash.util.JavaUtils;
 import ash.vm.Closure;
 import ash.vm.VM;
-import bruce.common.utils.CommonUtils;
+
+import java.util.Iterator;
 
 public final class LazyNode extends PersistentList {
 	private static final long serialVersionUID = -2645887899648828103L;
@@ -34,7 +34,7 @@ public final class LazyNode extends PersistentList {
 
 	@Override
 	public String toString() {
-		return VM.debugging ? CommonUtils.buildString('(', head(), " ...)") : super.toString();
+		return VM.debugging ? JavaUtils.buildString('(', head(), " ...)") : super.toString();
 	}
 
 	public static PersistentList create(Iterator<?> iter) {

@@ -4,7 +4,7 @@ import ash.compiler.Compiler;
 import ash.lang.PersistentList;
 import ash.lang.Symbol;
 import ash.parser.Parser;
-import bruce.common.utils.FileUtil;
+import ash.util.JavaUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -22,7 +22,7 @@ public final class VM implements Serializable {
 	}
 
 	protected void load(String resName) {
-		batchRunInMain(Compiler.batchCompile(Parser.parse(FileUtil.readTextFileForDefaultEncoding(resName))));
+		batchRunInMain(Compiler.batchCompile(Parser.parse(JavaUtils.readTextFileForDefaultEncoding(resName))));
 	}
 
 	public Object batchRunInMain(PersistentList compiledCodes) {

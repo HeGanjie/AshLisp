@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-import bruce.common.utils.CommonUtils;
+import ash.util.JavaUtils;
 
 //TODO : make more efficient
 public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E> {
@@ -176,7 +176,7 @@ public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E>
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString(VECTOR_START,
+		return JavaUtils.buildString(VECTOR_START,
 				PersistentList.cast(this).innerToString(),
 				VECTOR_END);
 	}

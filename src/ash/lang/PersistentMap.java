@@ -1,13 +1,13 @@
 package ash.lang;
 
+import ash.util.JavaUtils;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import bruce.common.utils.CommonUtils;
 
 // TODO : make more efficient
 public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> {
@@ -106,9 +106,9 @@ public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> 
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString(HASH_MAP_START,
-				PersistentList.cast(this).innerToString(),
-				HASH_MAP_END);
+		return JavaUtils.buildString(HASH_MAP_START,
+                PersistentList.cast(this).innerToString(),
+                HASH_MAP_END);
 	}
 
 	@Override
@@ -166,7 +166,7 @@ public class PersistentMap<K, V> implements Serializable, Iterable<Entry<K, V>> 
 
 		@Override
 		public String toString() {
-			return CommonUtils.buildString(BasicType.asString(getKey()),
+			return JavaUtils.buildString(BasicType.asString(getKey()),
 					' ', BasicType.asString(getValue()));
 		}
 	}

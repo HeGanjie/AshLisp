@@ -3,6 +3,7 @@ bin/
 .settings/
 *.class
 *.iml
+*.eml
 
 # Package Files #
 #*.jar

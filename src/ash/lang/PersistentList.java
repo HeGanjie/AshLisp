@@ -1,11 +1,11 @@
 package ash.lang;
 
+import ash.util.JavaUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import bruce.common.utils.CommonUtils;
 
 public abstract class PersistentList implements Serializable, Iterable<Object> {
 	private static final long serialVersionUID = -4993574552940681092L;
@@ -65,7 +65,7 @@ public abstract class PersistentList implements Serializable, Iterable<Object> {
 	
 	@Override
 	public String toString() {
-		return CommonUtils.buildString('(', innerToString(), ')');
+		return JavaUtils.buildString('(', innerToString(), ')');
 	}
 	
 	@Override

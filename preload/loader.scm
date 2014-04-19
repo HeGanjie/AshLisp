@@ -19,7 +19,7 @@
 
 (def doall (lambda* (lazy) (apply list lazy)))
 
-(def read-resource-file bruce.common.utils.FileUtil/readTextFileForDefaultEncoding)
+(def read-resource-file ash.util.JavaUtils/readTextFileForDefaultEncoding)
 
 (def load-src (lambda* (src)
 		       (doall

@@ -1,5 +1,7 @@
 package ash.vm;
 
+import ash.lang.*;
+
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -7,14 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import ash.lang.BasicType;
-import ash.lang.ListUtils;
-import ash.lang.PersistentMap;
-import ash.lang.PersistentSet;
-import ash.lang.Symbol;
-import bruce.common.functional.Func1;
-import bruce.common.functional.LambdaUtils;
+import java.util.stream.Collectors;
 
 public final class JavaMethod implements Serializable {
 	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[]{};
@@ -72,12 +67,7 @@ public final class JavaMethod implements Serializable {
 	}
 
 	private static List<Method> filterMethod(Method[] methods, final String methodName) {
-		return LambdaUtils.where(Arrays.asList(methods), new Func1<Boolean, Method>() {
-			@Override
-			public Boolean call(Method method) {
-				return method.getName().equals(methodName);
-			}
-		});
+        return Arrays.asList(methods).stream().filter(m -> m.getName().equals(methodName)).collect(Collectors.toList());
 	}
 
 	private String getStaticMemberName() {
@@ -171,54 +161,33 @@ public final class JavaMethod implements Serializable {
 	}
 
 	private static Method matchMethod(List<Method> candidateMethods, final Class<?>[] targetParameterTypes) {
-		Method firstMatch = LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
-			@Override
-			public Boolean call(Method m) {
-				return strictMatch(m.getParameterTypes(), targetParameterTypes);
-			}
-		});
-		if (firstMatch != null) return firstMatch;
-		return LambdaUtils.firstOrNull(candidateMethods, new Func1<Boolean, Method>() {
-			@Override
-			public Boolean call(Method m) {
-				return fuzzyMatch(m.getParameterTypes(), targetParameterTypes);
-			}
-		});
+        return candidateMethods.stream()
+                .filter(m -> strictMatch(m.getParameterTypes(), targetParameterTypes)).findFirst()
+                .orElseGet(() -> candidateMethods.stream()
+                        .filter(m -> fuzzyMatch(m.getParameterTypes(), targetParameterTypes))
+                        .findFirst().orElse(null));
 	}
 
 	private static Constructor<?> matchConstructor(List<Constructor<?>> candidateConstructors, final Class<?>[] targetParameterTypes) {
-		Constructor<?> firstMatch = LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
-			@Override
-			public Boolean call(Constructor<?> m) {
-				return strictMatch(m.getParameterTypes(), targetParameterTypes);
-			}
-		});
-		if (firstMatch != null) return firstMatch;
-		return LambdaUtils.firstOrNull(candidateConstructors, new Func1<Boolean, Constructor<?>>() {
-			@Override
-			public Boolean call(Constructor<?> m) {
-				return fuzzyMatch(m.getParameterTypes(), targetParameterTypes);
-			}
-		});
+        return candidateConstructors.stream()
+                .filter(c -> strictMatch(c.getParameterTypes(), targetParameterTypes))
+                .findFirst().orElseGet(() -> candidateConstructors.stream()
+                        .filter(c -> fuzzyMatch(c.getParameterTypes(), targetParameterTypes))
+                        .findFirst().orElse(null));
 	}
 	
 	private static Class<?>[] getParameterTypes(Object[] args) {
-		return LambdaUtils.select(Arrays.asList(args), new Func1<Class<?>, Object>() {
-			@Override
-			public Class<?> call(Object val) { return val.getClass(); }
-		}).toArray(EMPTY_CLASSES);
+        return Arrays.asList(args).stream().map(Object::getClass).toArray(Class[]::new);
 	}
 
 	// int match to Integer ignore Float
 	private static boolean strictMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[i].isPrimitive() &&
-					STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
-				continue;
-			} else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
-				continue;
-			} else {
+			if (methodParameterTypes[i].isPrimitive()
+                    && STRICT_PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]) == targetParameterTypes[i]) {
+            } else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
+            } else {
 				return false;
 			}
 		}
@@ -230,9 +199,7 @@ public final class JavaMethod implements Serializable {
 		for (int i = 0; i < targetParameterTypes.length; i++) {
 			if (methodParameterTypes[i].isPrimitive() &&
 					PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
-				continue;
 			} else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
-				continue;
 			} else {
 				return false;
 			}

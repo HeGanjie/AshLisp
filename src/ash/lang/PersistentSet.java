@@ -1,12 +1,8 @@
 package ash.lang;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import ash.util.JavaUtils;
 
-import bruce.common.utils.CommonUtils;
+import java.util.*;
 
 //TODO : make more efficient
 public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
@@ -126,8 +122,8 @@ public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
 
 	@Override
 	public String toString() {
-		return CommonUtils.buildString("${",
-				PersistentList.cast(this).innerToString(),
-				"}");
+		return JavaUtils.buildString("${",
+                PersistentList.cast(this).innerToString(),
+                "}");
 	}
 }

@@ -1,13 +1,13 @@
 package ash.repl;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
+import ash.util.JavaUtils;
 import ash.compiler.Compiler;
 import ash.lang.BasicType;
 import ash.parser.Parser;
 import ash.vm.VM;
-import bruce.common.utils.CommonUtils;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public final class REPLInVM {
 
@@ -22,7 +22,7 @@ public final class REPLInVM {
 					System.out.print("> ");
 					readIn = br.readLine();
 					if (readIn == null) break;
-					if (!CommonUtils.isStringNullOrWriteSpace(readIn)) {
+					if (!JavaUtils.isStringNullOrWriteSpace(readIn)) {
 						Object val = vm.batchRunInMain(Compiler.batchCompile(Parser.parse(readIn)));
 						System.out.println(BasicType.asString(val));
 					}

@@ -1,8 +1,8 @@
 package ash.lang;
 
-import java.util.regex.Pattern;
+import ash.util.JavaUtils;
 
-import bruce.common.utils.CommonUtils;
+import java.util.regex.Pattern;
 
 public final class BasicType {
 	public static final Symbol T = Symbol.create("t");
@@ -39,7 +39,7 @@ public final class BasicType {
 	
 	public static Object asString(Object val) {
 		if (val instanceof String)
-			return CommonUtils.buildString('\"', val, '\"');
+			return JavaUtils.buildString('\"', val, '\"');
 		else if (val instanceof Character) {
 			if ((Character)val == ' ')
 				return "\\space";

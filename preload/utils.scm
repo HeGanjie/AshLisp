@@ -138,7 +138,7 @@
       (map identity args))
 
 (defn str (. x)
-      (bruce.common.utils.CommonUtils/displayArray
+      (ash.util.JavaUtils/displayArray
 	(.toArray (.toList x))
 	""))
 

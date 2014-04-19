@@ -1,16 +1,16 @@
 package ash.vm;
 
+import ash.lang.BasicType;
+import ash.lang.ListUtils;
+import ash.lang.PersistentList;
+import ash.lang.Symbol;
+import ash.util.JavaUtils;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-
-import ash.lang.BasicType;
-import ash.lang.ListUtils;
-import ash.lang.PersistentList;
-import ash.lang.Symbol;
-import bruce.common.utils.CommonUtils;
 
 public final class VMFrame implements Serializable {
 	private static final Symbol SLEEP_SYMBOL = Symbol.create("_sleep_");
@@ -61,9 +61,9 @@ public final class VMFrame implements Serializable {
 		while (!frameChanged) {
 			Instruction i = executingInsts.get(runIndex++);
 			if (i.args != null)
-				System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins], ' ', i.args));
+				System.out.print(JavaUtils.buildString(makeIndent(this), INST_ARR[i.ins], ' ', i.args));
 			else
-				System.out.print(CommonUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
+				System.out.print(JavaUtils.buildString(makeIndent(this), INST_ARR[i.ins]));
 
 			exec(i.ins, i.args);
 
@@ -71,7 +71,7 @@ public final class VMFrame implements Serializable {
 			System.out.println(workingStack);
 			
 			if (tempVar.containsKey(SLEEP_SYMBOL))
-				CommonUtils.delay(((Number) tempVar.get(SLEEP_SYMBOL)).longValue());
+                JavaUtils.delay(((Number) tempVar.get(SLEEP_SYMBOL)).longValue());
 		}
 	}
 	

@@ -1,14 +1,11 @@
 package ash.vm;
 
+import ash.lang.ListUtils;
+
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import ash.lang.ListUtils;
-import bruce.common.functional.Func1;
-import bruce.common.functional.LambdaUtils;
-
+import java.util.stream.Collectors;
 
 public enum InstructionSet {
 	ldp, // 0
@@ -53,20 +50,10 @@ public enum InstructionSet {
 //	rem,
 //	dup;
 	
-	private static final Set<String> INST_NAME_CACHE = new HashSet<>(LambdaUtils.select(Arrays.asList(values()),
-			new Func1<String, InstructionSet>() {
-		@Override
-		public String call(InstructionSet ins) { return ins.name(); }
-	}));
-	
-	private static final List<Instruction> INST_CACHES = LambdaUtils.select(Arrays.asList(values()),
-			new Func1<Instruction, InstructionSet>() {
-		@Override
-		public Instruction call(InstructionSet inst) {
-			return new Instruction(inst);
-		}
-	});
-		
+	private static final Set<String> INST_NAME_CACHE = Arrays.asList(values()).stream().map(InstructionSet::name).collect(Collectors.toSet());
+
+	private static final List<Instruction> INST_CACHES = Arrays.asList(values()).stream().map(Instruction::new).collect(Collectors.toList());
+
 	public final Instruction create() { return INST_CACHES.get(ordinal()); }
 	
 	public final Instruction create(Object arg) {
