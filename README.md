@@ -46,7 +46,7 @@ public class AshLispUsage {
 		trace(eval("(= (+ 1 1) 2)")); // t
 ```
 
-### Define and Java native invoke
+### Define and Java reflective invoke
 ```Java
 		trace(eval("(def x 10)")); // ()
 		
