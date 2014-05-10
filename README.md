@@ -24,6 +24,7 @@ public class AshLispUsage {
 	}
 	
 	public static void main(String[] args) {
+		trace(eval("(puts \"Hello World!\")")); // Hello World!\n
 		...
 	}
 }
