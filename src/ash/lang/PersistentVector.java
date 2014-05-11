@@ -46,7 +46,7 @@ public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E>
 	}
 
 	@Override
-	public PersistentCollection<E> merge(PersistentCollection<? extends E> c) {
+	public PersistentVector<E> merge(PersistentCollection<? extends E> c) {
 		List<E> newLs = new ArrayList<>(ls);
 		newLs.addAll(c.getCollection());
 		return new PersistentVector<>(newLs);
@@ -151,7 +151,7 @@ public class PersistentVector<E> implements Iterable<E>, PersistentCollection<E>
 	}
 
 	@Override
-	public Collection<E> getCollection() {
+	public List<E> getCollection() {
 		return ls;
 	}
 

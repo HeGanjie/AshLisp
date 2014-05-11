@@ -97,7 +97,7 @@ public class PersistentSet<E> implements Iterable<E>, PersistentCollection<E> {
 	}
 
 	@Override
-	public Collection<E> getCollection() {
+	public Set<E> getCollection() {
 		return set;
 	}
 
