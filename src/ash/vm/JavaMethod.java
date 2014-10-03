@@ -1,6 +1,7 @@
 package ash.vm;
 
 import ash.lang.*;
+import ash.util.JavaUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -107,7 +108,8 @@ public final class JavaMethod implements Serializable {
 				return matchMethod(candidateMethods, getParameterTypes(args)).invoke(null, args);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error when callReflectMethod: " + candidateMethods.get(0).getName()
+					+ " with args: " + JavaUtils.displayArray(args, " "), e);
 		}
 	}
 
@@ -119,7 +121,8 @@ public final class JavaMethod implements Serializable {
 			matchMethod.setAccessible(true);
 			return matchMethod.invoke(args[0], argsArray);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Error when callInstanceMethod " + methodName +
+					" with args: " + JavaUtils.displayArray(args, " "), e);
 		}
 	}
 
@@ -197,8 +200,8 @@ public final class JavaMethod implements Serializable {
 	private static boolean fuzzyMatch(Class<?>[] methodParameterTypes, Class<?>[] targetParameterTypes) {
 		if (methodParameterTypes.length != targetParameterTypes.length) return false;
 		for (int i = 0; i < targetParameterTypes.length; i++) {
-			if (methodParameterTypes[i].isPrimitive() &&
-					PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
+			if (methodParameterTypes[i].isPrimitive()
+					&& PRIMITIVE_CLASS_MAP.get(methodParameterTypes[i]).contains(targetParameterTypes[i])) {
 			} else if (instanceOf(targetParameterTypes[i], methodParameterTypes[i])) {
 			} else {
 				return false;

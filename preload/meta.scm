@@ -67,6 +67,8 @@
 
 (defn seq? (obj) (instance? ash.lang.PersistentList obj))
 
+(defn vector? (obj) (instance? ash.lang.PersistentVector obj))
+
 (defn cadr (s) (car (cdr s)))
 
 (defn caddr (s) (car (cdr (cdr s))))

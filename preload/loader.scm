@@ -36,4 +36,5 @@
 (load "utils.scm")
 (load "regex.scm")
 (load "user.scm")
+(load "logic.scm")
 
