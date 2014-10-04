@@ -13,7 +13,9 @@ public final class REPLInVM {
 
 	public static void main(String[] args) {
 		VM vm = new VM();
-		if (VM.debugging) {
+		/*if (!VM.debugging)
+			vm.batchRunInMain(Compiler.batchCompile(Parser.parse("(load \"repl.scm\")")));
+		else*/ {
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 			while (true) {
@@ -28,10 +30,10 @@ public final class REPLInVM {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					return;
+					JavaUtils.delay(1000);
+					vm = new VM();
 				}
 			}
-		} else
-			vm.batchRunInMain(Compiler.batchCompile(Parser.parse("(load \"repl.scm\")")));
+		}
 	}
 }

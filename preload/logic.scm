@@ -14,7 +14,7 @@
 
 (def empty-s '())
 
-(defn ext-s-no-check (x v s)
+(defn ext-s-nc (x v s)
 	  (cons (list x v) s))
 
 (defn walk (lv s)
@@ -22,4 +22,16 @@
 	  	((lvar? lv) (let (v (assoc lv s))
 	  				 (if v (walk v s) lv)))
 	  	('t lv)))
+
+(defn unify (a b s)
+	  (let (a (walk a s)
+	  		b (walk b s))
+	  	(cond
+	  	  ((= a b) s)
+	  	  ((var? a) (ext-s-nc a b s))
+	  	  ((var? w) (ext-s-nc b a s))
+	  	  ((&& (seq? a) (seq? b))
+	  	   (let (uf (unify (car a) (car b) s))
+	  	   	 (when uf (unify (cdr a) (cdr b) uf))))
+	  	  ((eqv? a b ) s))))
 
