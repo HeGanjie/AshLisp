@@ -1,3 +1,5 @@
+(defn eqv? (. x)
+      (every (lambda (e) (eqv (car x) e)) (cdr x)))
 (defn = (. x)
       (every (lambda (e) (eq (car x) e)) (cdr x)))
 (defn != (. x) (not (apply = x)))

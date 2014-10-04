@@ -44,6 +44,9 @@ public class AshLispUsage {
 		trace(eval("(&& 't '())")); // ()
 		trace(eval("(|| 't '())")); // t
 		trace(eval("(= (+ 1 1) 2)")); // t
+		trace(eval("(= [1] [1])")); // t
+		trace(eval("(eqv? (+ 1 1) 2)")); // t
+		trace(eval("(eqv? [1] [1])")); // ()
 ```
 
 ### Define and Java reflective invoke

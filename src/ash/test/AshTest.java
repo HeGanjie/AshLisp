@@ -28,6 +28,17 @@ public final class AshTest extends TestCase {
 		assertEquals(BasicType.NIL, exec("(atom '(a))"));
 		assertEquals(BasicType.T, exec("(atom \"asdf\")"));
 	}
+
+	public void testEqv() throws Exception {
+		assertEquals(BasicType.T, exec("(eqv 'a 'a)"));
+		assertEquals(BasicType.T, exec("(eqv :a :a)"));
+		assertEquals(BasicType.T, exec("(eqv atom atom)"));
+		assertEquals(BasicType.T, exec("(eqv 1 1)"));
+		assertEquals(BasicType.NIL, exec("(eqv 1 2)"));
+		assertEquals(BasicType.NIL, exec("(eqv [1] [1])"));
+		assertEquals(BasicType.NIL, exec("(eqv '(1) '(1))"));
+		assertEquals(BasicType.T, exec("(eqv '() '())"));
+	}
 	
 	public void testEq() throws Exception {
 		assertEquals(BasicType.T, exec("(eq 'a 'a)"));
@@ -168,6 +179,20 @@ public final class AshTest extends TestCase {
 		assertEquals("(12 15 18)", exec("(zip + '(1 2 3) '(4 5 6) '(7 8 9))").toString());
 		assertEquals("((0 1) (2 3) (4 5) (6 7) (8 9))", exec("(partition 2 (range 0 10))").toString());
 		assertEquals("((0 2 4 6 8) (1 3 5 7 9))", exec("(zip-step (partition 2 (range 0 10)))").toString());
+	}
+
+	public void testLogic() throws Exception {
+		assertEquals(1, exec("(walk lz (ext-s-nc lz 1 empty-s))"));
+		assertEquals(2, exec("(walk lz (ext-s-nc ly 2 (ext-s-nc lz ly empty-s)))"));
+		assertEquals("[x]", exec("(walk lx (ext-s-nc ly 2 (ext-s-nc lz ly empty-s)))").toString());
+		
+		assertEquals("()", exec("(unify 'a 'a '())").toString());
+		assertEquals("()", exec("(unify 'a 'b '())").toString());
+		assertEquals("(([z] a))", exec("(unify 'a lz '())").toString());
+		assertEquals("()", exec("(unify lz 1 (unify 'a lz '()))").toString());
+		assertEquals("(([z] a))", exec("(unify lz 'a (unify 'a lz '()))").toString());
+		assertEquals("(([y] a) ([z] a))", exec("(unify lz ly (unify 'a lz '()))").toString());
+		assertEquals("(([y] b) ([x] a))", exec("(unify '(a b) (list lx ly) '())").toString());
 	}
 	
 	protected static Object exec(String code) {

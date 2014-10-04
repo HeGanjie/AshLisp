@@ -17,7 +17,7 @@ public final class Compiler {
 	public static final Symbol MULTI_ARGS_SIGNAL = Symbol.create(".");
 	private static final Set<String> NORMAL_INSTRUCTION_SET = new HashSet<>(Arrays.asList(
 			"def", "quote", "cond", "lambda*",
-			"atom", "car", "cdr", "not",
+			"eqv", "car", "cdr", "not",
 			"neq", "eq", "cons", "add", "sub", "mul", "div", "mod",
 			"gt", "ge", "lt", "le", "and", "or"));
 	

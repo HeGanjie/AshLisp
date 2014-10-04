@@ -25,7 +25,7 @@ public enum InstructionSet {
 	
 	ret, // 12
 	halt,
-	atom,
+	eqv,
 	car,
 	
 	cdr, // 16

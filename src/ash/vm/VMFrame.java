@@ -167,8 +167,8 @@ public final class VMFrame implements Serializable {
 						}
 						frameChanged = true;
 					} else {
-						if (ordinal == 14) { //atom
-							pushWorkingStack(ListUtils.atom(popWorkingStack()));
+						if (ordinal == 14) { //eqv
+							pushWorkingStack(ListUtils.transformBoolean(popWorkingStack() == popWorkingStack()));
 						} else { // car
 							pushWorkingStack(ListUtils.car(PersistentList.cast(popWorkingStack())));
 						}

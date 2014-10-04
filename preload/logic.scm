@@ -19,7 +19,7 @@
 
 (defn walk (lv s)
 	  (cond
-	  	((lvar? lv) (let (v (assoc lv s))
+	  	((lvar? lv) (let (v (assv lv s))
 	  				 (if v (walk v s) lv)))
 	  	('t lv)))
 
@@ -27,11 +27,11 @@
 	  (let (a (walk a s)
 	  		b (walk b s))
 	  	(cond
-	  	  ((= a b) s)
-	  	  ((var? a) (ext-s-nc a b s))
-	  	  ((var? w) (ext-s-nc b a s))
+	  	  ((eqv? a b) s)
+	  	  ((lvar? a) (ext-s-nc a b s))
+	  	  ((lvar? b) (ext-s-nc b a s))
 	  	  ((&& (seq? a) (seq? b))
 	  	   (let (uf (unify (car a) (car b) s))
 	  	   	 (when uf (unify (cdr a) (cdr b) uf))))
-	  	  ((eqv? a b ) s))))
+	  	  ((= a b) s))))
 

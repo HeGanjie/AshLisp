@@ -23,6 +23,8 @@
 			     ('t l)))
 		    ('t r))))
 
+(def atom ash.lang.ListUtils/atom)
+
 (defmacro lambda (params . body)
   (cond ((every atom params) `(lambda* ~params (do @body)))
 	('t `(lambda* ~(map-indexed (lambda* (i p)

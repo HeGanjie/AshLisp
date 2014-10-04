@@ -66,10 +66,16 @@
 	((eq (car keys) '.) (list (nth 1 keys) vals))
 	('t (cons (list (car keys) (car vals)) (pair (cdr keys) (cdr vals))))))
 
+(defn assv (key pair-seq)
+      (cond
+      	((nil? pair-seq) '())
+	    ((eqv (car (car pair-seq)) key) (cadr (car pair-seq)))
+	    ('t (tail key (cdr pair-seq)))))
+
 (defn assoc (key pair-seq)
-      (cond ((nil? pair-seq) '())
-	    ((eq (ntree '(0 0) pair-seq) key)
-	     (ntree '(0 1) pair-seq))
+      (cond
+      	((nil? pair-seq) '())
+	    ((eq (car (car pair-seq)) key) (cadr (car pair-seq)))
 	    ('t (tail key (cdr pair-seq)))))
 
 (defn count (seq) (reduce inc 0 seq))

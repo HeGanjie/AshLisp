@@ -8,7 +8,7 @@ public final class Parser {
     private Parser() {}
 
 	public static PersistentList parse(String src) {
-		return toTree(ListUtils.reverse(tokenize(src)), BasicType.NIL, null);
+		return toTree(ListUtils.reverse(tokenize(src, 0)), BasicType.NIL, null);
 	}
 
 	private static final PersistentMap<Character, Symbol> QUOTE_CHAR_MAP = new PersistentMap<>(
@@ -41,8 +41,6 @@ public final class Parser {
 			']', new Node(')'),
             '{', ListUtils.toSeq(0, '(', "hash-map"),
 			'}', new Node(')'));
-
-    private static PersistentList tokenize(String src) { return tokenize(src, 0); }
 
     private static final PersistentList HASH_SET_HEAD_TOKEN = ListUtils.toSeq(0, '(', "hash-set");
     private static PersistentList tokenize(String src, int offset) {
