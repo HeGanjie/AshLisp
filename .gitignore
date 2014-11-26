@@ -2,6 +2,7 @@ bin/
 .idea/
 .settings/
 *.class
+.classpath
 *.iml
 *.eml
 

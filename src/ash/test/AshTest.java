@@ -193,6 +193,10 @@ public final class AshTest extends TestCase {
 		assertEquals("(([z] a))", exec("(unify lz 'a (unify 'a lz '()))").toString());
 		assertEquals("(([y] a) ([z] a))", exec("(unify lz ly (unify 'a lz '()))").toString());
 		assertEquals("(([y] b) ([x] a))", exec("(unify '(a b) (list lx ly) '())").toString());
+		
+		assertEquals("(a a c)", exec("(walk* lx (list (list ly (list 'a lz 'c)) (list lx ly) (list lz 'a)))").toString());
+		assertEquals("(a [w] c)", exec("(walk* lx (list (list ly (list lz lw 'c)) (list lx ly) (list lz 'a)))").toString());
+		assertEquals("([w] b c)", exec("(walk* ly (list (list ly (list lw lz 'c)) (list lv 'b) (list lx lv) (list lz lx)))").toString());
 	}
 	
 	protected static Object exec(String code) {

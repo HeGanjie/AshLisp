@@ -23,6 +23,15 @@
 	  				 (if v (walk v s) lv)))
 	  	('t lv)))
 
+(defn walk* (lv s)
+	  (let (v (walk lv s))
+	  	(cond
+	  	  ((lvar? v) v)
+	  	  ((nil? v) v)
+	  	  ((seq? v) (cons (walk* (car v) s)
+	  	  				  (walk* (cdr v) s)))
+	  	  ('t v))))
+
 (defn unify (a b s)
 	  (let (a (walk a s)
 	  		b (walk b s))
