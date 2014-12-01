@@ -1,3 +1,9 @@
+(def eq? eqv?)
+(def equal? =)
+
+(defn pair? (s)
+	  (and s (seq? s)))
+
 (defmacro lvar (x)
   `(vector ~x))
 
@@ -27,20 +33,66 @@
 	  (let (v (walk lv s))
 	  	(cond
 	  	  ((lvar? v) v)
-	  	  ((nil? v) v)
-	  	  ((seq? v) (cons (walk* (car v) s)
+	  	  ((pair? v) (cons (walk* (car v) s)
 	  	  				  (walk* (cdr v) s)))
 	  	  ('t v))))
 
-(defn unify (a b s)
+(defn unify-nc (a b s)
 	  (let (a (walk a s)
-	  		b (walk b s))
+			b (walk b s))
+		(cond
+		  ((eq? a b) s)
+		  ((lvar? a) (ext-s-nc a b s))
+		  ((lvar? b) (ext-s-nc b a s))
+		  ((and (pair? a) (pair? b))
+		   (let (uf (unify-nc (car a) (car b) s))
+			 (when uf (unify-nc (cdr a) (cdr b) uf))))
+		  ((equal? a b) s))))
+
+(defn reify-name (n)
+	  (sym (str "_" n)))
+
+(defn reify-s (lv s)
+	  (let (v (walk lv s))
+		(cond
+		  ((lvar? v) (ext-s-nc v (reify-name (count s)) s))
+		  ((pair? v) (reify-s (cdr v)
+							 (reify-s (car v) s)))
+		  ('t s))))
+
+(defn reify (v)
+	  (walk* v (reify-s v empty-s)))
+
+(defn ext-s (x v s)
+	  (cond
+	  	((occurs x v s) '())
+	  	('t (ext-s-nc x v s))))
+
+(defn occurs (x v s)
+	  (let (v (walk v s))
 	  	(cond
-	  	  ((eqv? a b) s)
-	  	  ((lvar? a) (ext-s-nc a b s))
-	  	  ((lvar? b) (ext-s-nc b a s))
-	  	  ((&& (seq? a) (seq? b))
-	  	   (let (uf (unify (car a) (car b) s))
-	  	   	 (when uf (unify (cdr a) (cdr b) uf))))
-	  	  ((= a b) s))))
+	  	  ((lvar? v) (eq? v x))
+	  	  ((pair? v) (or (occurs x (car v) s)
+	  	  				(occurs x (cdr v) s))))))
+
+(defn unify (v w s)
+	  (let (v (walk v s)
+	  		w (walk w s))
+	  	(cond
+	  	  ((eq? v w) s)
+	  	  ((lvar? v) (ext-s v w s))
+	  	  ((lvar? w) (ext-s w v s))
+	  	  ((and (pair? v) (pair? w))
+	  	   (let (uf (unify (car v) (car w) s))
+	  	   	 (when uf (unify (cdr v) (cdr w) uf))))
+	  	  ((equal? v w) s))))
+
+(defn s# (s) (unit s))
+
+(defn u# (s) (mzero))
+
+(defn == (v w)
+	  (lambda (s)
+	  	(let (ur (unify v w s))
+	  	  (if ur (s# ur) (u# s)))))
 

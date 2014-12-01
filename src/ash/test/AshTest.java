@@ -186,6 +186,23 @@ public final class AshTest extends TestCase {
 		assertEquals(2, exec("(walk lz (ext-s-nc ly 2 (ext-s-nc lz ly empty-s)))"));
 		assertEquals("[x]", exec("(walk lx (ext-s-nc ly 2 (ext-s-nc lz ly empty-s)))").toString());
 		
+		assertEquals("()", exec("(unify-nc '() 'a '())").toString());
+		assertEquals("()", exec("(unify-nc 'a 'a '())").toString());
+		assertEquals("()", exec("(unify-nc 'a 'b '())").toString());
+		assertEquals("(([z] a))", exec("(unify-nc 'a lz '())").toString());
+		assertEquals("()", exec("(unify-nc lz 1 (unify-nc 'a lz '()))").toString());
+		assertEquals("(([z] a))", exec("(unify-nc lz 'a (unify-nc 'a lz '()))").toString());
+		assertEquals("(([y] a) ([z] a))", exec("(unify-nc lz ly (unify-nc 'a lz '()))").toString());
+		assertEquals("(([y] b) ([x] a))", exec("(unify-nc '(a b) (list lx ly) '())").toString());
+		
+		assertEquals("(a a c)", exec("(walk* lx (list (list ly (list 'a lz 'c)) (list lx ly) (list lz 'a)))").toString());
+		assertEquals("(a [w] c)", exec("(walk* lx (list (list ly (list lz lw 'c)) (list lx ly) (list lz 'a)))").toString());
+		assertEquals("([w] b c)", exec("(walk* ly (list (list ly (list lw lz 'c)) (list lv 'b) (list lx lv) (list lz lx)))").toString());
+		
+		assertEquals("(_0 _1 _2)", exec("(reify (list lw lx ly))").toString());
+		assertEquals("(_0 (_1 (_2 _3) _4) _3)", exec("(reify (list lu (list lv (list lw lx) ly) lx))").toString());
+		assertEquals("(a _0 c _0)", exec("(reify (walk* lx (list (list ly (list lz lw 'c lw)) (list lx ly) (list lz 'a))))").toString());
+
 		assertEquals("()", exec("(unify 'a 'a '())").toString());
 		assertEquals("()", exec("(unify 'a 'b '())").toString());
 		assertEquals("(([z] a))", exec("(unify 'a lz '())").toString());
@@ -194,9 +211,7 @@ public final class AshTest extends TestCase {
 		assertEquals("(([y] a) ([z] a))", exec("(unify lz ly (unify 'a lz '()))").toString());
 		assertEquals("(([y] b) ([x] a))", exec("(unify '(a b) (list lx ly) '())").toString());
 		
-		assertEquals("(a a c)", exec("(walk* lx (list (list ly (list 'a lz 'c)) (list lx ly) (list lz 'a)))").toString());
-		assertEquals("(a [w] c)", exec("(walk* lx (list (list ly (list lz lw 'c)) (list lx ly) (list lz 'a)))").toString());
-		assertEquals("([w] b c)", exec("(walk* ly (list (list ly (list lw lz 'c)) (list lv 'b) (list lx lv) (list lz lx)))").toString());
+		assertEquals("()", exec("(unify (list lz) lz '())").toString());
 	}
 	
 	protected static Object exec(String code) {
