@@ -19,7 +19,7 @@ public final class Compiler {
 			"def", "quote", "cond", "lambda*",
 			"eqv", "car", "cdr", "not",
 			"neq", "eq", "cons", "add", "sub", "mul", "div", "mod",
-			"gt", "ge", "lt", "le", "and", "or"));
+			"gt", "ge", "lt", "le", "land", "lor"));
 	
 	private Compiler() {}
 	

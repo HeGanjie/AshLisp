@@ -33,8 +33,8 @@ public enum InstructionSet {
 	eq,
 	neq,
 	
-	and, // 20
-	or,
+	land, // 20
+	lor,
 	not,
 	add,
 	

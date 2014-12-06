@@ -37,6 +37,12 @@
   `(cond (~test ~true)
 	 ('t ~else)))
 
+(defmacro and (a b)
+  `(if ~a ~b '()))
+
+(defmacro or (a b)
+  `(if (not ~a) ~b 't))
+
 (defmacro do (. things)
   (if (cdr things)
     `((lambda (. rst) (last rst)) @things)

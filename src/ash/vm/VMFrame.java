@@ -199,11 +199,11 @@ public final class VMFrame implements Serializable {
 					}
 				} else { // 20...24
 					if (ordinal < 22) {
-						if (ordinal == 20) { // and
+						if (ordinal == 20) { // land
 							boolean elem2 = ListUtils.transformBoolean(popWorkingStack());
 							boolean elem = ListUtils.transformBoolean(popWorkingStack());
 							pushWorkingStack(ListUtils.transformBoolean(elem && elem2));
-						} else { // or
+						} else { // lor
 							boolean elem2 = ListUtils.transformBoolean(popWorkingStack());
 							boolean elem = ListUtils.transformBoolean(popWorkingStack());
 							pushWorkingStack(ListUtils.transformBoolean(elem || elem2));
