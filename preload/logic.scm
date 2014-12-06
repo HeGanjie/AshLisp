@@ -80,7 +80,9 @@
 	  		w (walk w s))
 	  	(cond
 	  	  ((eq? v w) s)
-	  	  ((lvar? v) (ext-s v w s))
+	  	  ((lvar? v) (if (lvar? w)
+	  	  			   (ext-s-nc v w s)
+	  	  			   (ext-s v w s)))
 	  	  ((lvar? w) (ext-s w v s))
 	  	  ((and (pair? v) (pair? w))
 	  	   (let (uf (unify (car v) (car w) s))
