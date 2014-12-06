@@ -16,3 +16,5 @@
       (if (zero? n) (f 1)
 	(tail (dec n)
 	      (lambda (x) (f (* n x))))))
+
+(defn sum (ls) (reduce add 0 ls))
