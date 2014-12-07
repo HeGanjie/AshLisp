@@ -5,6 +5,7 @@ import java.util.Map;
 
 import ash.compiler.Compiler;
 import ash.vm.Closure;
+import ash.vm.VM;
 
 
 public final class MacroExpander {
@@ -61,6 +62,8 @@ public final class MacroExpander {
 				return new Node(Symbol.create(name.substring(1)), rest);
 			} else if (name.charAt(0) == '~') { // ~a -> (concat (list a) ...)
 				preListElem = Symbol.create(name.substring(1));
+			} else if (VM.tempVar.containsKey(head) && !MARCOS_MAP.containsKey(head)) { // for hygienic macro
+				preListElem = VM.tempVar.get(head);
 			} else
 				preListElem = quoted(head); // val -> (concat (list 'val) ...)
 		} else {

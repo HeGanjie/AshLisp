@@ -63,7 +63,7 @@ public final class Compiler {
 			default:
 				return compileInstCall((Symbol) op, node.rest(), lambdaContext, startIndex);
 			}
-		} else if (MacroExpander.SYNTAX_QUOTE.equals(op)) {// `(...)
+		} else if (MacroExpander.SYNTAX_QUOTE.equals(op)) { // `(...)
 			return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaContext, startIndex);
 		} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
 			return compile(MacroExpander.expand(node), lambdaContext, startIndex);
