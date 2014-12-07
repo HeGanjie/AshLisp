@@ -28,22 +28,22 @@ public final class MacroExpander {
 	}
 	
 	private static boolean match(PersistentList pattern, PersistentList ast) {
-		if (pattern == BasicType.NIL) return ast == BasicType.NIL; // pattern ending
+		if (pattern.isEndingNode()) return ast.isEndingNode(); // pattern ending
 		
-		if (pattern.head() instanceof Node) { // inner Node
-			return ast.head() instanceof Node
-					&& match((Node) pattern.head(), (Node) ast.head())
+		if (pattern.head() instanceof PersistentList) { // inner Node
+			return ast.head() instanceof PersistentList
+					&& match((PersistentList) pattern.head(), (PersistentList) ast.head())
 					&& match(pattern.rest(), ast.rest());
 		} else if (pattern.head() instanceof Symbol) {
 			return MORE_ELEM.equals(pattern.head()) // . more
-					|| ast != BasicType.NIL && match(pattern.rest(), ast.rest()); // x
+					|| !ast.isEndingNode() && match(pattern.rest(), ast.rest()); // x
 		} else {
-			throw new IllegalArgumentException("Pattern Illegal!");
+			throw new IllegalArgumentException("Pattern Illegal:\n" + pattern + "\n" + ast);
 		}
 	}
 	
 	private static Object applySyntaxQuote(Node visiting) {
-		if (visiting == BasicType.NIL) return BasicType.NIL;
+		if (visiting.isEndingNode()) return BasicType.NIL;
 		final Object head = ((Node) visiting).head();
 		Object preListElem;
 		PersistentList rest = (PersistentList) applySyntaxQuote((Node) visiting.rest());

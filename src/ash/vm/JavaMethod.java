@@ -1,8 +1,5 @@
 package ash.vm;
 
-import ash.lang.*;
-import ash.util.JavaUtils;
-
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -12,8 +9,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
+import ash.lang.BasicType;
+import ash.lang.ListUtils;
+import ash.lang.PersistentMap;
+import ash.lang.PersistentSet;
+import ash.lang.Symbol;
+import ash.util.JavaUtils;
+
 public final class JavaMethod implements Serializable {
-	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[]{};
 	private static final long serialVersionUID = -933603269059202413L;
 	private static final Map<String, JavaMethod> CACHE = new WeakHashMap<>();
 	
