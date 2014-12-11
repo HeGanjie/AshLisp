@@ -63,7 +63,7 @@ public final class MacroExpander {
 			} else if (name.charAt(0) == '~') { // ~a -> (concat (list a) ...)
 				preListElem = Symbol.create(name.substring(1));
 			} else if (VM.tempVar.containsKey(head) && !MARCOS_MAP.containsKey(head)) { // for hygienic macro
-				preListElem = VM.tempVar.get(head);
+				preListElem = quoted(quoted(VM.tempVar.get(head)));
 			} else
 				preListElem = quoted(head); // val -> (concat (list 'val) ...)
 		} else {

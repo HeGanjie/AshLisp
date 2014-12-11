@@ -47,28 +47,32 @@ public final class Compiler {
 	}
 
 	private static Serializable compileNode(Node node, PersistentList lambdaContext, int startIndex) {
-		final Object op = node.head(); // (operation ...)
-		if (op instanceof Symbol && NORMAL_INSTRUCTION_SET.contains(((Symbol) op).name)) {
-			switch (op.toString()) {
-			case "def":
-				return listInstruction(
-						compile(node.third(), lambdaContext, startIndex),
-						InstructionSet.asn.create(node.second()));
-			case "quote":
-				return listInstruction(InstructionSet.ldc.create(node.second()));
-			case "cond":
-				return compileCond(node.rest(), lambdaContext, startIndex);
-			case "lambda*":
-				return compileLambdaLazy(node, lambdaContext);
-			default:
-				return compileInstCall((Symbol) op, node.rest(), lambdaContext, startIndex);
+		try {
+			final Object op = node.head(); // (operation ...)
+			if (op instanceof Symbol && NORMAL_INSTRUCTION_SET.contains(((Symbol) op).name)) {
+				switch (op.toString()) {
+				case "def":
+					return listInstruction(
+							compile(node.third(), lambdaContext, startIndex),
+							InstructionSet.asn.create(node.second()));
+				case "quote":
+					return listInstruction(InstructionSet.ldc.create(node.second()));
+				case "cond":
+					return compileCond(node.rest(), lambdaContext, startIndex);
+				case "lambda*":
+					return compileLambdaLazy(node, lambdaContext);
+				default:
+					return compileInstCall((Symbol) op, node.rest(), lambdaContext, startIndex);
+				}
+			} else if (MacroExpander.SYNTAX_QUOTE.equals(op)) { // `(...)
+				return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaContext, startIndex);
+			} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
+				return compile(MacroExpander.expand(node), lambdaContext, startIndex);
+			} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure ...)
+				return compileCall(op, node.rest(), lambdaContext, startIndex);
 			}
-		} else if (MacroExpander.SYNTAX_QUOTE.equals(op)) { // `(...)
-			return compile(MacroExpander.visitSyntaxQuote(node.second()), lambdaContext, startIndex);
-		} else if (op instanceof Symbol && MacroExpander.hasMacro(node)) { // (let ...)
-			return compile(MacroExpander.expand(node), lambdaContext, startIndex);
-		} else { // (func ...) | (.new ...) | ((lambda ...) ...) | (closure ...)
-			return compileCall(op, node.rest(), lambdaContext, startIndex);
+		} catch (Throwable e) {
+			throw new RuntimeException("Error when compiling node: " + node + " lambdaContext: " + lambdaContext + " startIndex: " + startIndex, e);
 		}
 	}
 
