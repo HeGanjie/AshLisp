@@ -1,6 +1,7 @@
 package ash.compiler;
 
 import ash.lang.*;
+import ash.util.JavaUtils;
 import ash.vm.ClosureArgs;
 import ash.vm.Instruction;
 import ash.vm.InstructionSet;
@@ -140,7 +141,7 @@ public final class Compiler {
 	}
 	
 	private static boolean isJavaClassPathSymbol(final String op) {
-		return Character.isUpperCase(op.charAt(0)) ||
+		return Character.isUpperCase(op.charAt(0)) && JavaUtils.isClassExist("java.lang." + op) ||
 				op.charAt(0) != '.' && op.indexOf('.') != -1;
 	}
 

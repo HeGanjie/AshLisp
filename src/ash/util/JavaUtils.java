@@ -85,4 +85,13 @@ public final class JavaUtils {
         }
         return sb.toString();
     }
+
+    public static boolean isClassExist(String string) {
+    	try {
+    		Class.forName(string);
+    		return true;
+    	} catch(ClassNotFoundException e) {
+    		return false;
+    	}
+    }
 }

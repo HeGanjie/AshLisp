@@ -154,6 +154,9 @@ public final class AshTest extends TestCase {
 		assertEquals("(3 2 1)", exec("(let (reverse sum) (rev [1 2 3]))").toString());
 		assertEquals("()", exec("(defmacro test-empty-s (f) `(~f empty-s))").toString());
 		assertEquals("()", exec("(test-empty-s identity)").toString());
+		
+		assertEquals("()", exec("(defmacro destructuring-of-macro (x (y)) `(let (a ~x b ~y) (+ a b)))").toString());
+		assertEquals("(let (a 1 b 2) (+ a b))", exec("(expand-macro '(destructuring-of-macro 1 (2)))").toString());
 	}
 	
 	public void testLazySeq() throws Exception {
