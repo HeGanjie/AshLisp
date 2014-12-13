@@ -22,6 +22,7 @@ public final class JavaUtils {
     }
 
     public static String displayArray(final Object[] arrObjects, final String joinString) {
+    	if (arrObjects == null) return null;
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arrObjects.length; i++) {
             sb.append(arrObjects[i]);

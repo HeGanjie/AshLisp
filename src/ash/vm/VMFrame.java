@@ -1,16 +1,16 @@
 package ash.vm;
 
-import ash.lang.BasicType;
-import ash.lang.ListUtils;
-import ash.lang.PersistentList;
-import ash.lang.Symbol;
-import ash.util.JavaUtils;
-
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+
+import ash.lang.BasicType;
+import ash.lang.ListUtils;
+import ash.lang.PersistentList;
+import ash.lang.Symbol;
+import ash.util.JavaUtils;
 
 public final class VMFrame implements Serializable {
 	private static final Symbol SLEEP_SYMBOL = Symbol.create("_sleep_");
@@ -18,19 +18,27 @@ public final class VMFrame implements Serializable {
 	private static final InstructionSet[] INST_ARR = InstructionSet.values();
 	
 	private static final Map<Symbol, Object> tempVar = VM.tempVar;
-	private Scope myScope;
-	Object[] callArgs;
 	
+	private final Closure source;
 	private final Deque<Object> workingStack = new ArrayDeque<>();
 	private final List<Instruction> executingInsts;
+	private final Scope myScope;
+	Object[] callArgs;
 	private int runIndex;
 	boolean frameChanged = false;
 	VMFrame prevFrame;
 	VMFrame nextFrame;
 
 	public VMFrame(List<Instruction> executingInstructions, Scope parentScope) {
+		source = null;
 		executingInsts = executingInstructions;
 		myScope = parentScope;
+	}
+
+	public VMFrame(Closure closure) {
+		source = closure;
+		executingInsts = closure.getInsts();
+		myScope = closure.env;
 	}
 
 	private void pushWorkingStack(Object ser) { workingStack.push(ser); }
@@ -40,7 +48,7 @@ public final class VMFrame implements Serializable {
 	public Object popReturnValue() { return workingStack.isEmpty() ? BasicType.NIL : workingStack.pop(); }
 
 	private void prepareNextFrame(Closure closure, int paramsCount) {
-		nextFrame = new VMFrame(closure.getInsts(), closure.env);
+		nextFrame = new VMFrame(closure);
 		nextFrame.callArgs = createCallingArgs(paramsCount);
 		frameChanged = true;
 	}
@@ -78,8 +86,20 @@ public final class VMFrame implements Serializable {
 	public void execUntilStackChange() {
 		while (!frameChanged) {
 			Instruction i = executingInsts.get(runIndex++);
-			exec(i.ins, i.args);
+			try {
+				exec(i.ins, i.args);
+			} catch (Throwable e) {
+				throw new RuntimeException("Crash " + getFrameTrace(), e);
+			}
 		}
+	}
+
+	private String getFrameTrace() {
+		String msg = prevFrame != null ? prevFrame.getFrameTrace() + "\n\n" : "";
+		return msg + "at: " + executingInsts.get(runIndex - 1)
+				+ "\nClosure: " + source
+				+ "\nArgs: " + JavaUtils.displayArray(callArgs, ", ")
+				+ "\nrunning index " + (runIndex - 1) + " of " + executingInsts;
 	}
 	
 	private void exec(int ordinal, Object arg) {
