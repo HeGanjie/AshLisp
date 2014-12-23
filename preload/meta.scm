@@ -26,7 +26,7 @@
 (def atom ash.lang.ListUtils/atom)
 
 (defmacro lambda (params . body)
-  (cond ((every atom params) `(lambda* ~params (do @body)))
+  (cond ((every atom params) `(lambda* ~params @body))
 	('t `(lambda* ~(map-indexed (lambda* (i p)
 				      (if (atom p) p
 					(sym (str \_  i))))
@@ -45,7 +45,7 @@
 
 (defmacro do (. things)
   (if (cdr things)
-    `((lambda (. rst) (last rst)) @things)
+    `((lambda* (. rst) (last rst)) @things)
     `~(car things)))
 
 (defmacro defmacro (name args body)

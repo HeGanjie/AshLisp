@@ -86,11 +86,11 @@ public final class Compiler {
 		PersistentList paramList = (PersistentList) lambdaBody.second();
 		int dotIndex = ListUtils.indexOf(paramList, MULTI_ARGS_SIGNAL, 0);
 		boolean notCombineArgs = dotIndex == -1;
-		PersistentList argsList = notCombineArgs ? paramList : removeDot(paramList);
+		PersistentList paramListNoDot = notCombineArgs ? paramList : removeDot(paramList);
 		return expand(listInstructionRecur(notCombineArgs ? 1 : 0,
 				InstructionSet.cons_args.create(dotIndex),
-				compile(lambdaBody.third(),
-						ListUtils.append(argsList, lambdaContext),
+				compileArgs(lambdaBody.rest().rest(),
+						ListUtils.append(paramListNoDot, lambdaContext),
 						notCombineArgs ? 0 : 1),
 						InstructionSet.ret.create()));
 	}
