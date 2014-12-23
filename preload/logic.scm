@@ -1,5 +1,6 @@
 (def eq? eqv?)
 (def equal? =)
+(def procedure? fn?)
 
 (defn pair? (s)
 	  (and s (seq? s)))
@@ -96,5 +97,87 @@
 (defn == (v w)
 	  (lambda (s)
 	  	(let (ur (unify v w s))
-	  	  (if ur (s# ur) (u# s)))))
+	  	  (if ur (unit ur) (mzero)))))
 
+(defmacro mzero () `'())
+
+(defmacro unit (a) `~a)
+
+(defmacro choice (a f)
+  `(cons ~a ~f))
+
+(defmacro incr (e)
+  `(lambda () ~e))
+
+(defmacro run (N (q) . gs)
+  `(let (n ~N x (lvar (quote ~q)))
+  	 (when (or (not n) (< 0 n))
+	   (map8 n
+			 (lambda (s)
+			   (reify (walk* x s)))
+			 ((all @gs) empty-s)))))
+
+(defmacro case8 (e (() e0) ((F) e1) ((A) e2) ((a f) e3))
+  `(let (a8 ~e)
+	 (cond
+	   ((not a8) ~e0)
+	   ((procedure? a8) (let (~F a8) ~e1))
+	   ((and (pair? a8) (procedure? (cdr a8)))
+	   	(let (~a (car a8) ~f (cdr a8)) ~e3))
+	   ('t (let (~A a8) ~e2)))))
+
+(defn map8 (n p a8)
+	  (case8 a8 '()
+	  		 ((a) (cons (p a) '()))
+	  		 ((a f)
+	  		  (cons (p a)
+	  		  		(cond
+	  		  		  ((not n) (map8 n p (f)))
+	  		  		  ((< 1 n) (map8 (dec n) p (f))))))))
+
+(defmacro conde ((g0 . g0s) (g1 . g1s) . gs)
+  `(lambda (s)
+  	 (inc (mplus* (bind* (~g0 s) @g0s)
+  	 			  (bind* (~g1 s) @g1s) @gs))))
+
+(defmacro all (g . gs)
+  `(all-aux bind ~g @gs))
+
+(defmacro all-aux (bnd . gs)
+  (if-not gs s#
+	  (let ((g0 . ggg) gs)
+		(if-not ggg g0
+				`(let (G ~g0)
+				   (lambda (s)
+					 (~bnd (G s)
+						   (lambda (s) ((all-aux ~bnd @ggg) s)))))))))
+
+(defn bind (a8 g)
+	  (case8 a8
+	  		 (() (mzero))
+	  		 ((f) (inc (bind (f) g)))
+	  		 ((a) (g a))
+	  		 ((a f) (mplus (g a))
+	  		 		(lambda () (bind (f) g)))))
+
+(defmacro bind* (e . gs)
+  (if-not gs `~e
+  		  (let ((g0 . g1s) gs)
+  		  	`(bind* (bind ~e ~g0) @g1s))))
+
+(defn mplus (a8 f)
+	  (case8 a8
+			 (() (f))
+			 ((F) (inc (mplus (f) F)))
+			 ((a) (choice a f))
+			 ((a F) (choice a (lambda () (mplus (f) F))))))
+
+(defmacro mplus* (e0 . es)
+  (if-not es `~e0
+		  `(mplus ~e0 (lambda () (mplus* @es)))))
+
+(defmacro exist ((x . xs) g0 . gs)
+  `(lambda (s)
+  	 (inc
+  	   (let (~x (lvar '~x))
+  	   	 (bind* (~g0 s) @gs)))))
